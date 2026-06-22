@@ -56,7 +56,7 @@ export default function LoginPage() {
                 style={{
                   width: "10px",
                   height: "10px",
-                  backgroundColor: "var(--border-color)",
+                  backgroundColor: "var(--primary-color)",
                 }}
               />
               <span
@@ -64,7 +64,7 @@ export default function LoginPage() {
                 style={{
                   width: "10px",
                   height: "10px",
-                  backgroundColor: "var(--border-color)",
+                  backgroundColor: "var(--primary-color)",
                 }}
               />
             </div>

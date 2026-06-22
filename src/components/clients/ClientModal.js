@@ -39,12 +39,13 @@ export default function ClientModal({ show, onClose }) {
       onClick={onClose}
     >
       <div
-        className="bg-white p-4 shadow-premium font-inter w-100 transition-smooth"
+        className="bg-white shadow-premium font-inter w-100 transition-smooth"
         style={{
-          maxWidth: "480px",
+          maxWidth: "816px",
           height: "100vh",
           overflowY: "auto",
           borderRadius: "0",
+          padding: "48px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -266,10 +267,13 @@ export default function ClientModal({ show, onClose }) {
           <div className="d-flex justify-content-end mt-4">
             <button
               type="submit"
-              className="btn btn-primary-custom w-100 py-2 transition-smooth fw-medium"
+              className="btn btn-primary-custom transition-smooth fw-medium"
               style={{
                 backgroundColor: "var(--primary-color)",
                 borderColor: "var(--primary-color)",
+                width: "359px",
+                height: "43px",
+                borderRadius: "12px",
               }}
             >
               Confirmar
