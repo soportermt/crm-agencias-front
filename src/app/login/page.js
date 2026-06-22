@@ -41,6 +41,7 @@ export default function LoginPage() {
                 Identifícate para gestionar salidas, pagos y reportes en tiempo real.
               </p>
             </div>
+            {/* Indicadores de diapositiva estáticos */}
             <div className="d-flex justify-content-center gap-2 mt-4">
               <span
                 className="rounded-circle"
@@ -55,7 +56,7 @@ export default function LoginPage() {
                 style={{
                   width: "10px",
                   height: "10px",
-                  backgroundColor: "rgba(34, 124, 242, 0.2)",
+                  backgroundColor: "var(--border-color)",
                 }}
               />
               <span
@@ -63,7 +64,7 @@ export default function LoginPage() {
                 style={{
                   width: "10px",
                   height: "10px",
-                  backgroundColor: "rgba(34, 124, 242, 0.2)",
+                  backgroundColor: "var(--border-color)",
                 }}
               />
             </div>

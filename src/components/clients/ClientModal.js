@@ -20,14 +20,13 @@ export default function ClientModal({ show, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // En una fase posterior se conectará a la API
     console.log("Datos de cliente registrados:", formData);
     onClose();
   };
 
   return (
     <div
-      className="modal-backdrop-custom d-flex align-items-center justify-content-center"
+      className="modal-backdrop-custom d-flex align-items-stretch justify-content-end"
       style={{
         position: "fixed",
         top: 0,
@@ -36,23 +35,22 @@ export default function ClientModal({ show, onClose }) {
         height: "100vh",
         backgroundColor: "rgba(0, 0, 0, 0.4)",
         zIndex: 1050,
-        padding: "1rem",
       }}
       onClick={onClose}
     >
       <div
-        className="bg-white p-4 border-radius-12 shadow-premium font-inter w-100 transition-smooth"
+        className="bg-white p-4 shadow-premium font-inter w-100 transition-smooth"
         style={{
-          maxWidth: "1000px",
-          maxHeight: "90vh",
+          maxWidth: "480px",
+          height: "100vh",
           overflowY: "auto",
+          borderRadius: "0",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="d-flex align-items-center justify-content-between mb-4">
           <h2
-            className="font-poppins h4 mb-0 fw-semibold"
+            className="font-inter h4 mb-0 fw-medium"
             style={{ color: "var(--dark-green)" }}
           >
             Registro de nuevo cliente
@@ -69,18 +67,16 @@ export default function ClientModal({ show, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Seccion 1: Datos personales */}
           <div className="mb-4">
             <h3
-              className="font-poppins h6 fw-semibold mb-3"
+              className="font-inter h6 fw-medium mb-3"
               style={{ color: "var(--dark-green)" }}
             >
               Datos personales
             </h3>
             <div className="row">
-              {/* Nombre completo */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Nombre completo *
                 </label>
                 <input
@@ -95,9 +91,8 @@ export default function ClientModal({ show, onClose }) {
                 />
               </div>
 
-              {/* Correo electrónico */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Correo electrónico
                 </label>
                 <input
@@ -111,9 +106,8 @@ export default function ClientModal({ show, onClose }) {
                 />
               </div>
 
-              {/* Fecha de nacimiento */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Fecha de nacimiento *
                 </label>
                 <input
@@ -128,9 +122,8 @@ export default function ClientModal({ show, onClose }) {
                 />
               </div>
 
-              {/* Celular */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Celular *
                 </label>
                 <input
@@ -145,9 +138,8 @@ export default function ClientModal({ show, onClose }) {
                 />
               </div>
 
-              {/* Sexo */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Sexo
                 </label>
                 <select
@@ -164,9 +156,8 @@ export default function ClientModal({ show, onClose }) {
                 </select>
               </div>
 
-              {/* Estado civil */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Estado civil
                 </label>
                 <select
@@ -187,18 +178,16 @@ export default function ClientModal({ show, onClose }) {
             </div>
           </div>
 
-          {/* Seccion 2: Dirección */}
           <div className="mb-4">
             <h3
-              className="font-poppins h6 fw-semibold mb-3"
+              className="font-inter h6 fw-medium mb-3"
               style={{ color: "var(--dark-green)" }}
             >
               Dirección
             </h3>
             <div className="row">
-              {/* Código postal */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Código postal
                 </label>
                 <input
@@ -212,9 +201,8 @@ export default function ClientModal({ show, onClose }) {
                 />
               </div>
 
-              {/* Ciudad */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Ciudad *
                 </label>
                 <select
@@ -234,9 +222,8 @@ export default function ClientModal({ show, onClose }) {
                 </select>
               </div>
 
-              {/* Estado */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Estado *
                 </label>
                 <select
@@ -255,9 +242,8 @@ export default function ClientModal({ show, onClose }) {
                 </select>
               </div>
 
-              {/* País */}
-              <div className="col-12 col-md-6 col-lg-3 mb-3">
-                <label className="form-label text-secondary small fw-medium mb-1">
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   País *
                 </label>
                 <select
@@ -277,15 +263,13 @@ export default function ClientModal({ show, onClose }) {
             </div>
           </div>
 
-          {/* Footer del Formulario */}
           <div className="d-flex justify-content-end mt-4">
             <button
               type="submit"
-              className="btn btn-primary-custom px-5 py-2 transition-smooth fw-medium"
+              className="btn btn-primary-custom w-100 py-2 transition-smooth fw-medium"
               style={{
                 backgroundColor: "var(--primary-color)",
                 borderColor: "var(--primary-color)",
-                minWidth: "200px",
               }}
             >
               Confirmar

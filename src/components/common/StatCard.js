@@ -6,7 +6,10 @@ export default function StatCard({
   title,
   value,
   trend = "none",
+  subtext,
+  linkText = "Ver detalles",
   onLinkClick = (e) => e.preventDefault(),
+  valueColor,
 }) {
   const isUp = trend === "up";
   const isDown = trend === "down";
@@ -56,7 +59,7 @@ export default function StatCard({
         <h3
           className="font-inter fw-semibold mb-0"
           style={{
-            color: "#0f1901",
+            color: valueColor || "#0f1901",
             fontSize: "26px",
             lineHeight: "36px",
           }}
@@ -65,18 +68,31 @@ export default function StatCard({
         </h3>
 
         <div className="text-end">
-          <a
-            href="#"
-            onClick={onLinkClick}
-            className="font-inter fw-semibold text-decoration-none hover-underline"
-            style={{
-              color: "rgba(0, 0, 0, 0.4)",
-              fontSize: "12px",
-              lineHeight: "1.2",
-            }}
-          >
-            Ver detalles
-          </a>
+          {subtext ? (
+            <span
+              className="font-inter fw-medium"
+              style={{
+                color: "rgba(0, 0, 0, 0.4)",
+                fontSize: "12px",
+                lineHeight: "1.2",
+              }}
+            >
+              {subtext}
+            </span>
+          ) : (
+            <a
+              href="#"
+              onClick={onLinkClick}
+              className="font-inter fw-semibold text-decoration-none hover-underline"
+              style={{
+                color: "rgba(0, 0, 0, 0.4)",
+                fontSize: "12px",
+                lineHeight: "1.2",
+              }}
+            >
+              {linkText}
+            </a>
+          )}
         </div>
       </div>
     </div>

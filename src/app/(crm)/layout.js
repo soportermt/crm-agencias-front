@@ -18,10 +18,10 @@ export default function CRMLayout({ children }) {
         onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
-      <div className="flex-grow-1 d-flex flex-column min-vh-100 crm-content-wrapper" style={{ minWidth: 0 }}>
+      <div className="flex-grow-1 d-flex flex-column vh-100 crm-content-wrapper overflow-hidden" style={{ minWidth: 0 }}>
         <Header onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
 
-        <main className="p-4 flex-grow-1" style={{ backgroundColor: "var(--bg-light)" }}>
+        <main className="p-4 flex-grow-1 overflow-y-auto" style={{ backgroundColor: "var(--bg-light)" }}>
           {children}
         </main>
       </div>

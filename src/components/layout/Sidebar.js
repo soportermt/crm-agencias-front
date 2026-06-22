@@ -1,14 +1,33 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = () => {
     router.push("/login");
   };
+
+  const handleLinkClick = () => {
+    if (onCloseMobile) onCloseMobile();
+  };
+
+  const isActive = (path) => pathname === path;
+
+  const getLinkClass = (path, extraClass = "") => {
+    const baseClass = "d-flex align-items-center px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium";
+    const activeClass = isActive(path) ? "bg-light text-dark fw-bold" : "";
+    return `${baseClass} ${activeClass} ${extraClass}`.trim();
+  };
+
+  const getLinkStyle = (path) => ({
+    fontSize: "13px",
+    color: isActive(path) ? "#18181b" : "#3f3f46",
+  });
 
   return (
     <>
@@ -45,18 +64,15 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
         <nav className="flex-grow-1 overflow-y-auto pe-1 mb-3">
           <div className="mb-4">
-            <a
+            <Link
               href="/dashboard"
-              className="d-flex align-items-center gap-3 px-3 py-2 border-radius-12 bg-light fw-medium transition-smooth"
-              style={{
-                color: "#18181b",
-                fontSize: "13px",
-                textDecoration: "none",
-              }}
+              onClick={handleLinkClick}
+              className={getLinkClass("/dashboard", "gap-3 border-radius-12")}
+              style={getLinkStyle("/dashboard")}
             >
-              <i className="bi bi-grid-fill" style={{ color: "#18181b" }}></i>
+              <i className="bi bi-grid-fill" style={{ color: isActive("/dashboard") ? "#18181b" : "#3f3f46" }}></i>
               <span>Dashboard</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -66,13 +82,14 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Clientes
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/clientes"
+              onClick={handleLinkClick}
+              className={getLinkClass("/clientes", "gap-3")}
+              style={getLinkStyle("/clientes")}
             >
               <span>Gestión de clientes</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -82,13 +99,14 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Reservaciones
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/reservaciones"
+              onClick={handleLinkClick}
+              className={getLinkClass("/reservaciones", "gap-3")}
+              style={getLinkStyle("/reservaciones")}
             >
               <span>Lista de reservaciones</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -98,13 +116,14 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Vendedores
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/vendedores"
+              onClick={handleLinkClick}
+              className={getLinkClass("/vendedores", "gap-3")}
+              style={getLinkStyle("/vendedores")}
             >
               <span>Gestión de vendedores</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -114,14 +133,15 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Ingresos
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center justify-content-between px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/ingresos"
+              onClick={handleLinkClick}
+              className={getLinkClass("/ingresos", "justify-content-between")}
+              style={getLinkStyle("/ingresos")}
             >
               <span>Control de ingresos</span>
               <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>13</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -131,14 +151,15 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Egresos
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center justify-content-between px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/egresos"
+              onClick={handleLinkClick}
+              className={getLinkClass("/egresos", "justify-content-between")}
+              style={getLinkStyle("/egresos")}
             >
               <span>Control de egresos</span>
               <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>15</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -148,20 +169,22 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Catálogos
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium mb-1"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/destinos"
+              onClick={handleLinkClick}
+              className={getLinkClass("/destinos", "gap-3 mb-1")}
+              style={getLinkStyle("/destinos")}
             >
               <span>Destinos</span>
-            </a>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            </Link>
+            <Link
+              href="/hoteles"
+              onClick={handleLinkClick}
+              className={getLinkClass("/hoteles", "gap-3")}
+              style={getLinkStyle("/hoteles")}
             >
               <span>Hoteles</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -171,13 +194,14 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Servicios
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/productos"
+              onClick={handleLinkClick}
+              className={getLinkClass("/productos", "gap-3")}
+              style={getLinkStyle("/productos")}
             >
               <span>Productos</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mb-3">
@@ -187,39 +211,43 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               Utilidad por venta
             </p>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium mb-1"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            <Link
+              href="/precio-venta"
+              onClick={handleLinkClick}
+              className={getLinkClass("/precio-venta", "gap-3 mb-1")}
+              style={getLinkStyle("/precio-venta")}
             >
               <span>Precio por venta</span>
-            </a>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium mb-1"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            </Link>
+            <Link
+              href="/ganancia-operacion"
+              onClick={handleLinkClick}
+              className={getLinkClass("/ganancia-operacion", "gap-3 mb-1")}
+              style={getLinkStyle("/ganancia-operacion")}
             >
               <span>Ganancia por operación</span>
-            </a>
-            <a
-              href="#"
-              className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium"
-              style={{ fontSize: "13px", color: "#3f3f46" }}
+            </Link>
+            <Link
+              href="/margen-utilidad"
+              onClick={handleLinkClick}
+              className={getLinkClass("/margen-utilidad", "gap-3")}
+              style={getLinkStyle("/margen-utilidad")}
             >
               <span>Margen de utilidad</span>
-            </a>
+            </Link>
           </div>
         </nav>
 
         <div className="border-top pt-3 flex-shrink-0">
-          <a
-            href="#"
-            className="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none transition-smooth rounded hover-light fw-medium mb-2"
-            style={{ fontSize: "13px", color: "#3f3f46" }}
+          <Link
+            href="/configuracion"
+            onClick={handleLinkClick}
+            className={getLinkClass("/configuracion", "gap-3 mb-2")}
+            style={getLinkStyle("/configuracion")}
           >
             <i className="bi bi-gear" style={{ fontSize: "14px" }}></i>
             <span>Configuración</span>
-          </a>
+          </Link>
           <button
             onClick={handleLogout}
             className="w-100 d-flex align-items-center gap-3 px-3 py-2 text-danger small bg-transparent border-0 text-start transition-smooth rounded hover-light fw-medium"
