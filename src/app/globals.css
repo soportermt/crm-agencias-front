@@ -172,15 +172,19 @@ body {
   font-family: var(--font-plus-jakarta), sans-serif;
 }
 
+.crm-content-wrapper {
+  transition: margin-left 0.25s ease-in-out, margin-right 0.25s ease-in-out;
+}
+
 @media (min-width: 992px) {
   .crm-content-wrapper {
-    margin-left: 284px;
+    margin-left: var(--sidebar-width, 284px);
   }
 }
 
 @media (min-width: 1200px) {
   .crm-content-wrapper {
-    margin-right: 284px;
+    margin-right: var(--rightbar-width, 284px);
   }
 }
 
