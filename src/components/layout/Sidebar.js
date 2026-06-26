@@ -3,6 +3,23 @@
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import {
+  HomeIcon,
+  UsersIcon,
+  CalendarIcon,
+  IdentificationIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  BriefcaseIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+  PlusIcon
+} from "@heroicons/react/24/outline";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
@@ -29,10 +46,10 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
   const getLinkStyle = (path) => ({
     fontSize: "13px",
-    color: isActive(path) ? "#18181b" : "#3f3f46",
+    color: isActive(path) ? "#18181b" : "#374151",
   });
 
-  const renderNavLink = (href, label, iconClass, badge = null) => {
+  const renderNavLink = (href, label, IconComponent, badge = null) => {
     const active = isActive(href);
     return (
       <Link
@@ -42,7 +59,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
         style={getLinkStyle(href)}
         title={!isExpanded ? label : undefined}
       >
-        <i className={`bi ${iconClass}`} style={{ fontSize: "16px", color: active ? "#18181b" : "#3f3f46" }}></i>
+        <IconComponent className="flex-shrink-0" style={{ width: "18px", height: "18px", color: active ? "#18181b" : "#374151" }} />
         {isExpanded && <span className="text-truncate">{label}</span>}
         {isExpanded && badge}
       </Link>
@@ -54,7 +71,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
     return (
       <p
         className="text-uppercase fw-semibold px-3 mb-2"
-        style={{ fontSize: "11px", letterSpacing: "1px", color: "rgba(0, 0, 0, 0.15)" }}
+        style={{ fontSize: "11px", letterSpacing: "1px", color: "#9ca3af" }}
       >
         {label}
       </p>
@@ -108,29 +125,29 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             }}
             title={!isExpanded ? "Registrar nuevo cliente" : undefined}
           >
-            <i className="bi bi-plus-lg" style={{ fontSize: "14px" }}></i>
+            <PlusIcon style={{ width: "16px", height: "16px" }} />
             {isExpanded && <span>Registrar nuevo cliente</span>}
           </button>
         </div>
 
         <nav className="flex-grow-1 overflow-y-auto pe-1 mb-3">
           <div className="mb-4">
-            {renderNavLink("/dashboard", "Dashboard", "bi-grid-fill")}
+            {renderNavLink("/dashboard", "Dashboard", HomeIcon)}
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Clientes")}
-            {renderNavLink("/clientes", "Gestión de clientes", "bi-people-fill")}
+            {renderNavLink("/clientes", "Gestión de clientes", UsersIcon)}
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Reservaciones")}
-            {renderNavLink("/reservaciones", "Lista de reservaciones", "bi-calendar-check-fill")}
+            {renderNavLink("/reservaciones", "Lista de reservaciones", CalendarIcon)}
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Vendedores")}
-            {renderNavLink("/vendedores", "Gestión de vendedores", "bi-person-badge-fill")}
+            {renderNavLink("/vendedores", "Gestión de vendedores", IdentificationIcon)}
           </div>
 
           <div className="mb-3">
@@ -138,7 +155,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             {renderNavLink(
               "/ingresos",
               "Control de ingresos",
-              "bi-cash-coin",
+              ArrowTrendingUpIcon,
               <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>13</span>
             )}
           </div>
@@ -148,39 +165,39 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             {renderNavLink(
               "/egresos",
               "Control de egresos",
-              "bi-cash-stack",
+              ArrowTrendingDownIcon,
               <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>15</span>
             )}
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Catálogos")}
-            {renderNavLink("/destinos", "Destinos", "bi-geo-alt-fill")}
+            {renderNavLink("/destinos", "Destinos", MapPinIcon)}
             <div className="mt-1">
-              {renderNavLink("/hoteles", "Hoteles", "bi-building")}
+              {renderNavLink("/hoteles", "Hoteles", BuildingOfficeIcon)}
             </div>
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Servicios")}
-            {renderNavLink("/productos", "Productos", "bi-box-seam-fill")}
+            {renderNavLink("/productos", "Productos", BriefcaseIcon)}
           </div>
 
           <div className="mb-3">
             {renderCategoryHeader("Utilidad por venta")}
-            {renderNavLink("/precio-venta", "Precio por venta", "bi-currency-dollar")}
+            {renderNavLink("/precio-venta", "Precio por venta", CurrencyDollarIcon)}
             <div className="mt-1">
-              {renderNavLink("/ganancia-operacion", "Ganancia por operación", "bi-calculator")}
+              {renderNavLink("/ganancia-operacion", "Ganancia por operación", ChartBarIcon)}
             </div>
             <div className="mt-1">
-              {renderNavLink("/margen-utilidad", "Margen de utilidad", "bi-pie-chart-fill")}
+              {renderNavLink("/margen-utilidad", "Margen de utilidad", ChartPieIcon)}
             </div>
           </div>
         </nav>
 
         <div className="border-top pt-3 flex-shrink-0">
           <div className="mb-2">
-            {renderNavLink("/configuracion", "Configuración", "bi-gear")}
+            {renderNavLink("/configuracion", "Configuración", Cog6ToothIcon)}
           </div>
           <button
             onClick={handleLogout}
@@ -190,7 +207,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             style={{ fontSize: "13px" }}
             title={!isExpanded ? "Cerrar sesión" : undefined}
           >
-            <i className="bi bi-box-arrow-left" style={{ fontSize: "14px" }}></i>
+            <ArrowLeftOnRectangleIcon style={{ width: "18px", height: "18px" }} />
             {isExpanded && <span>Cerrar sesión</span>}
           </button>
         </div>

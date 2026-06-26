@@ -1,6 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  UserIcon,
+  ShoppingCartIcon,
+  CalendarDaysIcon,
+  ChartBarIcon
+} from "@heroicons/react/24/outline";
 
 export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -8,19 +14,19 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
   const isExpanded = isPinned || isHovered;
 
   const notifications = [
-    { title: "Mensaje de Vanessa Fuentes", time: "Justo ahora", bgIcon: "#f4faeb", iconColor: "#75bf06", icon: "bi-chat-text" },
-    { title: "Nuevo usuario registrado", time: "Hace 59 minutos", bgIcon: "#e7f1fe", iconColor: "#227cf2", icon: "bi-person-plus" },
-    { title: "Atraso de pago", time: "Hace 12 horas", bgIcon: "#f4faeb", iconColor: "#75bf06", icon: "bi-graph-down" },
-    { title: "Próximo pago pendiente", time: "Hoy, a las 11:59 am", bgIcon: "#e6f1fd", iconColor: "#227cf2", icon: "bi-calendar-event" },
+    { title: "Mensaje de Vanessa Fuentes", time: "Justo ahora", bgIcon: "#f4faeb", iconColor: "#000000", icon: UserIcon },
+    { title: "Nuevo usuario registrado", time: "Hace 59 minutos", bgIcon: "#e7f1fe", iconColor: "#000000", icon: UserIcon },
+    { title: "Atraso de pago", time: "Hace 12 horas", bgIcon: "#f4faeb", iconColor: "#000000", icon: ChartBarIcon },
+    { title: "Próximo pago pendiente", time: "Hoy, a las 11:59 am", bgIcon: "#e6f1fd", iconColor: "#000000", icon: ChartBarIcon },
   ];
 
   const contacts = [
-    { name: "Vanessa Fuentes", initials: "VF" },
-    { name: "Orlando Paz", initials: "OP" },
-    { name: "Lorena Figueroa", initials: "LF" },
-    { name: "Jonathan Neri", initials: "JN" },
-    { name: "María Cervantes", initials: "MC" },
-    { name: "Daniela López", initials: "DL" },
+    { name: "Vanessa Fuentes", initials: "VF", avatar: "/avatars/avatar-female-06.png" },
+    { name: "Orlando Paz", initials: "OP", avatar: "/avatars/avatar-male-01.png" },
+    { name: "Lorena Figueroa", initials: "LF", avatar: "/avatars/avatar-female-01.png" },
+    { name: "Jonathan Neri", initials: "JN", avatar: "/avatars/avatar-male-04.png" },
+    { name: "María Cervantes", initials: "MC", avatar: "/avatars/avatar-female-04.png" },
+    { name: "Daniela López", initials: "DL", avatar: "/avatars/avatar-female-05.png" },
   ];
 
   return (
@@ -46,7 +52,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
         <div className="d-flex align-items-center justify-content-between mb-2" style={{ height: "24px" }}>
           {isExpanded ? (
             <>
-              <h3 className="text-dark fw-semibold px-2 py-2 mb-0 font-poppins" style={{ fontSize: "14px" }}>
+              <h3 className="text-dark fw-normal px-2 py-2 mb-0 font-poppins" style={{ fontSize: "14px" }}>
                 Accesos rápidos
               </h3>
               <button
@@ -76,10 +82,10 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
             style={{ backgroundColor: "transparent" }}
             title={!isExpanded ? "Registrar cliente" : undefined}
           >
-            <div className="bg-success text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06" }}>
-              <i className="bi bi-person-fill" style={{ fontSize: "14px" }}></i>
+            <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06", borderRadius: "8px" }}>
+              <UserIcon style={{ width: "14px", height: "14px" }} />
             </div>
-            {isExpanded && <span className="small text-dark fw-medium">Registrar cliente</span>}
+            {isExpanded && <span className="small text-dark fw-normal font-inter">Registrar cliente</span>}
           </button>
 
           <button
@@ -89,10 +95,10 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
             style={{ backgroundColor: "transparent" }}
             title={!isExpanded ? "Crear de reserva" : undefined}
           >
-            <div className="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#227cf2" }}>
-              <i className="bi bi-cart-fill" style={{ fontSize: "14px" }}></i>
+            <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#227cf2", borderRadius: "8px" }}>
+              <ShoppingCartIcon style={{ width: "14px", height: "14px" }} />
             </div>
-            {isExpanded && <span className="small text-dark fw-medium">Crear de reserva</span>}
+            {isExpanded && <span className="small text-dark fw-normal font-inter">Crear de reserva</span>}
           </button>
 
           <button
@@ -102,17 +108,17 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
             style={{ backgroundColor: "transparent" }}
             title={!isExpanded ? "Calendario" : undefined}
           >
-            <div className="bg-success text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06" }}>
-              <i className="bi bi-calendar3" style={{ fontSize: "14px" }}></i>
+            <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06", borderRadius: "8px" }}>
+              <CalendarDaysIcon style={{ width: "14px", height: "14px" }} />
             </div>
-            {isExpanded && <span className="small text-dark fw-medium">Calendario</span>}
+            {isExpanded && <span className="small text-dark fw-normal font-inter">Calendario</span>}
           </button>
         </div>
       </div>
 
       <div>
         {isExpanded ? (
-          <h3 className="text-dark fw-semibold px-2 py-2 mb-2 font-poppins" style={{ fontSize: "14px" }}>
+          <h3 className="text-dark fw-normal px-2 py-2 mb-2 font-poppins" style={{ fontSize: "14px" }}>
             Notificaciones
           </h3>
         ) : (
@@ -128,15 +134,15 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
               title={!isExpanded ? notif.title : undefined}
             >
               <div
-                className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                style={{ width: "24px", height: "24px", minWidth: "24px", backgroundColor: notif.bgIcon }}
+                className="d-flex align-items-center justify-content-center flex-shrink-0"
+                style={{ width: "24px", height: "24px", minWidth: "24px", backgroundColor: notif.bgIcon, borderRadius: "8px" }}
               >
-                <i className={`bi ${notif.icon}`} style={{ fontSize: "14px", color: notif.iconColor }}></i>
+                <notif.icon style={{ width: "14px", height: "14px", color: notif.iconColor }} />
               </div>
               {isExpanded && (
                 <div className="flex-grow-1 min-w-0">
-                  <p className="mb-0 fw-medium text-dark text-truncate" style={{ fontSize: "13px" }}>{notif.title}</p>
-                  <p className="mb-0 text-muted" style={{ fontSize: "11px" }}>{notif.time}</p>
+                  <p className="mb-0 fw-medium text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{notif.title}</p>
+                  <p className="mb-0 text-muted font-inter" style={{ fontSize: "11px" }}>{notif.time}</p>
                 </div>
               )}
             </div>
@@ -146,7 +152,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
 
       <div className="flex-grow-1 overflow-y-auto">
         {isExpanded ? (
-          <h3 className="text-dark fw-semibold px-2 py-2 mb-2 font-poppins" style={{ fontSize: "14px" }}>
+          <h3 className="text-dark fw-normal px-2 py-2 mb-2 font-poppins" style={{ fontSize: "14px" }}>
             Contactos
           </h3>
         ) : (
@@ -161,15 +167,15 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
               }`}
               title={!isExpanded ? contact.name : undefined}
             >
-              <div
-                className="rounded-circle bg-light d-flex align-items-center justify-content-center fw-semibold text-secondary border font-poppins text-uppercase flex-shrink-0"
-                style={{ width: "24px", height: "24px", fontSize: "10px", minWidth: "24px" }}
-              >
-                {contact.initials}
-              </div>
+              <img
+                src={contact.avatar}
+                alt={contact.name}
+                className="rounded-circle flex-shrink-0 animate-fade-in"
+                style={{ width: "24px", height: "24px", minWidth: "24px", objectFit: "cover" }}
+              />
               {isExpanded && (
                 <div className="flex-grow-1 min-w-0">
-                  <p className="mb-0 fw-semibold text-dark text-truncate" style={{ fontSize: "13px" }}>{contact.name}</p>
+                  <p className="mb-0 fw-normal text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{contact.name}</p>
                 </div>
               )}
             </div>
