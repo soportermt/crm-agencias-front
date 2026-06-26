@@ -67,7 +67,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
   };
 
   const renderCategoryHeader = (label) => {
-    if (!isExpanded) return <hr className="my-2" style={{ opacity: 0.1 }} />;
+    if (!isExpanded) return null;
     return (
       <p
         className="text-uppercase fw-semibold px-3 mb-2"
@@ -96,6 +96,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           top: 0,
           bottom: 0,
           overflowX: "hidden",
+          overflowY: "hidden",
           transition: "width 0.25s ease-in-out, min-width 0.25s ease-in-out, padding 0.25s ease-in-out",
           padding: isExpanded ? "24px" : "24px 8px",
         }}
@@ -130,7 +131,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           </button>
         </div>
 
-        <nav className="flex-grow-1 overflow-y-auto pe-1 mb-3">
+        <nav className="flex-grow-1 overflow-y-auto pe-1 mb-3 hide-scrollbar">
           <div className="mb-4">
             {renderNavLink("/dashboard", "Dashboard", HomeIcon)}
           </div>

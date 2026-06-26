@@ -75,7 +75,7 @@ export default function LoginPage() {
         <div className="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
           <div className="p-card-login border border-light">
             {/* Logo Image */}
-            <div className="text-center" style={{ marginBottom: "48px" }}>
+            <div className="text-center mb-4 mb-md-5">
               <Image
                 src="/2bt2025.png"
                 alt="2Business Travel Logo"
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 height={60}
                 priority
                 className="img-fluid mx-auto d-block"
-                style={{ height: "auto", maxWidth: "300px" }}
+                style={{ height: "auto", maxWidth: "min(300px, 85vw)" }}
               />
             </div>
 

@@ -188,3 +188,32 @@ body {
   }
 }
 
+/* Oculta la barra de scroll pero mantiene la funcionalidad */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive Login: pantallas muy pequeñas (<576px) */
+@media (max-width: 575.98px) {
+  .p-card-login {
+    padding: 16px;
+    border-radius: 24px;
+  }
+  .title-login {
+    font-size: 24px;
+  }
+  .subtitle-login {
+    font-size: 14px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .input-custom {
+    width: 100%;
+    font-size: 13px;
+  }
+}
+

@@ -33,7 +33,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
     <aside
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="bg-white border-start d-none d-xl-flex flex-column gap-4 font-jakarta shadow-premium"
+      className="bg-white border-start d-none d-xl-flex flex-column gap-4 font-jakarta shadow-premium overflow-y-auto hide-scrollbar"
       style={{
         width: isExpanded ? "284px" : "80px",
         minWidth: isExpanded ? "284px" : "80px",
@@ -150,7 +150,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
         </div>
       </div>
 
-      <div className="flex-grow-1 overflow-y-auto">
+      <div>
         {isExpanded ? (
           <h3 className="text-dark fw-normal px-2 py-2 mb-2 font-poppins" style={{ fontSize: "14px" }}>
             Contactos
