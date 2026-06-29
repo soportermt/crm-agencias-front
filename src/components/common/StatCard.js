@@ -13,6 +13,7 @@ export default function StatCard({
   size = "md", // "sm" | "md"
   titleColor,
   titleFontFamily = "font-inter",
+  hasShadow = false,
 }) {
   const isUp = trend === "up";
   const isDown = trend === "down";
@@ -23,13 +24,14 @@ export default function StatCard({
 
   return (
     <div
-      className="p-3 bg-white transition-smooth d-flex flex-column justify-content-center"
+      className="bg-white transition-smooth d-flex flex-column justify-content-center"
       style={{
-        border: "1px solid rgba(0, 0, 0, 0.1)",
+        border: "1px solid rgba(161, 161, 170, 0.35)",
         borderRadius: "12px",
-        boxShadow: size === "sm" ? "none" : "0px 4px 12px rgba(0, 0, 0, 0.05)",
+        boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
         minHeight: size === "sm" ? "86px" : "104px",
+        padding: "12px 14px",
         overflow: "hidden",
       }}
     >
@@ -44,7 +46,7 @@ export default function StatCard({
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
-          title={title}
+          title={typeof title === "string" ? title : undefined}
         >
           {title}
         </span>
@@ -65,10 +67,10 @@ export default function StatCard({
           </div>
         )}
       </div>
-
-      <div className="d-flex flex-column gap-1">
+ 
+      <div className="d-flex flex-column" style={{ gap: "2px" }}>
         <span
-          className="font-inter fw-bold mb-0"
+          className="font-inter fw-semibold mb-0"
           style={{
             color: valueColor || "#0f1901",
             fontSize: size === "sm" ? "16px" : "26px",
@@ -89,7 +91,7 @@ export default function StatCard({
                 className="font-inter fw-medium"
                 style={{
                   color: "rgba(0, 0, 0, 0.4)",
-                  fontSize: "12px",
+                  fontSize: "14px",
                   lineHeight: "1.2",
                 }}
               >
@@ -102,7 +104,7 @@ export default function StatCard({
                 className="font-inter fw-semibold text-decoration-none hover-underline"
                 style={{
                   color: "rgba(0, 0, 0, 0.4)",
-                  fontSize: "12px",
+                  fontSize: "14px",
                   lineHeight: "1.2",
                 }}
               >

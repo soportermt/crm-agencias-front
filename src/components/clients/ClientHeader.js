@@ -6,7 +6,7 @@ export default function ClientHeader({ onRegisterClientClick }) {
   return (
     <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
       <div>
-        <h1 className="h3 fw-bold mb-1" style={{ color: "#0f1901" }}>
+        <h1 className="font-inter fw-medium mb-1" style={{ color: "#0f1901", fontSize: "24px", lineHeight: "1.2" }}>
           Control de clientes
         </h1>
         <p className="text-secondary small mb-0" style={{ color: "rgba(0, 0, 0, 0.4)", fontSize: "13px" }}>

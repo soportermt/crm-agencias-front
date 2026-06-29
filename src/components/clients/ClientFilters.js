@@ -1,14 +1,16 @@
-"use client";
-
 import React from "react";
 import ExportButton from "@/components/common/ExportButton";
 import SearchBar from "@/components/common/SearchBar";
+import DateRangeSelector from "@/components/common/DateRangeSelector";
 
 export default function ClientFilters({
   searchTerm,
   onSearchChange,
   activeFilter,
   onFilterChange,
+  startDate,
+  endDate,
+  onDateRangeChange,
 }) {
   const isActivosActive = activeFilter === "Activos";
 
@@ -30,31 +32,12 @@ export default function ClientFilters({
 
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3">
         <div className="d-flex align-items-center gap-2 flex-wrap">
-          <div className="d-flex align-items-center gap-1.5 border px-2 py-1 bg-white" style={{ borderRadius: "8px", height: "38px" }}>
-            <input
-              type="date"
-              className="border-0 bg-transparent text-secondary small"
-              onClick={(e) => e.target.showPicker && e.target.showPicker()}
-              style={{
-                outline: "none",
-                fontSize: "12px",
-                width: "115px",
-                cursor: "pointer",
-              }}
-            />
-            <span className="text-secondary px-1" style={{ fontSize: "11px" }}>a</span>
-            <input
-              type="date"
-              className="border-0 bg-transparent text-secondary small"
-              onClick={(e) => e.target.showPicker && e.target.showPicker()}
-              style={{
-                outline: "none",
-                fontSize: "12px",
-                width: "115px",
-                cursor: "pointer",
-              }}
-            />
-          </div>
+          <DateRangeSelector
+            startDate={startDate}
+            endDate={endDate}
+            onChange={onDateRangeChange}
+            showIcon={false}
+          />
 
           <button
             onClick={() => onFilterChange(isActivosActive ? "Todos" : "Activos")}

@@ -23,6 +23,7 @@ export default function DashboardPage() {
             title="Total a Cobrar"
             value="$15,769,184.91"
             trend="up"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -30,6 +31,7 @@ export default function DashboardPage() {
             title="Total a Pagar"
             value="$700,457.30"
             trend="down"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -37,6 +39,7 @@ export default function DashboardPage() {
             title="Total Generado en Ventas"
             value="$36,978,278.74"
             trend="up"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -44,6 +47,7 @@ export default function DashboardPage() {
             title="Clientes Registrados"
             value="630"
             trend="user"
+            hasShadow={true}
           />
         </div>
       </div>

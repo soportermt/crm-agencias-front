@@ -3,10 +3,15 @@
 import React, { useState } from "react";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
+import DateRangeSelector from "@/components/common/DateRangeSelector";
 
 export default function ClientProfilePurchases() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [dateRange, setDateRange] = useState({
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+  });
   const itemsPerPage = 2;
 
   const purchases = [
@@ -48,12 +53,27 @@ export default function ClientProfilePurchases() {
     },
   ];
 
-  const filteredPurchases = purchases.filter(
-    (item) =>
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const [day, month, year] = dateStr.split("/");
+    return new Date(year, month - 1, day);
+  };
+
+  const filteredPurchases = purchases.filter((item) => {
+    const matchesSearch =
       item.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      item.code.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const itemDate = parseDate(item.date);
+    const start = new Date(dateRange.startDate);
+    const end = new Date(dateRange.endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const matchesDate = !itemDate || (itemDate >= start && itemDate <= end);
+
+    return matchesSearch && matchesDate;
+  });
 
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -102,18 +122,12 @@ export default function ClientProfilePurchases() {
       {/* Filtros e Input de Búsqueda */}
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div className="d-flex align-items-center gap-2 flex-wrap">
-          <button
-            className="btn bg-white border font-inter text-dark-slate"
-            style={{
-              borderColor: "#d0d5dd",
-              borderRadius: "8px",
-              fontSize: "13px",
-              padding: "8px 16px",
-              height: "38px",
-            }}
-          >
-            01/05/2026 al 25/05/2026
-          </button>
+          <DateRangeSelector
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onChange={setDateRange}
+            showIcon={false}
+          />
           
           <button
             className="btn bg-white border font-inter text-dark-slate"
