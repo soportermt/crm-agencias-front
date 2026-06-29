@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useRouter } from "next/navigation";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
@@ -20,6 +23,7 @@ export default function IngresosTable({
   endDate,
   onDateRangeChange,
 }) {
+  const router = useRouter();
   const columns = [
     { key: "id", label: "ID", width: "80px" },
     { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
@@ -56,7 +60,10 @@ export default function IngresosTable({
         return (
           <a
             href="#"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              router.push(`/pagos/${row.id}`);
+            }}
             className="text-decoration-none fw-medium"
             style={{ color: "#0c5cc6", fontSize: "12px" }}
           >

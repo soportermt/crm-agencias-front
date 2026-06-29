@@ -57,7 +57,7 @@ export default function DataTable({
                       <td
                         key={colIndex}
                         className={`py-3 px-3 font-inter ${col.align ? `text-${col.align}` : ""}`}
-                        style={{ color: "#0f1901", fontSize: "13px" }}
+                        style={{ color: "#0f1901", fontSize: "13px", whiteSpace: "nowrap" }}
                       >
                         {content !== undefined ? content : row[col.key]}
                       </td>
