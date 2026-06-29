@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import PillBadge from "@/components/common/PillBadge";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
+import FilterButton from "./FilterButton";
+import OperadoresSummary from "./OperadoresSummary";
 
 const CATEGORY_STYLES = {
   Hotel: { backgroundColor: "#e7f1fe", color: "#0f1901" },
@@ -46,8 +48,9 @@ export default function EgresosTable({
   startDate,
   endDate,
   onDateRangeChange,
+  porOperadorData = [],
+  estadoCuentasData = [],
 }) {
-  const router = useRouter();
   const tabs = [
     { key: "pendientes", label: "Pendientes" },
     { key: "operadores", label: "Pagos a operadores" },
@@ -109,7 +112,7 @@ export default function EgresosTable({
     switch (key) {
       case "folio":
         return (
-          <span className="font-inter fw-semibold" style={{ color: "#0c5cc6" }}>
+          <span className="font-inter fw-semibold text-primary">
             {row.folio}
           </span>
         );
@@ -123,7 +126,7 @@ export default function EgresosTable({
 
       case "reserva":
         return (
-          <span className="font-inter fw-semibold" style={{ color: "#0c5cc6" }}>
+          <span className="font-inter fw-semibold text-primary">
             {row.reserva}
           </span>
         );
@@ -154,17 +157,13 @@ export default function EgresosTable({
 
       case "acciones":
         return (
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              router.push(`/pagos/${row.id}`);
-            }}
-            className="text-decoration-none fw-semibold"
-            style={{ color: "#0c5cc6", fontSize: "13px" }}
+          <Link
+            href={`/pagos/${row.id}`}
+            className="text-decoration-none fw-semibold text-primary"
+            style={{ fontSize: "13px" }}
           >
             Pagar
-          </a>
+          </Link>
         );
 
       default:
@@ -191,60 +190,10 @@ export default function EgresosTable({
     if (activeTab === "operadores") {
       return (
         <div className="d-flex flex-column gap-4 px-3 pb-3">
-          <div className="d-flex gap-4 w-100 flex-wrap flex-md-nowrap">
-            <div className="bg-white p-3 border flex-fill" style={{ borderRadius: "12px", borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
-              <p className="font-inter fw-semibold mb-3" style={{ fontSize: "16px", color: "#0f1901" }}>
-                Por operador
-              </p>
-              <div className="d-flex flex-column gap-3">
-                {[
-                  { name: "Megatravel", amount: "$34,500", pct: 100 },
-                  { name: "Carlos Travel", amount: "$22,100", pct: 64 },
-                  { name: "Tours del Sureste", amount: "$18,400", pct: 53 },
-                  { name: "Britos Tours", amount: "$11,200", pct: 32 }
-                ].map((item, idx) => (
-                  <div key={idx} className="d-flex flex-column gap-1">
-                    <div className="d-flex justify-content-between font-inter" style={{ fontSize: "14px", color: "#0f1901" }}>
-                      <span>{item.name}</span>
-                      <span className="fw-medium">{item.amount}</span>
-                    </div>
-                    <div className="w-full position-relative" style={{ height: "8px", borderRadius: "12px", backgroundColor: "rgba(97, 158, 5, 0.15)" }}>
-                      <div className="h-100" style={{ width: `${item.pct}%`, backgroundColor: "#619e05", borderRadius: "12px" }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white p-3 border flex-fill" style={{ borderRadius: "12px", borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
-              <p className="font-inter fw-semibold mb-3" style={{ fontSize: "16px", color: "#0f1901" }}>
-                Estado de cuentas
-              </p>
-              <div className="d-flex flex-column gap-2 font-inter" style={{ fontSize: "13px" }}>
-                <div className="d-flex justify-content-between text-muted fw-medium pb-2 border-bottom">
-                  <span>Operador</span>
-                  <div className="d-flex gap-4 ms-auto">
-                    <span style={{ width: "90px", textAlign: "right" }}>Pagado</span>
-                    <span style={{ width: "90px", textAlign: "right" }}>Pendiente</span>
-                  </div>
-                </div>
-                {[
-                  { name: "Megatravel", paid: "$24,700", pending: "$0", pendingColor: "#0f1901" },
-                  { name: "Carlos Travel", paid: "$22,100", pending: "$0", pendingColor: "#0f1901" },
-                  { name: "Tours del Sureste", paid: "$18,400", pending: "$5,000", pendingColor: "#b9861f" },
-                  { name: "Britos Tours", paid: "$6,200", pending: "$9,800", pendingColor: "#b9861f" }
-                ].map((item, idx) => (
-                  <div key={idx} className="d-flex justify-content-between align-items-center py-1">
-                    <span className="fw-medium" style={{ color: "#0f1901" }}>{item.name}</span>
-                    <div className="d-flex gap-4 ms-auto">
-                      <span className="fw-medium text-success" style={{ width: "90px", textAlign: "right", color: "#0e803c" }}>{item.paid}</span>
-                      <span className="fw-medium" style={{ width: "90px", textAlign: "right", color: item.pendingColor }}>{item.pending}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <OperadoresSummary
+            porOperadorData={porOperadorData}
+            estadoCuentasData={estadoCuentasData}
+          />
           <div style={{ minWidth: 0, overflowX: "auto" }}>
             {tableComponent}
           </div>
@@ -309,34 +258,8 @@ export default function EgresosTable({
               <>
                 <div className="d-flex align-items-center gap-2">
                   <ExportButton onExport={onExport} />
-                  <button
-                    className="btn d-flex align-items-center gap-2 border bg-white"
-                    style={{
-                      height: "38px",
-                      borderRadius: "8px",
-                      borderColor: "#d0d5dd",
-                      fontSize: "13px",
-                      color: "#0f1901",
-                      fontWeight: 400,
-                      padding: "0 16px",
-                    }}
-                  >
-                    Mayo 2026
-                  </button>
-                  <button
-                    className="btn d-flex align-items-center gap-2 border bg-white"
-                    style={{
-                      height: "38px",
-                      borderRadius: "8px",
-                      borderColor: "#d0d5dd",
-                      fontSize: "13px",
-                      color: "#0f1901",
-                      fontWeight: 400,
-                      padding: "0 16px",
-                    }}
-                  >
-                    Todas las categorías
-                  </button>
+                  <FilterButton>Mayo 2026</FilterButton>
+                  <FilterButton>Todas las categorías</FilterButton>
                 </div>
                 <SearchBar
                   value={searchValue}
@@ -349,34 +272,8 @@ export default function EgresosTable({
               <>
                 <div className="d-flex align-items-center gap-2">
                   <ExportButton onExport={onExport} />
-                  <button
-                    className="btn d-flex align-items-center gap-2 border bg-white"
-                    style={{
-                      height: "38px",
-                      borderRadius: "8px",
-                      borderColor: "#d0d5dd",
-                      fontSize: "13px",
-                      color: "#0f1901",
-                      fontWeight: 400,
-                      padding: "0 16px",
-                    }}
-                  >
-                    Todas las categorías
-                  </button>
-                  <button
-                    className="btn d-flex align-items-center gap-2 border bg-white"
-                    style={{
-                      height: "38px",
-                      borderRadius: "8px",
-                      borderColor: "#d0d5dd",
-                      fontSize: "13px",
-                      color: "#0f1901",
-                      fontWeight: 400,
-                      padding: "0 16px",
-                    }}
-                  >
-                    Todos los estados
-                  </button>
+                  <FilterButton>Todas las categorías</FilterButton>
+                  <FilterButton>Todos los estados</FilterButton>
                   <DateRangeSelector
                     startDate={startDate}
                     endDate={endDate}

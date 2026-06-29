@@ -10,6 +10,8 @@ import {
   egresosOperadoresMock,
   egresosVuelosHotelesMock,
   egresosHistorialMock,
+  egresosPorOperadorMock,
+  egresosEstadoCuentasMock,
 } from "@/mocks/egresosMock";
 
 const TAB_DATA = {
@@ -145,6 +147,8 @@ export default function EgresosPage() {
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
             onDateRangeChange={setDateRange}
+            porOperadorData={egresosPorOperadorMock}
+            estadoCuentasData={egresosEstadoCuentasMock}
           />
         </div>
       </div>

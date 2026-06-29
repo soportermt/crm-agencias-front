@@ -41,3 +41,17 @@ export const egresosHistorialMock = [
   { id: 6, folio: "EGR-0084", reserva: "#0049", proveedor: "Viva aerobus", categoria: "Vuelo", servicio: "MID-CDMX", monto: "$4,400", fechaLimite: "01 de junio 2025", registradoPor: "Luis R.", diasRestantes: "Pagado", estado: "Pagado" },
   { id: 7, folio: "EGR-0085", reserva: "#0046", proveedor: "The Westin Resort & Spa", categoria: "Operador", servicio: "Tour Sian Ka'an", monto: "$9,800", fechaLimite: "28 de mayo 2025", registradoPor: "Mónica", diasRestantes: "Pagado", estado: "Pagado" },
 ];
+
+export const egresosPorOperadorMock = [
+  { name: "Megatravel", amount: "$34,500", pct: 100 },
+  { name: "Carlos Travel", amount: "$22,100", pct: 64 },
+  { name: "Tours del Sureste", amount: "$18,400", pct: 53 },
+  { name: "Britos Tours", amount: "$11,200", pct: 32 }
+];
+
+export const egresosEstadoCuentasMock = [
+  { name: "Megatravel", paid: "$24,700", pending: "$0", pendingColor: "#0f1901" },
+  { name: "Carlos Travel", paid: "$22,100", pending: "$0", pendingColor: "#0f1901" },
+  { name: "Tours del Sureste", paid: "$18,400", pending: "$5,000", pendingColor: "#b9861f" },
+  { name: "Britos Tours", paid: "$6,200", pending: "$9,800", pendingColor: "#b9861f" }
+];
