@@ -7,7 +7,7 @@ import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import PillBadge from "@/components/common/PillBadge";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
-import FilterButton from "./FilterButton";
+import FilterButton from "@/components/common/FilterButton";
 import OperadoresSummary from "./OperadoresSummary";
 
 const CATEGORY_STYLES = {

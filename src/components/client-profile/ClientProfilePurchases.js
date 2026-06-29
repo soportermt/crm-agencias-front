@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
+import ExportButton from "@/components/common/ExportButton";
+import FilterButton from "@/components/common/FilterButton";
 
 export default function ClientProfilePurchases() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -102,21 +104,7 @@ export default function ClientProfilePurchases() {
           Historial de compras
         </h3>
         
-        <button
-          className="btn d-flex align-items-center gap-2 transition-smooth fw-medium"
-          style={{
-            backgroundColor: "#e7f1fe",
-            border: "1px solid #0c5cc6",
-            borderRadius: "8px",
-            color: "#0c5cc6",
-            padding: "8px 16px",
-            fontSize: "13px",
-            height: "38px"
-          }}
-        >
-          <i className="bi bi-cloud-arrow-down" style={{ fontSize: "16px" }}></i>
-          Exportar
-        </button>
+        <ExportButton onExport={() => console.log("Exportar historial de compras")} />
       </div>
 
       {/* Filtros e Input de Búsqueda */}
@@ -129,18 +117,7 @@ export default function ClientProfilePurchases() {
             showIcon={false}
           />
           
-          <button
-            className="btn bg-white border font-inter text-dark-slate"
-            style={{
-              borderColor: "#d0d5dd",
-              borderRadius: "8px",
-              fontSize: "13px",
-              padding: "8px 16px",
-              height: "38px",
-            }}
-          >
-            Activos
-          </button>
+          <FilterButton>Activos</FilterButton>
         </div>
 
         <SearchBar value={searchTerm} onChange={handleSearchChange} />

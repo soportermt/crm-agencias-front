@@ -2,6 +2,7 @@ import React from "react";
 import ExportButton from "@/components/common/ExportButton";
 import SearchBar from "@/components/common/SearchBar";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
+import FilterButton from "@/components/common/FilterButton";
 
 export default function ClientFilters({
   searchTerm,
@@ -39,13 +40,10 @@ export default function ClientFilters({
             showIcon={false}
           />
 
-          <button
+          <FilterButton
             onClick={() => onFilterChange(isActivosActive ? "Todos" : "Activos")}
-            className={`btn d-flex align-items-center justify-content-center transition-smooth px-3`}
+            active={isActivosActive}
             style={{
-              height: "38px",
-              fontSize: "13px",
-              borderRadius: "8px",
               border: isActivosActive ? "1px solid #0c5cc6" : "1px solid rgba(0, 0, 0, 0.1)",
               backgroundColor: isActivosActive ? "#e7f1fe" : "#fff",
               color: isActivosActive ? "#0c5cc6" : "#3f3f46",
@@ -53,7 +51,7 @@ export default function ClientFilters({
             }}
           >
             <span>Activos</span>
-          </button>
+          </FilterButton>
         </div>
 
         <SearchBar

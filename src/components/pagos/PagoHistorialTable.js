@@ -3,6 +3,7 @@ import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
+import FilterButton from "@/components/common/FilterButton";
 
 export default function PagoHistorialTable({
   data,
@@ -80,19 +81,7 @@ export default function PagoHistorialTable({
             onChange={onDateRangeChange}
             showIcon={false}
           />
-          <button
-            className="btn d-flex align-items-center gap-2 border bg-white"
-            style={{
-              height: "38px",
-              borderRadius: "8px",
-              borderColor: "#d0d5dd",
-              fontSize: "13px",
-              color: "#0f1901",
-              padding: "0 16px",
-            }}
-          >
-            Activos
-          </button>
+          <FilterButton>Activos</FilterButton>
         </div>
         <SearchBar
           value={searchValue}

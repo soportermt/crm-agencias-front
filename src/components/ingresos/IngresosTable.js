@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import StatusBadge from "@/components/common/StatusBadge";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
+import FilterButton from "@/components/common/FilterButton";
 
 export default function IngresosTable({
   activeTab,
@@ -23,7 +24,6 @@ export default function IngresosTable({
   endDate,
   onDateRangeChange,
 }) {
-  const router = useRouter();
   const columns = [
     { key: "id", label: "ID", width: "80px" },
     { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
@@ -58,17 +58,13 @@ export default function IngresosTable({
 
       case "acciones":
         return (
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              router.push(`/pagos/${row.id}`);
-            }}
+          <Link
+            href={`/pagos/${row.id}`}
             className="text-decoration-none fw-medium"
             style={{ color: "#0c5cc6", fontSize: "12px" }}
           >
             Ver información
-          </a>
+          </Link>
         );
 
       default:
@@ -133,18 +129,7 @@ export default function IngresosTable({
                 onChange={onDateRangeChange}
                 showIcon={false}
               />
-              <button
-                className="btn d-flex align-items-center gap-2 border bg-white"
-                style={{
-                  height: "38px",
-                  borderRadius: "8px",
-                  borderColor: "#d0d5dd",
-                  fontSize: "13px",
-                  color: "#0f1901",
-                  fontWeight: 400,
-                  padding: "0 16px",
-                }}
-              >
+              <FilterButton>
                 <span>
                   Sucursal{" "}
                   <span className="fw-semibold">Viajemos Juntos ATM</span>
@@ -153,7 +138,7 @@ export default function IngresosTable({
                   className="bi bi-chevron-down"
                   style={{ fontSize: "12px" }}
                 ></i>
-              </button>
+              </FilterButton>
             </div>
             <SearchBar
               value={searchValue}
