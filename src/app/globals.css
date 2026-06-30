@@ -1,6 +1,8 @@
 :root {
   --primary-color: #227cf2;
   --primary-light: #398af3;
+  --brand-blue: #0c5cc6;
+  --brand-blue-light: #e7f1fe;
   --dark-green: #0f1901;
   --accent-green: #619e05;
   --grey-text: #404040;
@@ -33,6 +35,18 @@ body {
 }
 
 /* Clases de Utilidad */
+.text-brand-blue {
+  color: var(--brand-blue);
+}
+
+.bg-brand-blue-light {
+  background-color: var(--brand-blue-light);
+}
+
+.border-brand-blue {
+  border-color: var(--brand-blue);
+}
+
 .shadow-premium {
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
 }

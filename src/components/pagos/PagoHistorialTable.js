@@ -5,6 +5,14 @@ import ExportButton from "@/components/common/ExportButton";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
 
+const COLUMNS = [
+  { key: "folio", label: "Folio de pago", width: "220px" },
+  { key: "fechaPago", label: "Fecha de pago", width: "220px" },
+  { key: "pago", label: "Pago", width: "220px" },
+  { key: "moneda", label: "Moneda", width: "220px" },
+  { key: "acciones", label: "Acciones", width: "220px" },
+];
+
 export default function PagoHistorialTable({
   data,
   desglose,
@@ -29,19 +37,11 @@ export default function PagoHistorialTable({
     currentPage * ITEMS_PER_PAGE
   );
 
-  const columns = [
-    { key: "folio", label: "Folio de pago", width: "220px" },
-    { key: "fechaPago", label: "Fecha de pago", width: "220px" },
-    { key: "pago", label: "Pago", width: "220px" },
-    { key: "moneda", label: "Moneda", width: "220px" },
-    { key: "acciones", label: "Acciones", width: "220px" },
-  ];
-
   const renderCell = (key, row) => {
     switch (key) {
       case "folio":
         return (
-          <span className="font-inter fw-semibold" style={{ color: "#0c5cc6" }}>
+          <span className="font-inter fw-semibold text-brand-blue">
             {row.folio}
           </span>
         );
@@ -50,8 +50,8 @@ export default function PagoHistorialTable({
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="text-decoration-none fw-semibold"
-            style={{ color: "#0c5cc6", fontSize: "13px" }}
+            className="text-decoration-none fw-semibold text-brand-blue"
+            style={{ fontSize: "13px" }}
           >
             Ver comprobante
           </a>
@@ -92,7 +92,7 @@ export default function PagoHistorialTable({
       </div>
 
       <DataTable
-        columns={columns}
+        columns={COLUMNS}
         data={paginatedData}
         renderCell={renderCell}
         pagination={true}
@@ -126,8 +126,8 @@ export default function PagoHistorialTable({
               <div className="d-flex justify-content-between font-inter">
                 <span style={{ fontSize: "12px", color: "#0f1901" }}>Saldo</span>
                 <span
-                  className="font-inter fw-semibold"
-                  style={{ fontSize: "24px", color: "#0c5cc6" }}
+                  className="font-inter fw-semibold text-brand-blue"
+                  style={{ fontSize: "24px" }}
                 >
                   {desglose.saldo}
                 </span>

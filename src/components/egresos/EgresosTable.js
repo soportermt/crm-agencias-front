@@ -217,13 +217,12 @@ export default function EgresosTable({
             <button
               key={tab.key}
               onClick={() => onTabChange(tab.key)}
-              className="btn border-0 transition-smooth d-flex align-items-center gap-2"
+              className={`btn border-0 transition-smooth d-flex align-items-center gap-2 ${isActive ? "bg-brand-blue-light text-brand-blue" : ""}`}
               style={{
                 padding: "12px 24px",
                 borderRadius: "24px",
                 fontSize: "14px",
-                backgroundColor: isActive ? "#e7f1fe" : "transparent",
-                color: isActive ? "#0c5cc6" : "rgba(0,0,0,0.4)",
+                color: isActive ? undefined : "rgba(0,0,0,0.4)",
                 fontWeight: 500,
               }}
             >

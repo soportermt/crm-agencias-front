@@ -9,6 +9,19 @@ import StatusBadge from "@/components/common/StatusBadge";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
 
+const COLUMNS = [
+  { key: "id", label: "ID", width: "80px" },
+  { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
+  { key: "cliente", label: "Cliente", width: "225px" },
+  { key: "metodoPago", label: "Método pago", width: "155px" },
+  { key: "tipoPago", label: "Tipo pago", width: "155px" },
+  { key: "limitePago", label: "Límite pago", width: "155px" },
+  { key: "total", label: "Total", width: "155px" },
+  { key: "moneda", label: "Moneda", width: "130px" },
+  { key: "estatus", label: "Estatus", width: "130px", align: "center" },
+  { key: "acciones", label: "Acciones", width: "174px", align: "center" },
+];
+
 export default function IngresosTable({
   activeTab,
   onTabChange,
@@ -24,24 +37,12 @@ export default function IngresosTable({
   endDate,
   onDateRangeChange,
 }) {
-  const columns = [
-    { key: "id", label: "ID", width: "80px" },
-    { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
-    { key: "cliente", label: "Cliente", width: "225px" },
-    { key: "metodoPago", label: "Método pago", width: "155px" },
-    { key: "tipoPago", label: "Tipo pago", width: "155px" },
-    { key: "limitePago", label: "Límite pago", width: "155px" },
-    { key: "total", label: "Total", width: "155px" },
-    { key: "moneda", label: "Moneda", width: "130px" },
-    { key: "estatus", label: "Estatus", width: "130px", align: "center" },
-    { key: "acciones", label: "Acciones", width: "174px", align: "center" },
-  ];
 
   const renderCell = (key, row) => {
     switch (key) {
       case "codigoConfirmacion":
         return (
-          <span className="font-inter fw-semibold" style={{ color: "#0c5cc6" }}>
+          <span className="font-inter fw-semibold text-brand-blue">
             {row.codigoConfirmacion}
           </span>
         );
@@ -60,8 +61,8 @@ export default function IngresosTable({
         return (
           <Link
             href={`/pagos/${row.id}`}
-            className="text-decoration-none fw-medium"
-            style={{ color: "#0c5cc6", fontSize: "12px" }}
+            className="text-decoration-none fw-medium text-brand-blue"
+            style={{ fontSize: "12px" }}
           >
             Ver información
           </Link>
@@ -82,13 +83,12 @@ export default function IngresosTable({
             <button
               key={tab}
               onClick={() => onTabChange(tab)}
-              className="btn border-0 transition-smooth"
+              className={`btn border-0 transition-smooth ${isActive ? "bg-brand-blue-light text-brand-blue" : ""}`}
               style={{
                 padding: "12px 24px",
                 borderRadius: "24px",
                 fontSize: "14px",
-                backgroundColor: isActive ? "#e7f1fe" : "transparent",
-                color: isActive ? "#0c5cc6" : "rgba(0,0,0,0.4)",
+                color: isActive ? undefined : "rgba(0,0,0,0.4)",
                 fontWeight: isActive ? 500 : 500,
                 overflow: "hidden",
               }}
@@ -150,7 +150,7 @@ export default function IngresosTable({
         </div>
 
         <DataTable
-          columns={columns}
+          columns={COLUMNS}
           data={data}
           renderCell={renderCell}
           pagination={true}
