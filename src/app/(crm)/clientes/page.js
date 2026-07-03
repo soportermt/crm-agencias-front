@@ -12,6 +12,10 @@ export default function ClientesPage() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todos");
+  const [dateRange, setDateRange] = useState({
+    startDate: "2026-05-01",
+    endDate: "2026-05-25",
+  });
 
   const filteredClients = clientsMock.filter((client) => {
     const matchesSearch =
@@ -41,6 +45,9 @@ export default function ClientesPage() {
           onSearchChange={setSearchTerm}
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
+          startDate={dateRange.startDate}
+          endDate={dateRange.endDate}
+          onDateRangeChange={setDateRange}
         />
 
         <ClientTable clients={filteredClients} />

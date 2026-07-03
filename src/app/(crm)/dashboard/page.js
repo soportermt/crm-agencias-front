@@ -23,6 +23,7 @@ export default function DashboardPage() {
             title="Total a Cobrar"
             value="$15,769,184.91"
             trend="up"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -30,6 +31,7 @@ export default function DashboardPage() {
             title="Total a Pagar"
             value="$700,457.30"
             trend="down"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -37,6 +39,7 @@ export default function DashboardPage() {
             title="Total Generado en Ventas"
             value="$36,978,278.74"
             trend="up"
+            hasShadow={true}
           />
         </div>
         <div className="col-12 col-sm-6 col-md-3">
@@ -44,6 +47,7 @@ export default function DashboardPage() {
             title="Clientes Registrados"
             value="630"
             trend="user"
+            hasShadow={true}
           />
         </div>
       </div>
@@ -99,8 +103,8 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-12 col-md-5">
-          <div className="bg-white p-4 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
-            <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="bg-white p-4 border shadow-premium h-100 d-flex flex-column" style={{ borderRadius: "12px" }}>
+            <div className="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
               <h2 className="font-inter mb-0" style={{ fontSize: "16px", color: "#0f1901" }}>
                 <span className="fw-semibold">Pendientes</span>
                 <span className="fw-normal"> del día</span>
@@ -115,7 +119,7 @@ export default function DashboardPage() {
               </a>
             </div>
 
-            <div className="d-flex flex-column" style={{ gap: "10px" }}>
+            <div className="d-flex flex-column justify-content-between flex-grow-1">
               {pendingTasks.map((task, index) => (
                 <div key={index} className="d-flex align-items-center" style={{ gap: "8px", padding: "4px 8px" }}>
                   <div
@@ -125,18 +129,18 @@ export default function DashboardPage() {
                       height: "36px",
                       minWidth: "36px",
                       backgroundColor: "#f4faeb",
-                      color: "#619e05",
+                      color: "#000000",
                       borderRadius: "8px",
                       fontSize: "16px",
                     }}
                   >
-                    <i className="bi bi-exclamation-triangle-fill"></i>
+                    <i className="bi bi-exclamation-triangle"></i>
                   </div>
                   <div className="flex-grow-1" style={{ fontFamily: "var(--font-inter)" }}>
-                    <h4 className="fw-semibold text-dark mb-0.5" style={{ fontSize: "14px", lineHeight: "20px" }}>
+                    <h4 className="fw-normal text-dark mb-0" style={{ fontSize: "14px", lineHeight: "1.2" }}>
                       Atraso de pago #{task.id}
                     </h4>
-                    <p className="mb-0" style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.4)", lineHeight: "16px" }}>
+                    <p className="mb-0" style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.4)", lineHeight: "1.2" }}>
                       {task.time}
                     </p>
                   </div>

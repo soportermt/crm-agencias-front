@@ -1,4 +1,5 @@
 import React from "react";
+import { CloudArrowDownIcon } from "@heroicons/react/24/outline";
 
 export default function ExportButton({ onExport, disabled = false, className = "" }) {
   return (
@@ -15,7 +16,7 @@ export default function ExportButton({ onExport, disabled = false, className = "
         fontWeight: 500,
       }}
     >
-      <i className="bi bi-cloud-arrow-down-fill"></i>
+      <CloudArrowDownIcon style={{ width: "20px", height: "20px" }} />
       <span>Exportar</span>
     </button>
   );
