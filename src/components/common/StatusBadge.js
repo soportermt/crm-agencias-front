@@ -17,7 +17,7 @@ export default function StatusBadge({ status }) {
     bg = "rgba(220, 38, 38, 0.1)";
     color = "#dc2626";
     dotBg = "#dc2626";
-  } else if (status === "Activo") {
+  } else if (status === "Activo" || status === "Pagado") {
     bg = "#ecfdf3";
     color = "#037847";
     dotBg = "#037847";
@@ -29,7 +29,7 @@ export default function StatusBadge({ status }) {
     bg = "rgba(175, 35, 58, 0.1)";
     color = "#af233a";
     dotBg = "#af233a";
-  } else if (status === "Inactivo") {
+  } else if (status === "Inactivo" || status === "Vigente") {
     bg = "rgba(71, 71, 71, 0.08)";
     color = "#475569";
     dotBg = "#475569";

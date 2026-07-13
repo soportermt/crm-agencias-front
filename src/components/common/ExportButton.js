@@ -14,6 +14,7 @@ export default function ExportButton({ onExport, disabled = false, className = "
         color: "#0c5cc6",
         fontSize: "13px",
         fontWeight: 500,
+        width: "fit-content"
       }}
     >
       <CloudArrowDownIcon style={{ width: "20px", height: "20px" }} />
