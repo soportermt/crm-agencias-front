@@ -268,3 +268,9 @@ body {
   padding: 0 !important;
   border-bottom: none;
 }
+
+.card-passenger-number {
+  font-size: 26px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
