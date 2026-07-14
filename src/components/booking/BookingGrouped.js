@@ -69,7 +69,7 @@ export default function BookingGrouped() {
                   <span
                     style={{
                       fontSize: "14px",
-                      color: "rgba(0, 0, 0, 0.4)",
+                      color: "var(--black-rgba-40)",
                     }}
                   >
                     {group.aerolinea} · {group.hotel} · {group.total_pasajeros} pasajeros

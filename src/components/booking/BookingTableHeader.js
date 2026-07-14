@@ -9,7 +9,7 @@ export default function BookingTableHeader() {
                 Gestión de reservas
             </h1>
             <a
-                href="#"
+                href="reservaciones/booking"
                 className="btn btn-primary-custom d-flex align-items-center gap-2 shadow-premium"
                 style={{
                     padding: "10px 20px",
