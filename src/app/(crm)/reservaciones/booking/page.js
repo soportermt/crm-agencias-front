@@ -1,5 +1,5 @@
-import BookingForm from '@/components/booking/booking-form/BookingForm'
-import BookingPriceBreakdown from '@/components/booking/booking-form/BookingPriceBreakdown'
+import BookingFormContainer from '@/components/booking/booking-form/BookingFormContainer'
+import { BookingFormProvider } from '@/components/booking/booking-form/BookingFormContext'
 import React from 'react'
 
 export default function Booking() {
@@ -11,25 +11,9 @@ export default function Booking() {
       <p className="text-secondary small mb-0" style={{ color: "var(--black-rgba-40)", fontSize: "13px" }}>
         Completa los datos para crear una nueva reservación.
       </p>
-      <form className="row g-3 m-0 form-booking">
-        <div className="col-12 col-xl-9">
-          <div
-            className="bg-white shadow-premium p-1"
-            style={{ borderRadius: "12px" }}
-          >
-            <BookingForm />
-          </div>
-        </div>
-
-        <div className="col-12 col-xl-3">
-          <div
-            className="bg-white shadow-premium p-1"
-            style={{ borderRadius: "12px" }}
-          >
-            <BookingPriceBreakdown />
-          </div>
-        </div>
-      </form>
+      <BookingFormProvider>
+        <BookingFormContainer />
+      </BookingFormProvider>
     </div>
   )
 }

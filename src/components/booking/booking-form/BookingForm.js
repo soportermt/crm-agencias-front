@@ -14,9 +14,8 @@ export default function BookingForm() {
             id="agente"
             name="agente"
             className="form-select"
-            required
           >
-            <option>Andrea Lizeth Pérez</option>
+            <option value={1}>Andrea Lizeth Pérez</option>
           </select>
         </div>
         <div className="col-12 col-md-6 col-lg-3">
@@ -27,7 +26,6 @@ export default function BookingForm() {
             id="moneda"
             type="text"
             className="form-control"
-            required
           />
         </div>
         <div className="col-12 col-md-6 col-lg-3">
@@ -38,7 +36,6 @@ export default function BookingForm() {
             id="fecha"
             type="date"
             className="form-control"
-            required
           />
         </div>
         <div className="col-12 col-md-6 col-lg-3">
@@ -49,7 +46,7 @@ export default function BookingForm() {
             id="fechaLimite"
             type="date"
             className="form-control"
-            required
+            
           />
         </div>
       </div>
@@ -63,7 +60,6 @@ export default function BookingForm() {
           <select
             id="vendidoA"
             className="form-select"
-            required
           >
             <option>Mildred Fernanda Sánchez</option>
           </select>
@@ -76,7 +72,6 @@ export default function BookingForm() {
             id="titular"
             type="text"
             className="form-control"
-            required
           />
         </div>
         <div className="col-12">

@@ -310,3 +310,24 @@ body {
   height: 70px;
   resize: none;
 }
+
+.service-btn-styled {
+  background-color: rgba(12, 12, 13, 0.05);
+  border: 1px solid var(--black-rgba-40);
+  border-radius: 24px;
+  font-size: 14px;
+  color: var(--black-rgba-40);
+  font-weight: 500;
+}
+
+.service-btn-styled:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.service-btn-styled.is-selected {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
