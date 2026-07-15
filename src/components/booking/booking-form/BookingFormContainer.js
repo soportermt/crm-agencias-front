@@ -20,13 +20,13 @@ export default function BookingFormContainer() {
   };
 
   return (
-    <form className="row g-3 m-0 form-booking" onSubmit={handleSubmit}>
-      <div className="col-12 col-xl-9 p-0">
+    <form className="row g-5 m-0 form-booking" onSubmit={handleSubmit}>
+      <div className="col-12 col-xl-9 p-0 my-3">
         <div className="bg-white shadow-premium p-1" style={{ borderRadius: "12px" }}>
           <BookingForm />
         </div>
       </div>
-      <div className="col-12 col-xl-3">
+      <div className="col-12 col-xl-3 my-3">
         <div className="bg-white shadow-premium p-1" style={{ borderRadius: "12px" }}>
           <BookingPriceBreakdown />
         </div>

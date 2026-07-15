@@ -285,8 +285,14 @@ body {
 .form-booking select,
 .form-booking textarea {
   font-size: 14px;
-  border-radius: 12px !important;
+  border-radius: 12px;
   padding: 8px 36px 8px 12px;
+}
+
+
+.form-booking select,
+.form-booking textarea {
+  border-radius: 12px !important;
 }
 
 .form-booking input[type="date"]::-webkit-calendar-picker-indicator {
@@ -330,4 +336,14 @@ body {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   color: #fff;
+}
+
+.input-group-text {
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  background-color: rgba(231, 241, 254, 0.6);
+}
+
+.custom-input {
+  border-radius: 12px 0 0 12px !important;
 }

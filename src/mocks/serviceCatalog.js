@@ -1,4 +1,6 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
+import TourForm from "@/components/booking/forms/TourForm";
+import TrasladoForm from "@/components/booking/forms/TrasladoForm";
 import { faHotel, faPersonSwimming, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
@@ -19,7 +21,7 @@ export const serviceCatalog = [
     id: "transporte",
     nombre: "Traslado",
     icon: faVanShuttle,
-    Form: HospedajeForm,
+    Form: TrasladoForm,
     summary: (data) => [
       { label: "Hotel", value: data.hotelLabel || data.hotel },
       { label: "Check-in", value: data.checkIn },
@@ -31,7 +33,7 @@ export const serviceCatalog = [
     id: "tour",
     nombre: "Tour",
     icon: faPersonSwimming,
-    Form: HospedajeForm,
+    Form: TourForm,
     summary: (data) => [
       { label: "Hotel", value: data.hotelLabel || data.hotel },
       { label: "Check-in", value: data.checkIn },

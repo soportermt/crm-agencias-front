@@ -3,7 +3,20 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 
 const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
-  const [data, setData] = useState(initialData || { hotel: "", destino: "", checkIn: "", checkOut: "", pasajeros: [] });
+  const defaultData = {
+    proveedor: "",
+    code: "",
+    hotel: "",
+    destino: "",
+    checkIn: "",
+    checkOut: "",
+    pasajeros: [],
+  };
+
+  const [data, setData] = useState({
+    ...defaultData,
+    ...initialData,
+  });
   const [errors, setErrors] = useState({});
 
   useImperativeHandle(ref, () => ({
@@ -12,7 +25,6 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
       if (!data.hotel) newErrors.hotel = "Selecciona un hotel";
       if (!data.checkIn) newErrors.checkIn = "Requerido";
       if (!data.checkOut) newErrors.checkOut = "Requerido";
-      if (data.pasajeros.length === 0) newErrors.pasajeros = "Agrega al menos un pasajero";
 
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) return { valid: false };
@@ -23,7 +35,23 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
   const setField = (name, value) => setData((d) => ({ ...d, [name]: value }));
 
   const addPasajero = () =>
-    setData((d) => ({ ...d, pasajeros: [...d.pasajeros, { nombre: "", esTitular: false }] }));
+    setData((d) => ({
+      ...d,
+      pasajeros: [
+        ...d.pasajeros,
+        {
+          pasajeros: "",
+          cama: "",
+          habitacion: "",
+          plan: "",
+          limite_pago: "",
+          limite_cliente: "",
+          total_publico: "",
+          total_neto: "",
+          fee: "",
+        },
+      ],
+    }));
 
   const updatePasajero = (i, field, value) =>
     setData((d) => {
@@ -36,9 +64,29 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
     setData((d) => ({ ...d, pasajeros: d.pasajeros.filter((_, idx) => idx !== i) }));
 
   return (
-    <div>
-      <div className="row g-3 mb-3">
-        <div className="col-12 col-md-4">
+    <div className="form-booking">
+      <div className="row g-2 mb-2 justify-content-end">
+        <div className="col-12 col-md-6">
+          <label className="form-label">Proveedor *</label>
+          <input
+            type="text"
+            className="form-control"
+            value={data.proveedor}
+            onChange={(e) => setField("proveedor", e.target.value)}
+          />
+          {errors.proveedor && <div className="text-danger small">{errors.proveedor}</div>}
+        </div>
+        <div className="col-12 col-md-6">
+          <label className="form-label">Código *</label>
+          <input
+            type="text"
+            className="form-control"
+            value={data.code}
+            onChange={(e) => setField("code", e.target.value)}
+          />
+          {errors.code && <div className="text-danger small">{errors.code}</div>}
+        </div>
+        <div className="col-12 col-md-6">
           <label className="form-label">Hotel *</label>
           <select
             className="form-select"
@@ -50,7 +98,7 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
           </select>
           {errors.hotel && <div className="text-danger small">{errors.hotel}</div>}
         </div>
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-md-6">
           <label className="form-label">Destino *</label>
           <select
             className="form-select"
@@ -62,8 +110,8 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
           </select>
           {errors.hotel && <div className="text-danger small">{errors.hotel}</div>}
         </div>
-        <div className="col-12 col-md-4">
-          <label className="form-label">Check-in *</label>
+        <div className="col-12 col-md-6">
+          <label className="form-label">Fecha de servicio *</label>
           <input
             type="date"
             className="form-control"
@@ -72,8 +120,8 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
           />
           {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
         </div>
-        <div className="col-12 col-md-4">
-          <label className="form-label">Check-out *</label>
+        <div className="col-12 col-md-6">
+          <label className="form-label">Fecha de servicio *</label>
           <input
             type="date"
             className="form-control"
@@ -82,36 +130,101 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
           />
           {errors.checkOut && <div className="text-danger small">{errors.checkOut}</div>}
         </div>
+        <div className="col-12 col-md-6 my-3">
+          <button type="button" className="btn btn-sm btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#398AF3" }}>
+            + Habitación
+          </button>
+        </div>
       </div>
-
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <label className="form-label mb-0">Pasajeros</label>
-        <button type="button" className="btn btn-sm btn-outline-primary" onClick={addPasajero}>
-          + Agregar pasajero
-        </button>
-      </div>
-      {errors.pasajeros && <div className="text-danger small mb-2">{errors.pasajeros}</div>}
 
       {data.pasajeros.map((p, i) => (
-        <div key={i} className="d-flex gap-2 align-items-center mb-2">
-          <input
-            className="form-control"
-            placeholder="Nombre del pasajero"
-            value={p.nombre}
-            onChange={(e) => updatePasajero(i, "nombre", e.target.value)}
-          />
-          <div className="form-check text-nowrap">
+        <div key={i} className="row g-2 mb-2 justify-content-end align-items-center">
+          <div className="col-12 col-md-6">
+            <label className="form-label">Pasajeros</label>
             <input
-              type="checkbox"
-              className="form-check-input"
-              checked={p.esTitular}
-              onChange={(e) => updatePasajero(i, "esTitular", e.target.checked)}
+              type="number"
+              className="form-control"
+              value={p.pasajeros}
+              onChange={(e) => updatePasajero(i, "pasajeros", e.target.value)}
             />
-            <label className="form-check-label small">Titular</label>
           </div>
-          <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removePasajero(i)}>
-            ×
-          </button>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Tipo de cama</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.cama}
+              onChange={(e) => updatePasajero(i, "cama", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Tipo habitación</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.habitacion}
+              onChange={(e) => updatePasajero(i, "habitacion", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Plan</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.plan}
+              onChange={(e) => updatePasajero(i, "plan", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Límite pago *</label>
+            <input
+              type="date"
+              className="form-control"
+              value={p.limite_pago}
+              onChange={(e) => updatePasajero(i, "limite_pago", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Límite cliente</label>
+            <input
+              type="date"
+              className="form-control"
+              value={p.limite_cliente}
+              onChange={(e) => updatePasajero(i, "limite_cliente", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Total público</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.total_publico}
+              onChange={(e) => updatePasajero(i, "total_publico", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Total neto</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.total_neto}
+              onChange={(e) => updatePasajero(i, "total_neto", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6">
+            <label className="form-label">Fee</label>
+            <input
+              type="text"
+              className="form-control"
+              value={p.fee}
+              onChange={(e) => updatePasajero(i, "fee", e.target.value)}
+            />
+          </div>
+          <div className="col-12 col-md-6 text-end">
+            <button type="button" className="btn" onClick={() => removePasajero(i)} style={{ fontSize: 14, color: "var(--brand-blue)", fontWeight: 500 }}>
+              Eliminar habitación
+            </button>
+          </div>
         </div>
       ))}
     </div>
