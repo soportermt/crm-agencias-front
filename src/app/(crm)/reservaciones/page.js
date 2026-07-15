@@ -1,9 +1,23 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import BookingMetrics from "@/components/booking/BookingMetrics";
+import BookingTable from "@/components/booking/BookingTable";
+import BookingTableHeader from "@/components/booking/BookingTableHeader";
+
 export default function ReservacionesPage() {
+  const [activeTab, setActiveTab] = useState("lista");
   return (
-    <div className="p-4">
-      <h1 className="h3 mb-4 fw-bold text-dark font-poppins">Reservaciones</h1>
-      <div className="card border-0 shadow-premium p-4 rounded-4">
-        <p className="text-secondary mb-0">Contenido de Reservaciones en desarrollo.</p>
+    <div className="container-fluid p-0">
+      <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "12px" }}>
+        <BookingTableHeader />
+
+        <BookingMetrics />
+
+        <BookingTable
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       </div>
     </div>
   );
