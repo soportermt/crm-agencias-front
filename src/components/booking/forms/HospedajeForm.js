@@ -1,5 +1,6 @@
 "use client";
 
+import HotelSelect from "@/components/common/HotelSelect";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 
 const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
@@ -87,28 +88,36 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
           {errors.code && <div className="text-danger small">{errors.code}</div>}
         </div>
         <div className="col-12 col-md-6">
-          <label className="form-label">Hotel *</label>
-          <select
-            className="form-select"
+          <HotelSelect
             value={data.hotel}
-            onChange={(e) => setField("hotel", e.target.value)}
-          >
-            <option value="">Selecciona...</option>
-            <option value="Barcelo Maya Grand">Barcelo Maya Grand</option>
-          </select>
-          {errors.hotel && <div className="text-danger small">{errors.hotel}</div>}
+            error={errors.hotel}
+            onChange={(hotel) => {
+
+              setData((prev) => ({
+                ...prev,
+                hotel: hotel.label,
+                destino: hotel.destino ?? prev.destino,
+              }));
+
+            }}
+          />
         </div>
         <div className="col-12 col-md-6">
           <label className="form-label">Destino *</label>
-          <select
-            className="form-select"
+
+          <input
+            type="text"
+            className="form-control"
             value={data.destino}
             onChange={(e) => setField("destino", e.target.value)}
-          >
-            <option value="">Selecciona...</option>
-            <option value="Cancun">Cancun</option>
-          </select>
-          {errors.hotel && <div className="text-danger small">{errors.hotel}</div>}
+            placeholder="Destino"
+          />
+
+          {errors.destino && (
+            <div className="text-danger small">
+              {errors.destino}
+            </div>
+          )}
         </div>
         <div className="col-12 col-md-6">
           <label className="form-label">Fecha de servicio *</label>

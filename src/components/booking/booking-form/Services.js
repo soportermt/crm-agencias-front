@@ -1,20 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import ServiceFormModal from "./ServiceFormModal";
 import ServiceSummaryCard from "./ServiceSummaryCard";
 import { serviceCatalog } from "@/mocks/serviceCatalog";
 import { useBookingForm } from "./BookingFormContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ServiceForm from "./ServiceForm";
 
 export default function Services() {
     const { addedServices, setAddedServices } = useBookingForm();
     const [activeServiceType, setActiveServiceType] = useState(null);
     const [editingId, setEditingId] = useState(null);
 
-    const openNew = (serviceType) => {
-        setActiveServiceType(serviceType);
-        setEditingId(null);
+    const toggleService = (service) => {
+        if (activeServiceType?.id === service.id) {
+            closeForm();
+        } else {
+            setActiveServiceType(service);
+            setEditingId(null);
+        }
     };
 
     const openEdit = (item) => {
@@ -23,7 +27,7 @@ export default function Services() {
         setEditingId(item.id);
     };
 
-    const closeModal = () => {
+    const closeForm = () => {
         setActiveServiceType(null);
         setEditingId(null);
     };
@@ -39,7 +43,7 @@ export default function Services() {
                 { id: crypto.randomUUID(), tipo: activeServiceType.id, data: formData },
             ]);
         }
-        closeModal();
+        closeForm();
     };
 
     const handleRemove = (id) => {
@@ -55,17 +59,36 @@ export default function Services() {
             <div className="d-flex flex-wrap gap-2 mb-3">
                 {serviceCatalog.map((service) => {
                     const isSelected = addedServices.some((item) => item.tipo === service.id);
+                    const isActive = activeServiceType?.id === service.id;
                     return (
                         <button
                             key={service.id}
                             type="button"
-                            className={`btn service-btn-styled ${isSelected ? "is-selected" : ""}`}
-                            onClick={() => openNew(service)}
+                            className={`btn ${isSelected ? "btn-success" : "btn-outline-primary"} ${isActive ? "active" : ""}`}
+                            aria-expanded={isActive}
+                            aria-controls="serviceFormCollapse"
+                            onClick={() => toggleService(service)}
                         >
                             <FontAwesomeIcon icon={service.icon} /> {service.nombre}
                         </button>
                     );
                 })}
+            </div>
+
+            <div
+                id="serviceFormCollapse"
+                className={`collapse ${activeServiceType ? "show" : ""} mb-3`}
+            >
+                {activeServiceType && (
+                    <div className="card card-body">
+                        <ServiceForm
+                            service={activeServiceType}
+                            initialData={editingInitialData}
+                            onSave={handleSave}
+                            onCancel={closeForm}
+                        />
+                    </div>
+                )}
             </div>
 
             {addedServices.map((item) => {
@@ -80,15 +103,6 @@ export default function Services() {
                     />
                 );
             })}
-
-            {activeServiceType && (
-                <ServiceFormModal
-                    service={activeServiceType}
-                    initialData={editingInitialData}
-                    onSave={handleSave}
-                    onClose={closeModal}
-                />
-            )}
         </div>
     );
 }

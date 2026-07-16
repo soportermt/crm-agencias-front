@@ -22,11 +22,14 @@ export default function BookingForm() {
           <label htmlFor="moneda" className="form-label">
             Moneda *
           </label>
-          <input
-            id="moneda"
-            type="text"
-            className="form-control"
-          />
+          <select
+            id="agente"
+            name="agente"
+            className="form-select"
+          >
+            <option value={"MXN"}>MXN</option>
+            <option value={"USD"}>USD</option>
+          </select>
         </div>
         <div className="col-12 col-md-6 col-lg-3">
           <label htmlFor="fecha" className="form-label">
@@ -46,7 +49,7 @@ export default function BookingForm() {
             id="fechaLimite"
             type="date"
             className="form-control"
-            
+
           />
         </div>
       </div>
@@ -85,7 +88,7 @@ export default function BookingForm() {
           />
         </div>
       </div>
-      <Services/>
+      <Services />
     </div>
   )
 }
