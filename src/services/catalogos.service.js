@@ -10,4 +10,9 @@ export const catalogosService = {
 
         return data;
     },
+
+    async searchCustomers() {
+        const { data } = await api.get("/reservas/searchCustomers");
+        return data;
+    },
 };

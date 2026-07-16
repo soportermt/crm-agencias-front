@@ -1,68 +1,26 @@
 "use client";
 
 import HotelSelect from "@/components/common/HotelSelect";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { useBookingForm } from "../booking-form/BookingFormContext";
 
-const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
-  const defaultData = {
-    proveedor: "",
-    code: "",
-    hotel: "",
-    destino: "",
-    checkIn: "",
-    checkOut: "",
-    pasajeros: [],
-  };
-
-  const [data, setData] = useState({
-    ...defaultData,
-    ...initialData,
-  });
-  const [errors, setErrors] = useState({});
-
-  useImperativeHandle(ref, () => ({
-    submit: () => {
-      const newErrors = {};
-      if (!data.hotel) newErrors.hotel = "Selecciona un hotel";
-      if (!data.checkIn) newErrors.checkIn = "Requerido";
-      if (!data.checkOut) newErrors.checkOut = "Requerido";
-
-      setErrors(newErrors);
-      if (Object.keys(newErrors).length > 0) return { valid: false };
-      return { valid: true, data };
-    },
-  }));
-
-  const setField = (name, value) => setData((d) => ({ ...d, [name]: value }));
+export default function HospedajeForm() {
+  const { draft, updateDraftField } = useBookingForm();
+  const { data, errors } = draft;
 
   const addPasajero = () =>
-    setData((d) => ({
-      ...d,
-      pasajeros: [
-        ...d.pasajeros,
-        {
-          pasajeros: "",
-          cama: "",
-          habitacion: "",
-          plan: "",
-          limite_pago: "",
-          limite_cliente: "",
-          total_publico: "",
-          total_neto: "",
-          fee: "",
-        },
-      ],
-    }));
+    updateDraftField("pasajeros", [
+      ...data.pasajeros,
+      { pasajeros: "", cama: "", habitacion: "", plan: "", limite_pago: "", limite_cliente: "", total_publico: "", total_neto: "", fee: "" },
+    ]);
 
-  const updatePasajero = (i, field, value) =>
-    setData((d) => {
-      const pasajeros = [...d.pasajeros];
-      pasajeros[i] = { ...pasajeros[i], [field]: value };
-      return { ...d, pasajeros };
-    });
+  const updatePasajero = (i, field, value) => {
+    const pasajeros = [...data.pasajeros];
+    pasajeros[i] = { ...pasajeros[i], [field]: value };
+    updateDraftField("pasajeros", pasajeros);
+  };
 
   const removePasajero = (i) =>
-    setData((d) => ({ ...d, pasajeros: d.pasajeros.filter((_, idx) => idx !== i) }));
+    updateDraftField("pasajeros", data.pasajeros.filter((_, idx) => idx !== i));
 
   return (
     <div className="form-booking">
@@ -92,13 +50,8 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
             value={data.hotel}
             error={errors.hotel}
             onChange={(hotel) => {
-
-              setData((prev) => ({
-                ...prev,
-                hotel: hotel.label,
-                destino: hotel.destino ?? prev.destino,
-              }));
-
+              updateDraftField("hotel", hotel.label);
+              updateDraftField("destino", hotel.destino ?? data.destino);
             }}
           />
         </div>
@@ -238,6 +191,4 @@ const HospedajeForm = forwardRef(function HospedajeForm({ initialData }, ref) {
       ))}
     </div>
   );
-});
-
-export default HospedajeForm;
+};

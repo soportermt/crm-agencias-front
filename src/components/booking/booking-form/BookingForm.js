@@ -1,7 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Services from './Services'
+import CustomersSelect from '@/components/common/CustomersSelect';
+import { useBookingForm } from './BookingFormContext';
 
 export default function BookingForm() {
+  const {
+    booking,
+    updateBooking
+  } = useBookingForm();
+
   return (
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Información general</h5>
@@ -57,15 +64,13 @@ export default function BookingForm() {
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Datos de la reserva</h5>
       <div className="row g-3">
         <div className="col-12 col-md-6 col-lg-4">
-          <label htmlFor="vendidoA" className="form-label">
-            Vendido a *
-          </label>
-          <select
-            id="vendidoA"
-            className="form-select"
-          >
-            <option>Mildred Fernanda Sánchez</option>
-          </select>
+          <CustomersSelect
+            value={booking.customerId}
+            onChange={(customer) => {
+              updateBooking("customerId", customer.value);
+              updateBooking("customer", customer.label);
+            }}
+          />
         </div>
         <div className="col-12 col-md-6 col-lg-4">
           <label htmlFor="titular" className="form-label">
