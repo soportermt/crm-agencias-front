@@ -38,14 +38,14 @@ export default function Services() {
       </div>
 
       {draft && (
-        <div className="card card-body p-1 d-flex flex-column gap-4">
+        <div className="card card-body p-3 d-flex flex-column gap-4">
           <div className="d-flex justify-content-between align-items-center">
             <h2 className="font-inter fw-medium mb-0" style={{ fontSize: "22px" }}>Información del servicio</h2>
             <button type="button" onClick={cancelDraft} className="btn-close" aria-label="Cerrar" />
           </div>
           <FormComponent />
           <div className="row justify-content-end">
-            <div className="col-md-6 p-0">
+            <div className="col-md-4">
               <button type="button" onClick={confirmDraft} className="btn btn-primary w-100" style={{ backgroundColor: "var(--brand-blue)" }}>
                 Confirmar
               </button>

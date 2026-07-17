@@ -15,4 +15,9 @@ export const catalogosService = {
         const { data } = await api.get("/reservas/searchCustomers");
         return data;
     },
+
+    async searchProviders() {
+        const { data } = await api.get("/reservas/getProviders");
+        return data;
+    },
 };

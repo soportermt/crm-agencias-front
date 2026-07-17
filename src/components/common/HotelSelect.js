@@ -52,10 +52,10 @@ export default function HotelSelect({
                         ...provided,
                         fontSize: "14px",
                         borderRadius: "8px",
-                        border: state.isFocused ? "1px solid #ccc" : "1px solid #ccc", 
+                        border: state.isFocused ? "0.5px solid rgb(120, 174, 245)" : "1px solid #ccc", 
                         boxShadow: "none",
                         "&:hover": {
-                            border: "1px solid #ccc", 
+                            border: "0.5px solid rgb(120, 174, 245)", 
                         }
                     }),
                     input: (provided) => ({

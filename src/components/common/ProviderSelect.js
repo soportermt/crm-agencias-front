@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import Select from "react-select";
-import { catalogosService } from "@/services/catalogos.service";
+import { catalogosService } from '@/services/catalogos.service';
 
-export default function CustomersSelect({
+export default function ProviderSelect({
     value,
     onChange,
     error,
@@ -13,20 +13,20 @@ export default function CustomersSelect({
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        loadCustomers();
+        loadProvider();
     }, []);
 
-    async function loadCustomers() {
+    async function loadProvider() {
         try {
             setLoading(true);
 
-            const customers = await catalogosService.searchCustomers();
+            const provider = await catalogosService.searchProviders();
 
             setOptions(
-                customers.map((customer) => ({
-                    value: customer.id,
-                    label: customer.text,
-                    ...customer,
+                provider.map((provider) => ({
+                    value: provider.id,
+                    label: provider.text,
+                    ...provider,
                 }))
             );
         } catch (err) {
@@ -38,13 +38,13 @@ export default function CustomersSelect({
 
     return (
         <>
-            <label className="form-label">Vendido a *</label>
+            <label className="form-label">Proveedor *</label>
 
             <Select
                 options={options}
                 isLoading={loading}
-                instanceId="customers-select"
-                inputId="customers-select"
+                instanceId="provider-select"
+                inputId="provider-select"
                 value={options.find((o) => o.value === value) || null}
                 onChange={onChange}
                 placeholder="Selecciona un cliente"
@@ -82,5 +82,5 @@ export default function CustomersSelect({
                 </div>
             )}
         </>
-    );
+    )
 }

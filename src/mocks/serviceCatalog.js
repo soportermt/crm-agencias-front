@@ -9,7 +9,7 @@ export const serviceCatalog = [
     nombre: "Hospedaje",
     icon: faHotel,
     Form: HospedajeForm,
-    defaultData: { proveedor: "", code: "", hotel: "", destino: "", checkIn: "", checkOut: "", pasajeros: [] },
+    defaultData: { proveedor: "", adults: 2, children: 0, code: "", hotel: "", destino: "", checkIn: "", checkOut: "", pasajeros: [] },
     validate: (data) => {
       const errors = {};
       if (!data.hotel) errors.hotel = "Selecciona un hotel";
