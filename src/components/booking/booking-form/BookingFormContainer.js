@@ -18,7 +18,7 @@ export default function BookingFormContainer() {
       className="row g-5 m-0 form-booking"
       onSubmit={handleSubmit}
     >
-      <div className="col-12 col-xl-9 p-0 my-3">
+      <div className="col-12 col-xl-9 my-3">
         <div
           className="bg-white shadow-premium p-1"
           style={{ borderRadius: "12px" }}

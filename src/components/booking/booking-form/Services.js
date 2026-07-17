@@ -40,7 +40,7 @@ export default function Services() {
       {draft && (
         <div className="card card-body p-3 d-flex flex-column gap-4">
           <div className="d-flex justify-content-between align-items-center">
-            <h2 className="font-inter fw-medium mb-0" style={{ fontSize: "22px" }}>Información del servicio</h2>
+            <h2 className="font-inter fw-medium mb-0" style={{ fontSize: "18px" }}>Información del servicio</h2>
             <button type="button" onClick={cancelDraft} className="btn-close" aria-label="Cerrar" />
           </div>
           <FormComponent />
