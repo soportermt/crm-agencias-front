@@ -9,13 +9,15 @@ export const serviceCatalog = [
     nombre: "Hospedaje",
     icon: faHotel,
     Form: HospedajeForm,
-    summary: (data) => ({
-      hotel: data.hotel || "Sin hotel",
-      destino: data.destino,
-      dateStart: data.checkIn,
-      dateEnd: data.checkOut,
-      precio: data.precio,
-    }),
+    defaultData: { proveedor: "", adults: 2, children: 0, code: "", hotel: "", destino: "", checkIn: "", checkOut: "", habitaciones: [] },
+    validate: (data) => {
+      const errors = {};
+      if (!data.hotel) errors.hotel = "Selecciona un hotel";
+      if (!data.checkIn) errors.checkIn = "Requerido";
+      if (!data.checkOut) errors.checkOut = "Requerido";
+      return errors;
+    },
+    summary: (data) => ({ hotel: data.hotel || "Sin hotel", destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
   },
   {
     id: "transporte",

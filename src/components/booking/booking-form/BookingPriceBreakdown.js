@@ -29,10 +29,10 @@ export default function BookingPriceBreakdown() {
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Desglose venta</h5>
       <div style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
         <div className='row align-items-center mb-2'>
-          <div className='col-8'>
+          <div className='col-12 col-md-6'>
             <p className='mb-2'>Comisión Agencia:</p>
           </div>
-          <div className='col-4'>
+          <div className='col-12 col-md-6 mt-2 mt-md-0'>
             <div className="input-group">
               <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)"}}/>
                 <span className="input-group-text" id="porcentaje">%</span>
