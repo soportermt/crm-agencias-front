@@ -16,12 +16,40 @@ export default function HospedajeForm() {
   const addPasajero = () =>
     updateDraftField("habitaciones", [
       ...data.habitaciones,
-      { habitaciones: "", cama: "", habitacion: "", plan: "", limite_pago: "", limite_cliente: "", total_publico: "", total_neto: "", fee: "" },
+      {
+        adults: 2,
+        children: 0,
+
+        pasajeros: [
+          {
+            tipo: "adult",
+            nombre: "",
+          },
+          {
+            tipo: "adult",
+            nombre: "",
+          },
+        ],
+
+        cama: "",
+        habitacion: "",
+        plan: "",
+        limite_pago: null,
+        limite_cliente: null,
+        total_publico: "",
+        total_neto: "",
+        fee: "",
+      },
     ]);
 
-  const updatePasajero = (i, field, value) => {
+  const updatePassenger = (roomIndex, passengerIndex, field, value) => {
     const habitaciones = [...data.habitaciones];
-    habitaciones[i] = { ...habitaciones[i], [field]: value };
+
+    habitaciones[roomIndex].pasajeros[passengerIndex] = {
+      ...habitaciones[roomIndex].pasajeros[passengerIndex],
+      [field]: value,
+    };
+
     updateDraftField("habitaciones", habitaciones);
   };
 
@@ -105,113 +133,170 @@ export default function HospedajeForm() {
       </div>
 
       {data.habitaciones.map((p, i) => (
-        <div key={i} className="row g-3 mb-2 justify-content-end align-items-center">
-          <div className="col-12 col-md-4">
-            <PassengersInput />
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Tipo de cama</label>
-            <select
-              className="form-control"
-              value={p.cama}
-              onChange={(e) => updatePasajero(i, "cama", e.target.value)}
-            >
-              <option value="" disabled>-- Seleccione --</option>
-              <option value="matrimoniales">2 matrimoniales</option>
-              <option value="king">King</option>
-              <option value="queen">Queen</option>
-            </select>
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Tipo habitación</label>
-            <input
-              type="text"
-              className="form-control"
-              value={p.habitacion}
-              onChange={(e) => updatePasajero(i, "habitacion", e.target.value)}
-            />
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Plan</label>
-            <select
-              className="form-control"
-              value={p.plan}
-              onChange={(e) => updatePasajero(i, "plan", e.target.value)}
-            >
-              <option value="" disabled>-- Seleccione --</option>
-              <option value="ai">Todo Incluido</option>
-              <option value="db">Desayuno Buffet</option>
-              <option value="dc">Desayuno Continental</option>
-              <option value="sh">Solo Hospedaje</option>
-            </select>
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Límite pago *</label>
-            <DatePicker
-              id="fecha"
-              selected={data.limite_pago}
-              onChange={(date) => updateBooking("limite_pago", date)}
-              locale="es"
-              dateFormat="dd/MM/yyyy"
-              className="form-control"
-              placeholderText="Selecciona una fecha"
-            />
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Límite cliente</label>
-            <DatePicker
-              id="fecha"
-              selected={data.limite_cliente}
-              onChange={(date) => updateBooking("limite_cliente", date)}
-              locale="es"
-              dateFormat="dd/MM/yyyy"
-              className="form-control"
-              placeholderText="Selecciona una fecha"
-            />
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Total público</label>
-            <div className="input-group mb-3">
-              <span className="input-group-text">$</span>
+        <div className="mt-4" key={i}>
+          <h6 style={{ color: "var(--brand-blue)", fontWeight: 700 }}>Habitacion {i + 1}</h6>
+          <div className="row g-3 mb-2 justify-content-end align-items-center">
+            <div className="col-12 col-md-4">
+              <PassengersInput
+                room={p}
+                onChange={(adults, children) => {
+                  const habitaciones = [...data.habitaciones];
+
+                  habitaciones[i].adults = adults;
+                  habitaciones[i].children = children;
+
+                  habitaciones[i].pasajeros = [
+                    ...Array.from({ length: adults }, () => ({
+                      tipo: "adult",
+                      nombre: "",
+                    })),
+                    ...Array.from({ length: children }, () => ({
+                      tipo: "child",
+                      nombre: "",
+                      edad: "",
+                    })),
+                  ];
+
+                  updateDraftField("habitaciones", habitaciones);
+                }}
+              />
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Tipo de cama</label>
+              <select
+                className="form-control"
+                value={p.cama}
+                onChange={(e) => updatePasajero(i, "cama", e.target.value)}
+              >
+                <option value="" disabled>-- Seleccione --</option>
+                <option value="matrimoniales">2 matrimoniales</option>
+                <option value="king">King</option>
+                <option value="queen">Queen</option>
+              </select>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Tipo habitación</label>
               <input
                 type="text"
                 className="form-control"
-                value={p.total_publico}
-                onChange={(e) => updatePasajero(i, "total_publico", e.target.value)}
-                style={{ borderLeft: "1px solid var(--primary-color)" }}
+                value={p.habitacion}
+                onChange={(e) => updatePasajero(i, "habitacion", e.target.value)}
               />
             </div>
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Total neto</label>
-            <div className="input-group mb-3">
-              <span className="input-group-text">$</span>
-              <input
-                type="text"
+            <div className="col-12 col-md-4">
+              <label className="form-label">Plan</label>
+              <select
                 className="form-control"
-                value={p.total_neto}
-                onChange={(e) => updatePasajero(i, "total_neto", e.target.value)}
-                style={{ borderLeft: "1px solid var(--primary-color)" }}
-              />
+                value={p.plan}
+                onChange={(e) => updatePasajero(i, "plan", e.target.value)}
+              >
+                <option value="" disabled>-- Seleccione --</option>
+                <option value="ai">Todo Incluido</option>
+                <option value="db">Desayuno Buffet</option>
+                <option value="dc">Desayuno Continental</option>
+                <option value="sh">Solo Hospedaje</option>
+              </select>
             </div>
-          </div>
-          <div className="col-12 col-md-4">
-            <label className="form-label">Fee</label>
-            <div className="input-group mb-3">
-              <span className="input-group-text">$</span>
-              <input
-                type="text"
+            <div className="col-12 col-md-4">
+              <label className="form-label">Límite pago *</label>
+              <DatePicker
+                id="fecha"
+                selected={data.limite_pago}
+                onChange={(date) => updateBooking("limite_pago", date)}
+                locale="es"
+                dateFormat="dd/MM/yyyy"
                 className="form-control"
-                value={p.fee}
-                onChange={(e) => updatePasajero(i, "fee", e.target.value)}
-                style={{ borderLeft: "1px solid var(--primary-color)" }}
+                placeholderText="Selecciona una fecha"
               />
             </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Límite cliente</label>
+              <DatePicker
+                id="fecha"
+                selected={data.limite_cliente}
+                onChange={(date) => updateBooking("limite_cliente", date)}
+                locale="es"
+                dateFormat="dd/MM/yyyy"
+                className="form-control"
+                placeholderText="Selecciona una fecha"
+              />
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Total público</label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">$</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={p.total_publico}
+                  onChange={(e) => updatePasajero(i, "total_publico", e.target.value)}
+                  style={{ borderLeft: "1px solid var(--primary-color)" }}
+                />
+              </div>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Total neto</label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">$</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={p.total_neto}
+                  onChange={(e) => updatePasajero(i, "total_neto", e.target.value)}
+                  style={{ borderLeft: "1px solid var(--primary-color)" }}
+                />
+              </div>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className="form-label">Fee</label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">$</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={p.fee}
+                  onChange={(e) => updatePasajero(i, "fee", e.target.value)}
+                  style={{ borderLeft: "1px solid var(--primary-color)" }}
+                />
+              </div>
+            </div>
+
           </div>
-          <div className="col-12 col-md-4 text-end m-0">
-            <button type="button" className="btn" onClick={() => removePasajero(i)} style={{ fontSize: 14, color: "var(--brand-blue)", fontWeight: 500 }}>
-              Eliminar habitación
-            </button>
+          <p className="mb-1" style={{ fontSize: "18px", fontWeight: 600 }}>Datos de los pasajeros</p>
+          {p.pasajeros.map((pasajero, index) => (
+            <div key={index} className="row g-3 mb-1">
+              <div className="col-md-6">
+                <label className="form-label">
+                  Nombre completo ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
+                </label>
+
+                <input
+                  className="form-control"
+                  value={pasajero.nombre}
+                  onChange={(e) => updatePassenger(i, index, "nombre", e.target.value)}
+                />
+              </div>
+
+              {pasajero.tipo === "child" && (
+                <div className="col-md-2">
+                  <label className="form-label">Edad</label>
+
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={pasajero.edad}
+                    onChange={(e) => updatePassenger(i, index, "edad", Number(e.target.value))}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+          <div className="row mb-2 justify-content-end align-items-center">
+            <div className="col-12 col-md-4 text-end m-0">
+              <button type="button" className="btn btn-outline-primary" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>
+                Eliminar habitación
+              </button>
+            </div>
           </div>
         </div>
       ))}

@@ -1,11 +1,15 @@
 "use client";
 
 import React from "react";
-import { useBookingForm } from "../booking/booking-form/BookingFormContext";
 
-export default function PassengersInput() {
-  const { draft, updateDraftField } = useBookingForm();
-  const { data } = draft;
+export default function PassengersInput({ room, onChange }) {
+  const handleAdultsChange = (e) => {
+    onChange(Number(e.target.value), room.children);
+  };
+
+  const handleChildrenChange = (e) => {
+    onChange(room.adults, Number(e.target.value));
+  };
 
   return (
     <div className="dropdown">
@@ -17,7 +21,7 @@ export default function PassengersInput() {
         data-bs-toggle="dropdown"
         aria-expanded="false"
         readOnly
-        value={`${data.adults} adulto(s), ${data.children} menor(es)`}
+        value={`${room.adults} adulto(s), ${room.children} menor(es)`}
         style={{ cursor: "pointer" }}
       />
 
@@ -28,10 +32,8 @@ export default function PassengersInput() {
 
             <select
               className="form-select"
-              value={data.adults}
-              onChange={(e) =>
-                updateDraftField("adults", Number(e.target.value))
-              }
+              value={room.adults}
+              onChange={handleAdultsChange}
             >
               {Array.from({ length: 8 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
@@ -46,10 +48,8 @@ export default function PassengersInput() {
 
             <select
               className="form-select"
-              value={data.children}
-              onChange={(e) =>
-                updateDraftField("children", Number(e.target.value))
-              }
+              value={room.children}
+              onChange={handleChildrenChange}
             >
               {Array.from({ length: 6 }, (_, i) => (
                 <option key={i} value={i}>
