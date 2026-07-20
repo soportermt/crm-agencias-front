@@ -20,27 +20,40 @@ export default function HospedajeForm() {
         adults: 2,
         children: 0,
 
+        cama: "",
+        tipoHabitacion: "",
+        plan: "",
+
+        limitePago: null,
+        limiteCliente: null,
+
+        totalPublico: "",
+        totalNeto: "",
+        fee: "",
+
         pasajeros: [
           {
             tipo: "adult",
-            nombre: "",
+            nombre: ""
           },
           {
             tipo: "adult",
-            nombre: "",
-          },
-        ],
-
-        cama: "",
-        habitacion: "",
-        plan: "",
-        limite_pago: null,
-        limite_cliente: null,
-        total_publico: "",
-        total_neto: "",
-        fee: "",
-      },
+            nombre: ""
+          }
+        ]
+      }
     ]);
+
+  const updateRoom = (roomIndex, field, value) => {
+    const habitaciones = [...data.habitaciones];
+
+    habitaciones[roomIndex] = {
+      ...habitaciones[roomIndex],
+      [field]: value,
+    };
+
+    updateDraftField("habitaciones", habitaciones);
+  };
 
   const updatePassenger = (roomIndex, passengerIndex, field, value) => {
     const habitaciones = [...data.habitaciones];
@@ -74,7 +87,7 @@ export default function HospedajeForm() {
             type="text"
             className="form-control"
             value={data.code}
-            onChange={(e) => setField("code", e.target.value)}
+            onChange={(e) => updateDraftField("code", e.target.value)}
           />
           {errors.code && <div className="text-danger small">{errors.code}</div>}
         </div>
@@ -166,7 +179,7 @@ export default function HospedajeForm() {
               <select
                 className="form-control"
                 value={p.cama}
-                onChange={(e) => updatePasajero(i, "cama", e.target.value)}
+                onChange={(e) => updateRoom(i, "cama", e.target.value)}
               >
                 <option value="" disabled>-- Seleccione --</option>
                 <option value="matrimoniales">2 matrimoniales</option>
@@ -179,8 +192,8 @@ export default function HospedajeForm() {
               <input
                 type="text"
                 className="form-control"
-                value={p.habitacion}
-                onChange={(e) => updatePasajero(i, "habitacion", e.target.value)}
+                value={p.tipoHabitacion}
+                onChange={(e) => updateRoom(i, "tipoHabitacion", e.target.value)}
               />
             </div>
             <div className="col-12 col-md-4">
@@ -188,7 +201,7 @@ export default function HospedajeForm() {
               <select
                 className="form-control"
                 value={p.plan}
-                onChange={(e) => updatePasajero(i, "plan", e.target.value)}
+                onChange={(e) => updateRoom(i, "plan", e.target.value)}
               >
                 <option value="" disabled>-- Seleccione --</option>
                 <option value="ai">Todo Incluido</option>
@@ -201,8 +214,8 @@ export default function HospedajeForm() {
               <label className="form-label">Límite pago *</label>
               <DatePicker
                 id="fecha"
-                selected={data.limite_pago}
-                onChange={(date) => updateBooking("limite_pago", date)}
+                selected={p.limitePago}
+                onChange={(date) => updateRoom(i, "limitePago", date)}
                 locale="es"
                 dateFormat="dd/MM/yyyy"
                 className="form-control"
@@ -213,8 +226,8 @@ export default function HospedajeForm() {
               <label className="form-label">Límite cliente</label>
               <DatePicker
                 id="fecha"
-                selected={data.limite_cliente}
-                onChange={(date) => updateBooking("limite_cliente", date)}
+                selected={p.limiteCliente}
+                onChange={(date) => updateRoom(i, "limiteCliente", date)}
                 locale="es"
                 dateFormat="dd/MM/yyyy"
                 className="form-control"
@@ -228,8 +241,8 @@ export default function HospedajeForm() {
                 <input
                   type="text"
                   className="form-control"
-                  value={p.total_publico}
-                  onChange={(e) => updatePasajero(i, "total_publico", e.target.value)}
+                  value={p.totalPublico}
+                  onChange={(e) => updateRoom(i, "totalPublico", e.target.value)}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>
@@ -241,8 +254,8 @@ export default function HospedajeForm() {
                 <input
                   type="text"
                   className="form-control"
-                  value={p.total_neto}
-                  onChange={(e) => updatePasajero(i, "total_neto", e.target.value)}
+                  value={p.totalNeto}
+                  onChange={(e) => updateRoom(i, "totalNeto", e.target.value)}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>
@@ -255,7 +268,7 @@ export default function HospedajeForm() {
                   type="text"
                   className="form-control"
                   value={p.fee}
-                  onChange={(e) => updatePasajero(i, "fee", e.target.value)}
+                  onChange={(e) => updateRoom(i, "fee", e.target.value)}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>

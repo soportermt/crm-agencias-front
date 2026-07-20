@@ -17,7 +17,7 @@ export const serviceCatalog = [
       destino: "",
       checkIn: null,
       checkOut: null,
-      habitaciones: [],
+      habitaciones: []
     },
     validate: (data) => {
       const errors = {};
