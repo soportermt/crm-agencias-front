@@ -60,7 +60,7 @@ export default function BookingPriceBreakdown() {
           <p className='mb-2 fw-bolder' style={{ color: "var(--dark-green)" }}>$8,800.00 MXN</p>
         </div>
       </div>
-      <button className='btn btn-primary w-100 mt-3' style={{ backgroundColor: "var(--brand-blue)" }}>Guardar</button>
+      <button type="submit" className='btn btn-primary w-100 mt-3' style={{ backgroundColor: "var(--brand-blue)" }}>Crear reservación</button>
     </div >
   )
 }

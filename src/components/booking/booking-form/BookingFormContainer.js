@@ -3,14 +3,18 @@
 import BookingForm from "./BookingForm";
 import BookingPriceBreakdown from "./BookingPriceBreakdown";
 import { useBookingForm } from "./BookingFormContext";
+import { serializeDates } from "@/utils/serializeBooking";
 
 export default function BookingFormContainer() {
   const { booking } = useBookingForm();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const payload = serializeDates(booking);
+  
     console.log("Payload");
-    console.log(booking);
+    console.log(payload);
   };
 
   return (

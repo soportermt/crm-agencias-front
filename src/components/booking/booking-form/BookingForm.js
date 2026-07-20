@@ -23,8 +23,9 @@ export default function BookingForm() {
           </label>
           <select
             id="agente"
-            name="agente"
             className="form-select"
+            value={booking.idUsuario}
+            onChange={(e) => updateBooking("idUsuario", e.target.value)}
           >
             <option value={1}>Agente de prueba</option>
           </select>
@@ -34,9 +35,9 @@ export default function BookingForm() {
             Moneda *
           </label>
           <select
-            id="agente"
-            name="agente"
             className="form-select"
+            value={booking.moneda}
+            onChange={(e) => updateBooking("moneda", e.target.value)}
           >
             <option value={"MXN"}>MXN</option>
             <option value={"USD"}>USD</option>
@@ -48,8 +49,8 @@ export default function BookingForm() {
           </label>
           <DatePicker
             id="fecha"
-            selected={booking.creationDate}
-            onChange={(date) => updateBooking("creationDate", date)}
+            selected={booking.fecha}
+            onChange={(date) => updateBooking("fecha", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
             className="form-control"
@@ -61,9 +62,9 @@ export default function BookingForm() {
             Límite de cambios *
           </label>
           <DatePicker
-            id="fecha"
-            selected={booking.limitDate}
-            onChange={(date) => updateBooking("limitDate", date)}
+            id="fechaLimite"
+            selected={booking.limiteCancelacion}
+            onChange={(date) => updateBooking("limiteCancelacion", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
             className="form-control"
@@ -91,6 +92,8 @@ export default function BookingForm() {
             id="titular"
             type="text"
             className="form-control"
+            value={booking.pasajeroTitular}
+            onChange={(e) => updateBooking("pasajeroTitular", e.target.value)}
           />
         </div>
         <div className="col-12">
@@ -101,6 +104,8 @@ export default function BookingForm() {
             id="observaciones"
             rows={4}
             className="form-control"
+            value={booking.descripcion}
+            onChange={(e) => updateBooking("descripcion", e.target.value)}
           />
         </div>
       </div>

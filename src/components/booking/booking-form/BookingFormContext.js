@@ -14,7 +14,7 @@ const initialBooking = {
   observaciones: "",
   moneda: "MXN",
   idAgencia: "",
-  idUsuario: "",
+  idUsuario: 1,
   idCliente: null,
   idTipoVenta: null,
   perteneceA: null,
