@@ -40,13 +40,34 @@ function buildDesglose(tipoId, data) {
   const desglose = { ...data };
 
   if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
-    desglose.habitaciones = (data.habitaciones || []).map((hab) => ({
-      ...hab,
-      pasajeros: {
-        ...hab.pasajeros,
-        menores: hab.pasajeros?.menores ?? [],
-      },
-    }));
+    desglose.habitaciones = (data.habitaciones || []).map((hab) => {
+  
+      const adultos = [];
+      const menores = [];
+  
+      (hab.pasajeros || []).forEach((p) => {
+        const pasajero = {
+          nombre: p.nombre,
+          apellidos: p.apellidos ?? "",
+        };
+  
+        if (p.tipo === "child") {
+          pasajero.edad = p.edad;
+          menores.push(pasajero);
+        } else {
+          adultos.push(pasajero);
+        }
+      });
+  
+      return {
+        ...hab,
+        ocupacion: `${hab.adultos} adulto(s), ${hab.menores} menor(es)`,
+        pasajeros: {
+          adultos,
+          menores,
+        },
+      };
+    });
   }
 
   if (TIPOS_CON_MENORES.includes(tipoId)) {

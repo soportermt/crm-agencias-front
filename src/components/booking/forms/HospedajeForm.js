@@ -17,28 +17,30 @@ export default function HospedajeForm() {
     updateDraftField("habitaciones", [
       ...data.habitaciones,
       {
-        adults: 2,
-        children: 0,
+        adultos: 2,
+        menores: 0,
 
-        cama: "",
-        tipoHabitacion: "",
+        tipo_cama: "",
+        tipo_habitacion: "",
         plan: "",
 
         limitePago: null,
         limiteCliente: null,
 
-        totalPublico: "",
-        totalNeto: "",
+        total_publico: "",
+        total_neto: "",
         fee: "",
 
         pasajeros: [
           {
             tipo: "adult",
-            nombre: ""
+            nombre: "",
+            apellidos: "",
           },
           {
             tipo: "adult",
-            nombre: ""
+            nombre: "",
+            apellidos: "",
           }
         ]
       }
@@ -152,20 +154,22 @@ export default function HospedajeForm() {
             <div className="col-12 col-md-4">
               <PassengersInput
                 room={p}
-                onChange={(adults, children) => {
+                onChange={(adultos, menores) => {
                   const habitaciones = [...data.habitaciones];
 
-                  habitaciones[i].adults = adults;
-                  habitaciones[i].children = children;
+                  habitaciones[i].adultos = adultos;
+                  habitaciones[i].menores = menores;
 
                   habitaciones[i].pasajeros = [
-                    ...Array.from({ length: adults }, () => ({
+                    ...Array.from({ length: adultos }, () => ({
                       tipo: "adult",
                       nombre: "",
+                      apellidos: "",
                     })),
-                    ...Array.from({ length: children }, () => ({
+                    ...Array.from({ length: menores }, () => ({
                       tipo: "child",
                       nombre: "",
+                      apellidos: "",
                       edad: "",
                     })),
                   ];
@@ -178,8 +182,8 @@ export default function HospedajeForm() {
               <label className="form-label">Tipo de cama</label>
               <select
                 className="form-control"
-                value={p.cama}
-                onChange={(e) => updateRoom(i, "cama", e.target.value)}
+                value={p.tipo_cama}
+                onChange={(e) => updateRoom(i, "tipo_cama", e.target.value)}
               >
                 <option value="" disabled>-- Seleccione --</option>
                 <option value="matrimoniales">2 matrimoniales</option>
@@ -192,8 +196,8 @@ export default function HospedajeForm() {
               <input
                 type="text"
                 className="form-control"
-                value={p.tipoHabitacion}
-                onChange={(e) => updateRoom(i, "tipoHabitacion", e.target.value)}
+                value={p.tipo_habitacion}
+                onChange={(e) => updateRoom(i, "tipo_habitacion", e.target.value)}
               />
             </div>
             <div className="col-12 col-md-4">
@@ -241,8 +245,8 @@ export default function HospedajeForm() {
                 <input
                   type="text"
                   className="form-control"
-                  value={p.totalPublico}
-                  onChange={(e) => updateRoom(i, "totalPublico", e.target.value)}
+                  value={p.total_publico}
+                  onChange={(e) => updateRoom(i, "total_publico", e.target.value)}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>
@@ -254,8 +258,8 @@ export default function HospedajeForm() {
                 <input
                   type="text"
                   className="form-control"
-                  value={p.totalNeto}
-                  onChange={(e) => updateRoom(i, "totalNeto", e.target.value)}
+                  value={p.total_neto}
+                  onChange={(e) => updateRoom(i, "total_neto", e.target.value)}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>
@@ -278,15 +282,26 @@ export default function HospedajeForm() {
           <p className="mb-1" style={{ fontSize: "18px", fontWeight: 600 }}>Datos de los pasajeros</p>
           {p.pasajeros.map((pasajero, index) => (
             <div key={index} className="row g-3 mb-1">
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label className="form-label">
-                  Nombre completo ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
+                  Nombre ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
                 </label>
 
                 <input
                   className="form-control"
                   value={pasajero.nombre}
                   onChange={(e) => updatePassenger(i, index, "nombre", e.target.value)}
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">
+                  Apellidos ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
+                </label>
+
+                <input
+                  className="form-control"
+                  value={pasajero.apellidos}
+                  onChange={(e) => updatePassenger(i, index, "apellidos", e.target.value)}
                 />
               </div>
 

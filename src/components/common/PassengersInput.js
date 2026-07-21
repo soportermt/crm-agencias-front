@@ -4,11 +4,11 @@ import React from "react";
 
 export default function PassengersInput({ room, onChange }) {
   const handleAdultsChange = (e) => {
-    onChange(Number(e.target.value), room.children);
+    onChange(Number(e.target.value), room.menores);
   };
 
   const handleChildrenChange = (e) => {
-    onChange(room.adults, Number(e.target.value));
+    onChange(room.adultos, Number(e.target.value));
   };
 
   return (
@@ -21,7 +21,7 @@ export default function PassengersInput({ room, onChange }) {
         data-bs-toggle="dropdown"
         aria-expanded="false"
         readOnly
-        value={`${room.adults} adulto(s), ${room.children} menor(es)`}
+        value={`${room.adultos} adulto(s), ${room.menores} menor(es)`}
         style={{ cursor: "pointer" }}
       />
 
@@ -32,7 +32,7 @@ export default function PassengersInput({ room, onChange }) {
 
             <select
               className="form-select"
-              value={room.adults}
+              value={room.adultos}
               onChange={handleAdultsChange}
             >
               {Array.from({ length: 8 }, (_, i) => (
@@ -48,7 +48,7 @@ export default function PassengersInput({ room, onChange }) {
 
             <select
               className="form-select"
-              value={room.children}
+              value={room.menores}
               onChange={handleChildrenChange}
             >
               {Array.from({ length: 6 }, (_, i) => (
