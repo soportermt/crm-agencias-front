@@ -3,18 +3,27 @@
 import BookingForm from "./BookingForm";
 import BookingPriceBreakdown from "./BookingPriceBreakdown";
 import { useBookingForm } from "./BookingFormContext";
-import { serializeDates } from "@/utils/serializeBooking";
+import { serializeBookingToForm } from "@/utils/serializeBooking";
+import { catalogosService } from "@/services/catalogos.service";
+import { useState } from "react";
 
 export default function BookingFormContainer() {
   const { booking } = useBookingForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const payload = serializeDates(booking);
-  
-    console.log("Payload");
-    console.log(payload);
+    setIsSubmitting(true);
+
+    try {
+      const payload = serializeBookingToForm(booking);
+      const result = await catalogosService.create(payload);
+      console.log("Reserva creada en prueba", result);
+    } catch (error) {
+      console.error("Error al crear la reserva: ", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,7 +45,7 @@ export default function BookingFormContainer() {
           className="bg-white shadow-premium p-1"
           style={{ borderRadius: "12px" }}
         >
-          <BookingPriceBreakdown />
+          <BookingPriceBreakdown isSubmitting={isSubmitting} />
         </div>
       </div>
     </form>

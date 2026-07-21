@@ -20,4 +20,14 @@ export const catalogosService = {
         const { data } = await api.get("/reservas/getProviders");
         return data;
     },
+
+    async create(booking) {
+        const { data } = await api.post("/reservas/createApi", booking, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
 };

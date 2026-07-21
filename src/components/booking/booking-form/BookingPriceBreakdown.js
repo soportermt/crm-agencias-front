@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function BookingPriceBreakdown() {
+export default function BookingPriceBreakdown({ isSubmitting }) {
   return (
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Información agencia</h5>
@@ -34,8 +34,8 @@ export default function BookingPriceBreakdown() {
           </div>
           <div className='col-12 col-md-6 mt-2 mt-md-0'>
             <div className="input-group">
-              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)"}}/>
-                <span className="input-group-text" id="porcentaje">%</span>
+              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{ borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)" }} />
+              <span className="input-group-text" id="porcentaje">%</span>
             </div>
           </div>
         </div>
@@ -60,7 +60,14 @@ export default function BookingPriceBreakdown() {
           <p className='mb-2 fw-bolder' style={{ color: "var(--dark-green)" }}>$8,800.00 MXN</p>
         </div>
       </div>
-      <button type="submit" className='btn btn-primary w-100 mt-3' style={{ backgroundColor: "var(--brand-blue)" }}>Crear reservación</button>
+      <button 
+        type="submit" 
+        className='btn btn-primary w-100 mt-3' 
+        style={{ backgroundColor: "var(--brand-blue)" }}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Creando..." : "Crear reservación"}
+      </button>
     </div >
   )
 }
