@@ -6,14 +6,20 @@ import { serviceCatalog } from "@/mocks/serviceCatalog";
 const BookingFormContext = createContext(null);
 
 const initialBooking = {
-  agente: "",
-  moneda: "MXN",
-  fecha: "",
-  fechaLimite: "",
-  customerId: "",
-  customer: "",
-  titular: "",
+  idVenta: null,
+  folio: "",
+  fecha: new Date(),
+  pasajeroTitular: "",
   descripcion: "",
+  observaciones: "",
+  moneda: "MXN",
+  idAgencia: 2,
+  idUsuario: 1,
+  idCliente: null,
+  idTipoVenta: null,
+  perteneceA: null,
+  cargoServicios: 0,
+  limiteCancelacion: null,
   servicios: [],
 };
 

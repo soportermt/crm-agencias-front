@@ -1,24 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "../common/DataTable";
 import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
-import { bookingListTableMock } from "@/mocks/bookingMock";
+import { bookingService } from "@/services/booking.service";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
     { key: "cliente", label: "Cliente", width: "225px", align: "start" },
     { key: "hotel", label: "Hotel", width: "155px", align: "start" },
-    { key: "plan", label: "Tipo de plan", width: "130px", align: "start" },
+    { key: "plan", label: "Servicio", width: "130px", align: "start" },
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
     { key: "total", label: "Total", width: "130px", align: "start" },
     { key: "estatus", label: "Estatus", width: "130px", align: "center" },
 ];
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 25;
+
+function parseDesglose(desgloseStr) {
+    try {
+        return JSON.parse(desgloseStr);
+    } catch {
+        return {};
+    }
+}
+
+function formatDateRange(inicio, fin) {
+    if (!inicio) return "-";
+    const opts = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const dInicio = new Date(inicio).toLocaleDateString("es-MX", opts);
+    if (!fin || fin === inicio) return dInicio;
+    const dFin = new Date(fin).toLocaleDateString("es-MX", opts);
+    return `${dInicio} a ${dFin}`;
+}
+
+function mapVentaToRow(venta) {
+    const servicios = venta.ventasServicioses || [];
+    const primero = servicios[0] || {};
+
+    const hoteles = [...new Set(servicios.map((s) => s.descripcion).filter(Boolean))];
+    const destinos = [...new Set(
+        servicios.map((s) => parseDesglose(s.desglose)?.destino).filter(Boolean)
+    )];
+    const tipos = [...new Set(
+        servicios.map((s) => s.idTipoServicio?.tipo_servicio).filter(Boolean)
+    )];
+
+    const total = servicios.reduce(
+        (sum, s) => sum + (Number(s.tarifa_publica) || 0) + (Number(s.fee) || 0),
+        0
+    );
+
+    return {
+        id: venta.id_venta,
+        folio: venta.folio,
+        cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
+        hotel: hoteles.join(", ") || "-",
+        plan: tipos.join(", ") || "-",
+        estancia: formatDateRange(primero.inicio_servicio, primero.fin_servicio),
+        destino: destinos.join(", ") || "-",
+        total,
+        estatus: venta.estatus,
+    };
+}
+
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -26,22 +74,45 @@ export default function BookingList() {
     const [destinationFilter, setDestinationFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
 
-    const filteredData = bookingListTableMock.filter((row) => {
+    const [bookings, setBookings] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        let cancelado = false;
+
+        async function cargarReservas() {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const data = await bookingService.reservas();
+                const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
+                if (!cancelado) setBookings(filas);
+            } catch (err) {
+                console.error("Error al cargar reservas:", err);
+                if (!cancelado) setError("No se pudieron cargar las reservaciones.");
+            } finally {
+                if (!cancelado) setIsLoading(false);
+            }
+        }
+
+        cargarReservas();
+        return () => { cancelado = true; };
+    }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchValue, statusFilter, destinationFilter]);
+
+    const filteredData = bookings.filter((row) => {
         const matchesSearch =
-            row.cliente.toLowerCase().includes(searchValue.toLowerCase()) ||
-            row.folio.toLowerCase().includes(searchValue.toLowerCase());
+            row.cliente?.toLowerCase().includes(searchValue.toLowerCase()) ||
+            row.folio?.toLowerCase().includes(searchValue.toLowerCase());
 
-        const matchesStatus =
-            !statusFilter || row.estatus === statusFilter;
+        const matchesStatus = !statusFilter || row.estatus === statusFilter;
+        const matchesDestination = !destinationFilter || row.destino === destinationFilter;
 
-        const matchesDestination =
-            !destinationFilter || row.destino === destinationFilter;
-
-        return (
-            matchesSearch &&
-            matchesStatus &&
-            matchesDestination
-        );
+        return matchesSearch && matchesStatus && matchesDestination;
     });
 
     const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -59,14 +130,15 @@ export default function BookingList() {
                         {row.folio}
                     </a>
                 );
-
+            case "total":
+                return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
                 return <StatusBadge status={row.estatus} />;
-
             default:
                 return row[key];
         }
     };
+
     return (
         <div className="container-fluid p-0">
             <div className="d-flex flex-column" style={{ gap: "16px" }}>
@@ -78,8 +150,8 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <ExportButton  onExport={() => console.log("Exportar")} />
-                        <select name="estado" id="estado"
+                        <ExportButton onExport={() => console.log("Exportar")} />
+                        <select name="estado"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
                                 height: "38px",
@@ -94,13 +166,12 @@ export default function BookingList() {
                                 width: "fit-content"
                             }}
                             value={statusFilter}
-                            onChange={(e) => onStatusFilterChange(e.target.value)}
+                            onChange={(e) => setStatusFilter(e.target.value)}
                         >
                             <option value="">Todos los estados</option>
-                            <option value="Pagado">Pagados</option>
-                            <option value="Vigente">Vigente</option>
+                            <option value="venta">Venta</option>
                         </select>
-                        <select name="destino" id="destino"
+                        <select name="destino"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
                                 height: "38px",
@@ -115,20 +186,26 @@ export default function BookingList() {
                                 width: "fit-content"
                             }}
                             value={destinationFilter}
-                            onChange={(e) => onDestinationFilterChange(e.target.value)}
+                            onChange={(e) => setDestinationFilter(e.target.value)}
                         >
                             <option value="">Todos los destinos</option>
-                            <option value="Cancún">Cancún</option>
-                            <option value="Playa del Carmen">Playa del Carmen</option>
+                            {[...new Set(bookings.map((b) => b.destino))].filter(Boolean).map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
                         </select>
                     </div>
                     <SearchBar
                         value={searchValue}
-                        onChange={(e) => onSearchChange(e.target.value)}
+                        onChange={(e) => setSearchValue(e.target.value)}
                         placeholder="Buscar por cliente, folio"
                         width="300px"
                     />
                 </div>
+                {error && (
+                    <div className="alert alert-danger py-2 mb-0" role="alert">
+                        {error}
+                    </div>
+                )}
 
                 <DataTable
                     columns={COLUMNS}
@@ -139,7 +216,8 @@ export default function BookingList() {
                     totalPages={totalPages}
                     totalItems={filteredData.length}
                     onPageChange={setCurrentPage}
-                    emptyMessage="No se encontraron reservas."
+                    loading={isLoading}
+                    emptyMessage={isLoading ? "Cargando reservaciones..." : "No se encontraron reservas."}
                     minWidth="1265px"
                 />
             </div>

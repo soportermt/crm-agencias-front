@@ -9,7 +9,7 @@ export default function StatusBadge({ status }) {
     bg = "rgba(22, 163, 74, 0.1)";
     color = "#16a34a";
     dotBg = "#16a34a";
-  } else if (status === "Proceso") {
+  } else if (status === "Proceso" || status === "venta") {
     bg = "rgba(245, 158, 11, 0.1)";
     color = "#f59e0b";
     dotBg = "#f59e0b";

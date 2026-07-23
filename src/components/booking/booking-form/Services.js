@@ -28,7 +28,7 @@ export default function Services() {
             <button
               key={service.id}
               type="button"
-              className={`btn ${isSelected ? "btn-success" : "btn-outline-primary"} ${isActive ? "active" : ""}`}
+              className={`btn ${isSelected ? "btn-primary" : "btn-outline-primary"} ${isActive ? "active" : ""}`}
               onClick={() => toggleService(service)}
             >
               <FontAwesomeIcon icon={service.icon} /> {service.nombre}
@@ -54,15 +54,16 @@ export default function Services() {
         </div>
       )}
 
-      {booking.servicios.map((item) => (
-        <ServiceSummaryCard
-          key={item.id}
-          service={serviceCatalog.find((s) => s.id === item.tipo)}
-          data={item.data}
-          onEdit={() => openEdit(item)}
-          onRemove={() => removeService(item.id)}
-        />
-      ))}
+      {!draft &&
+        booking.servicios.map((item) => (
+          <ServiceSummaryCard
+            key={item.id}
+            service={serviceCatalog.find((s) => s.id === item.tipo)}
+            data={item.data}
+            onEdit={() => openEdit(item)}
+            onRemove={() => removeService(item.id)}
+          />
+        ))}
     </div>
   );
 }

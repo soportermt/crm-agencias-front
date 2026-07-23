@@ -8,8 +8,15 @@ export default function ServiceSummaryCard({ service, data, onEdit, onRemove }) 
   function formatDate(date) {
     if (!date) return "";
   
-    const [year, month, day] = date.split("-");
-    return `${day}/${month}/${year}`;
+    const d = date instanceof Date ? date : new Date(date);
+  
+    if (isNaN(d.getTime())) return "";
+  
+    return d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   }
 
   const dateRangeLabel =
