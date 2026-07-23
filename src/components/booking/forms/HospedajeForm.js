@@ -7,6 +7,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import PassengersInput from "@/components/common/PassengersInput";
+import { calcularTotalNeto, formatMoney } from "@/utils/pricing";
 
 registerLocale("es", es);
 export default function HospedajeForm() {
@@ -24,12 +25,12 @@ export default function HospedajeForm() {
         tipo_habitacion: "",
         plan: "",
 
-        limitePago: null,
-        limiteCliente: null,
+        // limitePago: null,
+        // limiteCliente: null,
 
         total_publico: "",
         total_neto: "",
-        fee: "",
+        // fee: "",
 
         pasajeros: [
           {
@@ -204,7 +205,7 @@ export default function HospedajeForm() {
             <div className="col-12 col-md-4">
               <label className="form-label">Plan</label>
               <select
-                className="form-control"
+                className="form-control mb-3"
                 value={p.plan}
                 onChange={(e) => updateRoom(i, "plan", e.target.value)}
               >
@@ -215,30 +216,7 @@ export default function HospedajeForm() {
                 <option value="sh">Solo Hospedaje</option>
               </select>
             </div>
-            <div className="col-12 col-md-4">
-              <label className="form-label">Límite pago *</label>
-              <DatePicker
-                id="fecha"
-                selected={p.limitePago}
-                onChange={(date) => updateRoom(i, "limitePago", date)}
-                locale="es"
-                dateFormat="dd/MM/yyyy"
-                className="form-control"
-                placeholderText="Selecciona una fecha"
-              />
-            </div>
-            <div className="col-12 col-md-4">
-              <label className="form-label">Límite cliente</label>
-              <DatePicker
-                id="fecha"
-                selected={p.limiteCliente}
-                onChange={(date) => updateRoom(i, "limiteCliente", date)}
-                locale="es"
-                dateFormat="dd/MM/yyyy"
-                className="form-control"
-                placeholderText="Selecciona una fecha"
-              />
-            </div>
+
             <div className="col-12 col-md-4">
               <label className="form-label">Total público</label>
               <div className="input-group mb-3">
@@ -259,22 +237,10 @@ export default function HospedajeForm() {
                 <input
                   type="text"
                   className="form-control"
-                  value={p.total_neto}
-                  onChange={(e) => updateRoom(i, "total_neto", e.target.value)}
-                  style={{ borderLeft: "1px solid var(--primary-color)" }}
-                />
-              </div>
-            </div>
-            <div className="col-12 col-md-4">
-              <label className="form-label">Fee</label>
-              <div className="input-group mb-3">
-                <span className="input-group-text">$</span>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={p.fee}
-                  onChange={(e) => updateRoom(i, "fee", e.target.value)}
-                  style={{ borderLeft: "1px solid var(--primary-color)" }}
+                  value={calcularTotalNeto(p.total_publico, data.providerData?.comision).toFixed(2)}
+                  readOnly
+                  disabled
+                  style={{ borderLeft: "1px solid var(--primary-color)", color: "rgba(64, 64, 64, .8)"}}
                 />
               </div>
             </div>
@@ -329,6 +295,46 @@ export default function HospedajeForm() {
           </div>
         </div>
       ))}
+
+      <div className="row">
+        <div className="col-12 col-md-4">
+          <label className="form-label">Límite pago *</label>
+          <DatePicker
+            id="fecha"
+            selected={data.limitePago}
+            onChange={(date) => updateRoom(i, "limitePago", date)}
+            locale="es"
+            dateFormat="dd/MM/yyyy"
+            className="form-control"
+            placeholderText="Selecciona una fecha"
+          />
+        </div>
+        <div className="col-12 col-md-4">
+          <label className="form-label">Límite cliente</label>
+          <DatePicker
+            id="fecha"
+            selected={data.limiteCliente}
+            onChange={(date) => updateRoom(i, "limiteCliente", date)}
+            locale="es"
+            dateFormat="dd/MM/yyyy"
+            className="form-control"
+            placeholderText="Selecciona una fecha"
+          />
+        </div>
+        <div className="col-12 col-md-4">
+          <label className="form-label">Fee</label>
+          <div className="input-group mb-3">
+            <span className="input-group-text">$</span>
+            <input
+              type="text"
+              className="form-control"
+              value={data.fee}
+              onChange={(e) => updateDraftField("fee", e.target.value)}
+              style={{ borderLeft: "1px solid var(--primary-color)" }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

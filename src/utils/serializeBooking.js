@@ -97,22 +97,21 @@ function buildService(item) {
   const inicio = item.data.checkIn ?? item.data.inicio;
   const fin = item.data.checkOut ?? item.data.fin;
   // console.log(item.data);
-  const habitacion = item.data.habitaciones?.[0];
   return {
     id_tipo_servicio: tipoId,
   
     id_proveedor: Number(item.data.provider) || null,
     codigo: item.data.code ?? "",
     descripcion: item.data.hotel ?? "",
-    limite_cliente: habitacion?.limiteCliente
-    ? toISODateOnly(habitacion.limiteCliente)
+    limite_cliente: item.data.limiteCliente
+    ? toISODateOnly(item.data.limiteCliente)
     : null,
     fee: Number(item.data.fee ?? 0),
   
     inicio_servicio: inicio ? toISODateOnly(inicio) : null,
     fin_servicio: fin ? toISODateOnly(fin) : null,
-    fecha_limite: habitacion?.limitePago
-    ? toISODateOnly(habitacion.limitePago)
+    fecha_limite: item.data.limitePago
+    ? toISODateOnly(item.data.limitePago)
     : null,
   
     comision: 0,

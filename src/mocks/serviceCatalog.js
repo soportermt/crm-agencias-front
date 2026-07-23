@@ -11,6 +11,7 @@ export const serviceCatalog = [
       provider: "",
       providerName: "",
       code: "",
+      fee: "",
       hotel: "",
       destino: "",
       checkIn: null,
