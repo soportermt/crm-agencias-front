@@ -1,23 +1,41 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import DocumentCard from "@/components/common/DocumentCard";
+import { clientsService } from "@/services/clients.service";
 
-export default function ClientProfileDocuments() {
-  const documents = [
-    {
-      id: 1,
-      name: "Acta_nacimiento.pdf",
-      size: "290 kb",
-      type: "PDF",
-    },
-    {
-      id: 2,
-      name: "Pasaporte.pdf",
-      size: "340 kb",
-      type: "PDF",
-    },
-  ];
+export default function ClientProfileDocuments({ clientId }) {
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDocuments() {
+      try {
+        setLoading(true);
+        if (clientId) {
+          const data = await clientsService.getClientDocuments(clientId);
+          // format demo data for frontend UI
+          const formattedData = data.map((d) => ({
+            id: d.id,
+            name: d.name || "Documento.pdf",
+            size: d.size || "250 kb",
+            type: d.type?.toUpperCase() || "PDF",
+          }));
+          setDocuments(formattedData);
+        }
+      } catch (error) {
+        console.error("Error al cargar documentos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDocuments();
+  }, [clientId]);
+
+  if (loading) {
+    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+  }
+
 
   return (
     <div className="d-flex flex-column gap-4 font-inter w-100">

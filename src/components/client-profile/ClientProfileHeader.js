@@ -5,7 +5,9 @@ import Image from "next/image";
 import StatusBadge from "@/components/common/StatusBadge";
 import StatCard from "@/components/common/StatCard";
 
-export default function ClientProfileHeader() {
+export default function ClientProfileHeader({ client }) {
+  if (!client) return null;
+  
   return (
     <div className="mb-4">
       <div className="d-flex align-items-start justify-content-between mb-4">
@@ -29,24 +31,30 @@ export default function ClientProfileHeader() {
           <div>
             <div className="d-flex align-items-center gap-2 mb-1">
               <h1 className="h4 font-poppins fw-bold mb-0" style={{ color: "var(--dark-green)" }}>
-                María Lucía Zabaleta
+                {client.nombreCompleto || client.name}
               </h1>
-              <StatusBadge status="Nuevo" />
+              <StatusBadge status={client.status || "Nuevo"} />
             </div>
 
             <div className="d-flex flex-wrap align-items-center gap-3 font-inter small" style={{ color: "var(--grey-text)" }}>
-              <div className="d-flex align-items-center gap-1">
-                <i className="bi bi-telephone"></i>
-                <span>+52 999 123 4567</span>
-              </div>
-              <div className="d-flex align-items-center gap-1">
-                <i className="bi bi-envelope"></i>
-                <span>m.garcia@email.com</span>
-              </div>
-              <div className="d-flex align-items-center gap-1">
-                <i className="bi bi-geo-alt"></i>
-                <span>Mérida, Yucatán</span>
-              </div>
+              {client.celular && (
+                <div className="d-flex align-items-center gap-1">
+                  <i className="bi bi-telephone"></i>
+                  <span>{client.celular}</span>
+                </div>
+              )}
+              {client.correo && (
+                <div className="d-flex align-items-center gap-1">
+                  <i className="bi bi-envelope"></i>
+                  <span>{client.correo}</span>
+                </div>
+              )}
+              {(client.ciudad || client.estado) && (
+                <div className="d-flex align-items-center gap-1">
+                  <i className="bi bi-geo-alt"></i>
+                  <span>{[client.ciudad || client.city, client.estado || client.state].filter(Boolean).join(", ")}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -109,3 +117,4 @@ export default function ClientProfileHeader() {
     </div>
   );
 }
+
