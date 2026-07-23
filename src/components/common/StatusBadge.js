@@ -18,9 +18,9 @@ export default function StatusBadge({ status }) {
     color = "#dc2626";
     dotBg = "#dc2626";
   } else if (status === "Activo" || status === "Pagado") {
-    bg = "#ecfdf3";
+    bg = "rgba(20, 186, 109, 0.1)"; // Light #14BA6D
     color = "#037847";
-    dotBg = "#037847";
+    dotBg = "#14BA6D";
   } else if (status === "Pendiente") {
     bg = "rgba(245, 158, 11, 0.1)";
     color = "#b9861f";

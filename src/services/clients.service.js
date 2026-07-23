@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import { clientsApi as api } from "@/lib/axios";
 
 export const clientsService = {
   async getClients() {

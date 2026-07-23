@@ -297,7 +297,7 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
             <button
               type="submit"
               disabled={submitting}
-              className="btn btn-primary-custom transition-smooth fw-medium"
+              className="btn btn-primary-custom transition-smooth fw-medium d-flex align-items-center justify-content-center"
               style={{
                 backgroundColor: "var(--primary-color)",
                 borderColor: "var(--primary-color)",
