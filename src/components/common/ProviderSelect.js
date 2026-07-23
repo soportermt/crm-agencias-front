@@ -8,25 +8,28 @@ export default function ProviderSelect({
     value,
     onChange,
     error,
+    idAgencia,
 }) {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        loadProvider();
-    }, []);
+        if (idAgencia) {
+            loadProvider();
+        }
+    }, [idAgencia]);
 
     async function loadProvider() {
         try {
             setLoading(true);
-
-            const provider = await catalogosService.searchProviders();
+            const provider = await catalogosService.searchProviders(idAgencia);
 
             setOptions(
                 provider.map((provider) => ({
                     value: provider.id,
                     label: provider.text,
                     ...provider,
+                    comision: provider.comision ?? provider.porcentaje ?? 0,
                 }))
             );
         } catch (err) {
