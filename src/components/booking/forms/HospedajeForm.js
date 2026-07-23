@@ -302,7 +302,7 @@ export default function HospedajeForm() {
           <DatePicker
             id="fecha"
             selected={data.limitePago}
-            onChange={(date) => updateRoom(i, "limitePago", date)}
+            onChange={(date) => updateDraftField("limitePago", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
             className="form-control"
@@ -314,7 +314,7 @@ export default function HospedajeForm() {
           <DatePicker
             id="fecha"
             selected={data.limiteCliente}
-            onChange={(date) => updateRoom(i, "limiteCliente", date)}
+            onChange={(date) => updateDraftField("limiteCliente", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
             className="form-control"

@@ -1,4 +1,5 @@
 import qs from "qs";
+import { calcularTotalNeto } from "./pricing";
 
 const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
@@ -8,8 +9,6 @@ const TIPO_SERVICIO_MAP = {
   tour: 5,
   traslado: 6,
 };
-
-const TIPOS_CON_FECHAS_PROPIAS = [3, 4];
 
 const TIPOS_CON_MENORES = [2, 5, 6, 7, 8, 9, 10];
 
@@ -36,21 +35,17 @@ function buildSale(booking) {
   };
 }
 
-function buildDesglose(tipoId, data) {
+function buildDesglose(tipoId, data, comisionPct) {
   const desglose = { ...data };
 
   if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
     desglose.habitaciones = (data.habitaciones || []).map((hab) => {
-  
+
       const adultos = [];
       const menores = [];
-  
+
       (hab.pasajeros || []).forEach((p) => {
-        const pasajero = {
-          nombre: p.nombre,
-          apellidos: p.apellidos ?? "",
-        };
-  
+        const pasajero = { nombre: p.nombre, apellidos: p.apellidos ?? "" };
         if (p.tipo === "child") {
           pasajero.edad = p.edad;
           menores.push(pasajero);
@@ -58,9 +53,13 @@ function buildDesglose(tipoId, data) {
           adultos.push(pasajero);
         }
       });
-  
+
+      const totalPublico = Number(hab.total_publico) || 0;
+
       return {
         ...hab,
+        total_publico: totalPublico,
+        total_neto: calcularTotalNeto(totalPublico, comisionPct),
         ocupacion: `${hab.adultos} adulto(s), ${hab.menores} menor(es)`,
         pasajeros: {
           adultos,
@@ -68,6 +67,8 @@ function buildDesglose(tipoId, data) {
         },
       };
     });
+
+    desglose.comision = comisionPct;
   }
 
   if (TIPOS_CON_MENORES.includes(tipoId)) {
@@ -96,30 +97,47 @@ function buildService(item) {
 
   const inicio = item.data.checkIn ?? item.data.inicio;
   const fin = item.data.checkOut ?? item.data.fin;
-  // console.log(item.data);
+
+  const comisionPct = Number(item.data.providerData?.comision) || 0;
+
+  let tarifaPublica = 0;
+  let numHabs = 0;
+
+  if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
+    const habitaciones = item.data.habitaciones || [];
+    numHabs = habitaciones.length;
+    tarifaPublica = habitaciones.reduce(
+      (sum, hab) => sum + (Number(hab.total_publico) || 0),
+      0
+    );
+  }
+
+  const comisionPesos = tarifaPublica * (comisionPct / 100);
+  const costo = tarifaPublica - comisionPesos;
   return {
     id_tipo_servicio: tipoId,
-  
+
     id_proveedor: Number(item.data.provider) || null,
     codigo: item.data.code ?? "",
     descripcion: item.data.hotel ?? "",
     limite_cliente: item.data.limiteCliente
-    ? toISODateOnly(item.data.limiteCliente)
-    : null,
+      ? toISODateOnly(item.data.limiteCliente)
+      : null,
     fee: Number(item.data.fee ?? 0),
-  
+
     inicio_servicio: inicio ? toISODateOnly(inicio) : null,
     fin_servicio: fin ? toISODateOnly(fin) : null,
     fecha_limite: item.data.limitePago
-    ? toISODateOnly(item.data.limitePago)
-    : null,
-  
-    comision: 0,
-    comision_pesos: 0,
-    tarifa_publica: 0,
-    costo: 0,
-  
-    desglose: buildDesglose(tipoId, item.data),
+      ? toISODateOnly(item.data.limitePago)
+      : null,
+
+    comision: comisionPct,
+    comision_pesos: comisionPesos,
+    tarifa_publica: tarifaPublica,
+    costo,
+    num_habs: numHabs,
+
+    desglose: buildDesglose(tipoId, item.data, comisionPct),
   };
 }
 
