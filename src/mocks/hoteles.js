@@ -44,4 +44,22 @@ export const mockHoteles = [
     colonia: "Sector A",
     cp: "44556",
   },
+  {
+    id: "6",
+    nombre: "Desert Oasis Resort",
+    destino: "HX-OASIS",
+    zona: "A",
+    calle: "Dune Road 654",
+    colonia: "Sector B",
+    cp: "78901",
+  },
+  {
+    id: "7",
+    nombre: "Seaside Escape Hotel",
+    destino: "HX-SEASIDE",
+    zona: "D",
+    calle: "Coastal Ave 987",
+    colonia: "Sector C",
+    cp: "23456",
+  },
 ];
