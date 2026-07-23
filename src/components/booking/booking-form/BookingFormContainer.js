@@ -20,9 +20,9 @@ export default function BookingFormContainer() {
     setIsSubmitting(true);
 
     try {
-      // const payload = serializeBookingToForm(booking);
-      // const result = await bookingService.create(payload);
-      // console.log("Reserva creada en prueba", result);
+      const payload = serializeBookingToForm(booking);
+      const result = await bookingService.create(payload);
+      console.log("Reserva creada en prueba", result);
       setShowAlert(true);
     } catch (error) {
       console.error("Error al crear la reserva: ", error);
