@@ -1,59 +1,56 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
 import ExportButton from "@/components/common/ExportButton";
 import FilterButton from "@/components/common/FilterButton";
+import { clientsService } from "@/services/clients.service";
 
-export default function ClientProfilePurchases() {
+export default function ClientProfilePurchases({ clientId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState({
     startDate: "2024-01-01",
-    endDate: "2024-12-31",
+    endDate: "2026-12-31",
   });
   const itemsPerPage = 2;
 
-  const purchases = [
-    {
-      id: 1,
-      code: "SID3843732",
-      date: "20/02/2024",
-      destination: "Cancún",
-      description: "Traslado",
-      total: "$ 1,700.50",
-      currency: "MXN",
-    },
-    {
-      id: 2,
-      code: "SID3843733",
-      date: "22/02/2024",
-      destination: "Playa del Carmen",
-      description: "Reserva de hotel",
-      total: "$ 1,500.75",
-      currency: "MXN",
-    },
-    {
-      id: 3,
-      code: "SID3843734",
-      date: "24/02/2024",
-      destination: "Tulum",
-      description: "Excursión a las ruinas",
-      total: "$ 800.00",
-      currency: "MXN",
-    },
-    {
-      id: 4,
-      code: "SID3843735",
-      date: "26/02/2024",
-      destination: "Cozumel",
-      description: "Buceo",
-      total: "$ 1,200.00",
-      currency: "MXN",
-    },
-  ];
+  const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPurchases() {
+      try {
+        setLoading(true);
+        if (clientId) {
+          const data = await clientsService.getClientPurchases(clientId);
+          // For demo mapping, ensure we format them for the table
+          const formattedData = data.map((d) => ({
+            id: d.id,
+            code: "SID384373" + d.id,
+            date: d.date ? d.date.split("-").reverse().join("/") : "20/02/2026",
+            destination: d.title || "Destino",
+            description: d.details || "Descripción",
+            total: "$ 1,000.00",
+            currency: "MXN",
+          }));
+          setPurchases(formattedData);
+        }
+      } catch (error) {
+        console.error("Error al cargar compras:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPurchases();
+  }, [clientId]);
+
+  if (loading) {
+    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+  }
+
 
   const parseDate = (dateStr) => {
     if (!dateStr) return null;

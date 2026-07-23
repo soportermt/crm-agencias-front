@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { clientsService } from "@/services/clients.service";
 
-export default function ClientModal({ show, onClose }) {
+export default function ClientModal({ show, onClose, onClientCreated }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     correo: "",
@@ -18,11 +21,36 @@ export default function ClientModal({ show, onClose }) {
 
   if (!show) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Datos de cliente registrados:", formData);
-    onClose();
+    try {
+      setSubmitting(true);
+      setError(null);
+      await clientsService.createClient(formData);
+      if (onClientCreated) {
+        await onClientCreated();
+      }
+      setFormData({
+        nombreCompleto: "",
+        correo: "",
+        fechaNacimiento: "",
+        celular: "",
+        sexo: "",
+        estadoCivil: "",
+        codigoPostal: "",
+        ciudad: "",
+        estado: "",
+        pais: "",
+      });
+      onClose();
+    } catch (err) {
+      console.error("Error al registrar cliente:", err);
+      setError("Error al guardar cliente en el backend. Intenta nuevamente.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   return (
     <div
@@ -264,9 +292,11 @@ export default function ClientModal({ show, onClose }) {
             </div>
           </div>
 
+          {error && <div className="text-danger mb-3 font-poppins small">{error}</div>}
           <div className="d-flex justify-content-end mt-4">
             <button
               type="submit"
+              disabled={submitting}
               className="btn btn-primary-custom transition-smooth fw-medium"
               style={{
                 backgroundColor: "var(--primary-color)",
@@ -276,9 +306,17 @@ export default function ClientModal({ show, onClose }) {
                 borderRadius: "12px",
               }}
             >
-              Confirmar
+              {submitting ? (
+                <span>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Guardando...
+                </span>
+              ) : (
+                "Confirmar"
+              )}
             </button>
           </div>
+
         </form>
       </div>
     </div>

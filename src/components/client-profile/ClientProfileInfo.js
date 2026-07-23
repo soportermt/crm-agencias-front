@@ -2,7 +2,9 @@
 
 import React from "react";
 
-export default function ClientProfileInfo() {
+export default function ClientProfileInfo({ client }) {
+  if (!client) return null;
+
   return (
     <div className="d-flex flex-column flex-md-row gap-4 mb-4 mt-4">
       {/* Datos Personales */}
@@ -16,7 +18,7 @@ export default function ClientProfileInfo() {
               Correo electrónico
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              m.garcia@email.com
+              {client.correo || "-"}
             </div>
           </div>
           <div className="row g-0">
@@ -24,7 +26,7 @@ export default function ClientProfileInfo() {
               Fecha de nacimiento
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              21 de Marzo 1994
+              {client.fechaNacimiento || "-"}
             </div>
           </div>
           <div className="row g-0">
@@ -32,7 +34,7 @@ export default function ClientProfileInfo() {
               Teléfono
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              +52 999 765 3452
+              {client.celular || "-"}
             </div>
           </div>
           <div className="row g-0">
@@ -40,7 +42,7 @@ export default function ClientProfileInfo() {
               RFC
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              UEB284623N
+              -
             </div>
           </div>
           <div className="row g-0">
@@ -48,7 +50,7 @@ export default function ClientProfileInfo() {
               Sexo
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              Mujer
+              {client.sexo || "-"}
             </div>
           </div>
           <div className="row g-0">
@@ -56,7 +58,7 @@ export default function ClientProfileInfo() {
               Estado civil
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              Soltero
+              {client.estadoCivil || "-"}
             </div>
           </div>
         </div>
@@ -73,9 +75,9 @@ export default function ClientProfileInfo() {
               Ubicación
             </div>
             <div className="col-7 col-md-8" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px", lineHeight: "1.4" }}>
-              Calle 23 #89 × 142 y 9c,<br />
-              Francisco de Montejo, Mérida, Yucatán<br />
-              97300
+              {[client.ciudad || client.city, client.estado || client.state].filter(Boolean).join(", ") || "-"}<br />
+              {client.codigoPostal && <span>{client.codigoPostal} <br/></span>}
+              {client.pais || "-"}
             </div>
           </div>
         </div>
@@ -83,3 +85,4 @@ export default function ClientProfileInfo() {
     </div>
   );
 }
+
