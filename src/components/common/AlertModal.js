@@ -10,7 +10,7 @@ export default function AlertModal({ icon, title, description, onClose }) {
                         <span className='fw-bold mt-2'>{title}</span>
                         <p>{description}</p>
                     </div>
-                    <button onClick={onClose} className='btn btn-bg-style w-100'>Cerrar</button>
+                    {/* <button onClick={onClose} className='btn btn-bg-style w-100'>Cerrar</button> */}
                 </div>
             </div>
         </div>

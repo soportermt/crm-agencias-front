@@ -1,27 +1,41 @@
 import React, { useMemo } from 'react'
 import { useBookingForm } from './BookingFormContext';
-import { calcularTotalNeto, formatMoney } from "@/utils/pricing";
+import { calcularResumenServicio, calcularTotalNeto, formatMoney } from "@/utils/pricing";
 
 export default function BookingPriceBreakdown({ isSubmitting }) {
-  const { draft, booking } = useBookingForm();
+  const { draft, booking, updateDraftField } = useBookingForm();
   const vendedor = booking.customer;
-  const provider = draft?.data?.providerData;
-  const habitaciones = draft?.data?.habitaciones || [];
-  const fee = Number(draft?.data?.fee) || 0;
+  // const provider = draft?.data?.providerData;
+  // const habitaciones = draft?.data?.habitaciones || [];
+  // const fee = Number(draft?.data?.fee) || 0;
 
-  const { totalPublico, totalNeto } = useMemo(() => {
-    return habitaciones.reduce(
-      (acc, hab) => {
-        const publico = Number(hab.total_publico) || 0;
-        acc.totalPublico += publico;
-        acc.totalNeto += calcularTotalNeto(publico, provider?.comision);
+  const serviciosParaTotal = useMemo(() => {
+    const confirmados = booking.servicios || [];
+    if (!draft) return confirmados;
+    
+    const sinElActivo = draft.editingId != null
+    ? confirmados.filter((s) => s.id !== draft.editingId)
+    : confirmados;
+
+    return [...sinElActivo, draft];
+  }, [booking.servicios, draft]);
+
+  const { totalPublico, totalNeto, totalFee } = useMemo(() => {
+    return serviciosParaTotal.reduce(
+      (acc, item) => {
+        const resumen = calcularResumenServicio(item);
+        acc.totalPublico += resumen.tarifaPublica;
+        acc.totalNeto += resumen.totalNeto;
+        acc.totalFee += resumen.fee;
         return acc;
       },
-      { totalPublico: 0, totalNeto: 0 }
+      { totalPublico: 0, totalNeto: 0, totalFee: 0 }
     );
-  }, [habitaciones, provider?.comision]);
+  }, [serviciosParaTotal]);
 
-  const totalFinal = totalPublico + fee;
+  const totalFinal = totalPublico + totalFee;
+  const activo = draft ?? serviciosParaTotal[serviciosParaTotal.length - 1];
+  const provider = activo?.data?.providerData;
 
   return (
     <div className="container-fluid py-2">
@@ -64,15 +78,16 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
           </div>
           <div className='col-12 col-md-6 mt-2 mt-md-0'>
             <div className="input-group">
-              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{ borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)", color: "rgba(64, 64, 64, .8)" }} value={provider?.comision ?? ''}
-               onChange={(e) =>
-                updateDraftField("providerData", {
-                  ...provider,
-                  comision: e.target.value,
-                })
-              } 
-              readOnly
-              disabled
+              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{ borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)", color: "rgba(64, 64, 64, .8)" }}
+                value={provider?.comision ?? ''}
+                onChange={(e) =>
+                  updateDraftField("providerData", {
+                    ...provider,
+                    comision: e.target.value,
+                  })
+                }
+                disabled={!draft}
+                readOnly
               />
               <span className="input-group-text" id="porcentaje">%</span>
             </div>
@@ -88,7 +103,7 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
         </div>
         <div className='d-flex justify-content-between'>
           <p className='mb-2'>Fee:</p>
-          <p className='mb-2'>{formatMoney(fee)}</p>
+          <p className='mb-2'>{formatMoney(totalFee)}</p>
         </div>
         <div className='d-flex justify-content-between'>
           <p className='mb-2'>Descuento:</p>

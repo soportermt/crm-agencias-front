@@ -4,28 +4,26 @@ import BookingForm from "./BookingForm";
 import BookingPriceBreakdown from "./BookingPriceBreakdown";
 import { useBookingForm } from "./BookingFormContext";
 import { serializeBookingToForm } from "@/utils/serializeBooking";
-import { catalogosService } from "@/services/catalogos.service";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AlertModal from "@/components/common/AlertModal";
+import { bookingService } from "@/services/booking.service";
+import { useRouter } from "next/navigation";
 
 export default function BookingFormContainer() {
   const { booking } = useBookingForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const payload = serializeBookingToForm(booking);
-      const result = await catalogosService.create(payload);
+      // const payload = serializeBookingToForm(booking);
+      // const result = await bookingService.create(payload);
+      // console.log("Reserva creada en prueba", result);
       setShowAlert(true);
-      console.log("Reserva creada en prueba", result);
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 5500);
     } catch (error) {
       console.error("Error al crear la reserva: ", error);
     } finally {
@@ -33,10 +31,18 @@ export default function BookingFormContainer() {
     }
   };
 
+  useEffect(() => {
+    if (!showAlert) return;
+    const timer = setTimeout(() => {
+      router.push("/reservaciones");
+    }, 2000); 
+    return () => clearTimeout(timer);
+  }, [showAlert, router]);
+
   return (
     <>
       <form
-        className="row g-5 m-0 form-booking"
+        className="row g-5 m-0 form-booking align-items-startg"
         onSubmit={handleSubmit}
       >
         <div className="col-12 col-xl-9 my-3">
@@ -50,8 +56,13 @@ export default function BookingFormContainer() {
 
         <div className="col-12 col-xl-3 my-3">
           <div
-            className="bg-white shadow-premium p-1"
-            style={{ borderRadius: "12px" }}
+            className="bg-white shadow-premium p-1 position-sticky"
+            style={{
+              borderRadius: "12px",
+              top: "1rem",
+              maxHeight: "calc(100vh - 2rem)",
+              overflowY: "auto",
+            }}
           >
             <BookingPriceBreakdown isSubmitting={isSubmitting} />
           </div>
@@ -64,7 +75,7 @@ export default function BookingFormContainer() {
           </svg>}
           title="¡Reservación exitosa!"
           description="Tu reservación se ha realizado correctamente"
-          onClose={() => setShowAlert(false)}
+          onClose={() => router.push("/reservaciones")}
         />
       )}
     </>
