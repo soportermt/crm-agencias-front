@@ -29,6 +29,7 @@ export default function ProviderSelect({
                     value: provider.id,
                     label: provider.text,
                     ...provider,
+                    comision: provider.comision ?? provider.porcentaje ?? 0,
                 }))
             );
         } catch (err) {

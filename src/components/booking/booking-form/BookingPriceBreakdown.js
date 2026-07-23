@@ -2,8 +2,9 @@ import React from 'react'
 import { useBookingForm } from './BookingFormContext'
 
 export default function BookingPriceBreakdown({ isSubmitting }) {
-  const { booking } = useBookingForm();
+  const { draft, booking } = useBookingForm();
   const vendedor = booking.customer;
+  const comision =  draft?.data?.providerData;
 
   return (
     <div className="container-fluid py-2">
@@ -46,7 +47,13 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
           </div>
           <div className='col-12 col-md-6 mt-2 mt-md-0'>
             <div className="input-group">
-              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{ borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)" }} />
+              <input type="number" className="form-control px-2" aria-label="porcentaje" aria-describedby="porcentaje" style={{ borderRadius: "12px 0 0 12px !important", borderRight: "1px solid var(--primary-color)" }} value={comision?.comision ?? ''}
+                onChange={(e) => {
+                  updateDraftField("providerData", {
+                    ...comision,
+                    comision: e.target.value
+                  });
+                }} />
               <span className="input-group-text" id="porcentaje">%</span>
             </div>
           </div>

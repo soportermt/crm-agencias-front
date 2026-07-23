@@ -80,7 +80,7 @@ export default function HospedajeForm() {
             value={data.provider}
             onChange={(provider) => {
               updateDraftField("provider", provider.value);
-              updateDraftField("providerName", provider.label);
+              updateDraftField("providerData", provider);
             }}
           />
         </div>
