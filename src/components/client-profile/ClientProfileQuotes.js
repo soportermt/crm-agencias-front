@@ -1,30 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "@/components/common/SearchBar";
 import QuoteCard from "@/components/common/QuoteCard";
+import { clientsService } from "@/services/clients.service";
 
-export default function ClientProfileQuotes() {
+export default function ClientProfileQuotes({ clientId }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const quotes = [
-    {
-      id: 1,
-      title: "Barcelo Maya Grand",
-      details: "Rivera Maya/Playa del Carmen",
-      dateRange: "09/06/2026 a 12/06/2026",
-      type: "Hospedaje",
-      icon: "hotel",
-    },
-    {
-      id: 2,
-      title: "Redondo",
-      details: "Hotel - Aeropuerto",
-      dateRange: "15/06/2026 al 19/06/2026",
-      type: "Traslado",
-      icon: "shuttle",
-    },
-  ];
+  useEffect(() => {
+    async function loadQuotes() {
+      try {
+        setLoading(true);
+        if (clientId) {
+          const data = await clientsService.getClientQuotes(clientId);
+          setQuotes(data);
+        }
+      } catch (error) {
+        console.error("Error al cargar cotizaciones:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadQuotes();
+  }, [clientId]);
+
+  if (loading) {
+    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+  }
+
 
   const filteredQuotes = quotes.filter(
     (quote) =>

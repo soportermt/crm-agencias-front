@@ -1,7 +1,30 @@
+"use client";
+
+import React, { useState } from "react";
+import ConfigSidebar from "@/components/configuracion/ConfigSidebar";
+import GeneralTab from "@/components/configuracion/GeneralTab";
+import UsuariosTab from "@/components/configuracion/UsuariosTab";
+import BancosTab from "@/components/configuracion/BancosTab";
+import TerminosTab from "@/components/configuracion/TerminosTab";
+import ConectividadTab from "@/components/configuracion/ConectividadTab";
+import ConfiguracionHeader from "@/components/configuracion/ConfiguracionHeader";
+
 export default function ConfiguracionPage() {
+  const [activeTab, setActiveTab] = useState("general");
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Configuración</h1>
+    <div className="d-flex flex-column h-100 w-100 p-2 p-md-4 gap-3">
+      <ConfiguracionHeader activeTab={activeTab} />
+      <div className="bg-white rounded-4 shadow-sm w-100 d-flex flex-column flex-md-row p-3 p-md-4 gap-4" style={{ minHeight: "80vh", flex: 1 }}>
+        <ConfigSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="flex-grow-1">
+          {activeTab === "general" && <GeneralTab />}
+          {activeTab === "usuarios" && <UsuariosTab />}
+          {activeTab === "bancos" && <BancosTab />}
+          {activeTab === "terminos" && <TerminosTab />}
+          {activeTab === "conectividad" && <ConectividadTab />}
+        </div>
+      </div>
     </div>
   );
 }

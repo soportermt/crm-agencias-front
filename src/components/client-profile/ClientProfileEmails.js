@@ -1,37 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { conectividadService } from "@/services/conectividad.service";
 
-export default function ClientProfileEmails() {
-  const emails = [
-    {
-      id: 1,
-      sender: "María Zabaleta",
-      subject: "Solicitud de cotización",
-      preview: "Solicitud de información para viaje a Cancún",
-      unread: true,
-      avatarBg: "#d02c89",
-      initials: "M",
-    },
-    {
-      id: 2,
-      sender: "María Zabaleta",
-      subject: "Reserva de tour",
-      preview: "Interés en tour a Chichén Itzá",
-      unread: false,
-      avatarBg: "#d02c89",
-      initials: "M",
-    },
-    {
-      id: 3,
-      sender: "María Zabaleta",
-      subject: "Viaje en grupo",
-      preview: "Cotización para viaje de grupo empresarial",
-      unread: false,
-      avatarBg: "#d02c89",
-      initials: "M",
-    },
-  ];
+export default function ClientProfileEmails({ clientId }) {
+  const [emails, setEmails] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEmails() {
+      try {
+        setLoading(true);
+        if (clientId) {
+          const data = await conectividadService.getClientEmails(clientId);
+          setEmails(data);
+        }
+      } catch (error) {
+        console.error("Error al cargar correos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEmails();
+  }, [clientId]);
+
+  if (loading) {
+    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+  }
 
   return (
     <div className="d-flex flex-column gap-3 w-100 font-inter">

@@ -1,41 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { conectividadService } from "@/services/conectividad.service";
 
-export default function ClientProfileChat() {
-  const messages = [
-    {
-      id: 1,
-      sender: "client",
-      text: "Hola, buenas tardes.",
-      time: "10:25",
-    },
-    {
-      id: 2,
-      sender: "agent",
-      text: "¡Hola! Buenas tardes. Gracias por comunicarte con nosotros. ¿En qué podemos ayudarte?",
-      time: "01:25",
-    },
-    {
-      id: 3,
-      sender: "client",
-      text: "Estoy interesado en un tour para este fin de semana en Cancún.",
-      time: "10:25",
-    },
-    {
-      id: 4,
-      sender: "agent",
-      text: "Con gusto. ¿Cuántas personas viajarían y qué fecha tienen en mente?",
-      time: "01:25",
-    },
-    {
-      id: 5,
-      sender: "client",
-      text: "Seríamos 2 adultos para el sábado.",
-      time: "10:25",
-    },
-  ];
+export default function ClientProfileChat({ clientId }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadChats() {
+      try {
+        setLoading(true);
+        if (clientId) {
+          const data = await conectividadService.getClientChats(clientId);
+          setMessages(data);
+        }
+      } catch (error) {
+        console.error("Error al cargar chats:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadChats();
+  }, [clientId]);
+
+  if (loading) {
+    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+  }
 
   return (
     <div>
