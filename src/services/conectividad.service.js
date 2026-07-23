@@ -1,4 +1,4 @@
-import { clientsApi as api } from "@/lib/axios";
+import { connectivityApi as api } from "@/lib/axios";
 
 export const conectividadService = {
   async getClientChats(id) {
