@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { clientsService } from "@/services/clients.service";
+import { conectividadService } from "@/services/conectividad.service";
 
 export default function ClientProfileChat({ clientId }) {
   const [messages, setMessages] = useState([]);
@@ -13,7 +13,7 @@ export default function ClientProfileChat({ clientId }) {
       try {
         setLoading(true);
         if (clientId) {
-          const data = await clientsService.getClientChats(clientId);
+          const data = await conectividadService.getClientChats(clientId);
           setMessages(data);
         }
       } catch (error) {

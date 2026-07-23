@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { clientsService } from "@/services/clients.service";
+import { conectividadService } from "@/services/conectividad.service";
 
 export default function ClientProfileEmails({ clientId }) {
   const [emails, setEmails] = useState([]);
@@ -12,7 +12,7 @@ export default function ClientProfileEmails({ clientId }) {
       try {
         setLoading(true);
         if (clientId) {
-          const data = await clientsService.getClientEmails(clientId);
+          const data = await conectividadService.getClientEmails(clientId);
           setEmails(data);
         }
       } catch (error) {
