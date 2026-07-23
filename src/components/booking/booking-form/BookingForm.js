@@ -80,7 +80,7 @@ export default function BookingForm() {
             value={booking.customerId}
             onChange={(customer) => {
               updateBooking("customerId", customer.value);
-              updateBooking("customer", customer.label);
+              updateBooking("customer", customer);
             }}
           />
         </div>

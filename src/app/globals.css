@@ -370,3 +370,31 @@ body {
 .react-datepicker__day--selected {
   background-color: var(--primary-color) !important;
 }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  max-width: 400px;
+  width: 90%;
+}
+
+.btn-bg-style {
+  background-color: #EDEFFA;
+  color: var(--brand-blue);
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-bg-style:hover, .btn-bg-style:active {
+  background-color: #DCDFF5 !important;
+  color: var(--brand-blue) !important;
+  border: 1px solid #DCDFF5 !important;
+}
