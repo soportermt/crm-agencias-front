@@ -7,6 +7,7 @@ import {
   CalendarDaysIcon,
   ChartBarIcon
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -76,9 +77,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
         <div className="d-flex flex-column gap-2">
           <button
             onClick={onRegisterClientClick}
-            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${
-              !isExpanded ? "justify-content-center" : "gap-3"
-            }`}
+            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${!isExpanded ? "justify-content-center" : "gap-3"
+              }`}
             style={{ backgroundColor: "transparent" }}
             title={!isExpanded ? "Registrar cliente" : undefined}
           >
@@ -88,23 +88,23 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
             {isExpanded && <span className="small text-dark fw-normal font-inter">Registrar cliente</span>}
           </button>
 
-          <button
-            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${
-              !isExpanded ? "justify-content-center" : "gap-3"
-            }`}
-            style={{ backgroundColor: "transparent" }}
-            title={!isExpanded ? "Crear de reserva" : undefined}
-          >
-            <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#227cf2", borderRadius: "8px" }}>
-              <ShoppingCartIcon style={{ width: "14px", height: "14px" }} />
-            </div>
-            {isExpanded && <span className="small text-dark fw-normal font-inter">Crear de reserva</span>}
-          </button>
+          <Link href="/reservaciones/crear" className="text-decoration-none">
+            <button
+              className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${!isExpanded ? "justify-content-center" : "gap-3"
+                }`}
+              style={{ backgroundColor: "transparent" }}
+              title={!isExpanded ? "Crear una reserva" : undefined}
+            >
+              <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#227cf2", borderRadius: "8px" }}>
+                <ShoppingCartIcon style={{ width: "14px", height: "14px" }} />
+              </div>
+              {isExpanded && <span className="small text-dark fw-normal font-inter">Crear una reserva</span>}
+            </button>
+          </Link>
 
           <button
-            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${
-              !isExpanded ? "justify-content-center" : "gap-3"
-            }`}
+            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${!isExpanded ? "justify-content-center" : "gap-3"
+              }`}
             style={{ backgroundColor: "transparent" }}
             title={!isExpanded ? "Calendario" : undefined}
           >
@@ -128,9 +128,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           {notifications.map((notif, idx) => (
             <div
               key={idx}
-              className={`d-flex align-items-start px-2 py-1 transition-smooth hover-light rounded-3 ${
-                !isExpanded ? "justify-content-center" : "gap-3"
-              }`}
+              className={`d-flex align-items-start px-2 py-1 transition-smooth hover-light rounded-3 ${!isExpanded ? "justify-content-center" : "gap-3"
+                }`}
               title={!isExpanded ? notif.title : undefined}
             >
               <div
@@ -162,9 +161,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           {contacts.map((contact, idx) => (
             <div
               key={idx}
-              className={`d-flex align-items-center rounded-3 hover-light transition-smooth ${
-                !isExpanded ? "justify-content-center p-1" : "gap-3 p-2"
-              }`}
+              className={`d-flex align-items-center rounded-3 hover-light transition-smooth ${!isExpanded ? "justify-content-center p-1" : "gap-3 p-2"
+                }`}
               title={!isExpanded ? contact.name : undefined}
             >
               <img
