@@ -14,6 +14,24 @@ export default function DataTable({
   emptyMessage = "No se encontraron registros.",
   minWidth = "1200px"
 }) {
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
+
   return (
     <>
       <div className="table-responsive">
@@ -104,29 +122,49 @@ export default function DataTable({
                 <span>Previous</span>
               </a>
 
-              {[...Array(totalPages)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); if (onPageChange) onPageChange(i + 1); }}
-                  style={{
-                    border: "1px solid #dcdcdc",
-                    color: "#292929",
-                    fontSize: "14px",
-                    height: "36px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "4px",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    backgroundColor: currentPage === i + 1 ? "#f6f6f6" : "#ffffff",
-                    marginLeft: "-1px",
-                    padding: "0 14px",
-                  }}
-                >
-                  {i + 1}
-                </a>
+              {getPageNumbers().map((page, index) => (
+                page === '...' ? (
+                  <span
+                    key={`dots-${index}`}
+                    style={{
+                      border: "1px solid #dcdcdc",
+                      color: "#292929",
+                      fontSize: "14px",
+                      height: "36px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#ffffff",
+                      marginLeft: "-1px",
+                      padding: "0 14px",
+                    }}
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <a
+                    key={index}
+                    href="#"
+                    onClick={(e) => { e.preventDefault(); if (onPageChange) onPageChange(page); }}
+                    style={{
+                      border: "1px solid #dcdcdc",
+                      color: "#292929",
+                      fontSize: "14px",
+                      height: "36px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "4px",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      backgroundColor: currentPage === page ? "#f6f6f6" : "#ffffff",
+                      marginLeft: "-1px",
+                      padding: "0 14px",
+                    }}
+                  >
+                    {page}
+                  </a>
+                )
               ))}
 
               <a

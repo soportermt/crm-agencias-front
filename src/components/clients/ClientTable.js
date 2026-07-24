@@ -15,7 +15,7 @@ const COLUMNS = [
   { key: "actions", label: "Acciones", sortable: false, align: "center", width: "120px" },
 ];
 
-export default function ClientTable({ clients = [] }) {
+export default function ClientTable({ clients = [], currentPage, totalPages, totalItems, onPageChange }) {
 
   const renderCell = (key, row) => {
     if (key === "status") {
@@ -60,9 +60,10 @@ export default function ClientTable({ clients = [] }) {
       data={clients}
       renderCell={renderCell}
       pagination={true}
-      currentPage={1}
-      totalPages={2}
-      totalItems={clients.length}
+      currentPage={currentPage || 1}
+      totalPages={totalPages || 1}
+      totalItems={totalItems || clients.length}
+      onPageChange={onPageChange}
       emptyMessage="No se encontraron clientes."
     />
   );

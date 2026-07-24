@@ -6,8 +6,8 @@ export const conectividadService = {
     return data;
   },
 
-  async getClientEmails(id) {
-    const { data } = await api.get(`/clients/${id}/emails`);
+  async getClientEmails(id, email) {
+    const { data } = await api.get(`/clients/${id}/emails${email ? `?email=${encodeURIComponent(email)}` : ''}`);
     return data;
   }
 };

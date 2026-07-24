@@ -77,7 +77,7 @@ export default function ClienteDetailPage({ params }) {
             <ClientProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
             
             {activeTab === "Conversaciones" && <ClientProfileChat clientId={id} />}
-            {activeTab === "Historial de correos" && <ClientProfileEmails clientId={id} />}
+            {activeTab === "Historial de correos" && <ClientProfileEmails clientId={id} clientEmail={client.correo} />}
             {activeTab === "Cotizaciones" && <ClientProfileQuotes clientId={id} />}
             {activeTab === "Historial de compras" && <ClientProfilePurchases clientId={id} />}
             {activeTab === "Documentos" && <ClientProfileDocuments clientId={id} />}

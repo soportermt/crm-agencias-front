@@ -1,4 +1,4 @@
-import { clientsMock } from "@/mocks/clientsMock";
+import api from "@/lib/axios";
 
 const purchasesMock = [
   { id: 1, date: "2024-02-20", title: "Cancún", details: "Traslado" },
@@ -23,29 +23,41 @@ const notesMock = [
 ];
 
 export const clientsService = {
-  async getClients() {
-    return clientsMock;
+  async getClients({ page = 1, perPage = 10, search = "", filter = "Todos" } = {}) {
+    const { data } = await api.get("/clientes/clientesCrmApi", {
+      params: { page, perPage, search, filter },
+    });
+    return data;
   },
 
   async getClientById(id) {
-    const client = clientsMock.find(c => c.id === Number(id)) || clientsMock[0];
-    return client;
+    const { data } = await api.get(`/clientes/clienteCrmDetailApi/${id}`);
+    return data;
   },
 
   async createClient(clientData) {
-    return { success: true, ...clientData };
+    const { data } = await api.post("/clientes/clientesCrmCreate", clientData);
+    return data;
   },
 
   async updateClient(id, clientData) {
-    return { success: true, ...clientData };
+    const { data } = await api.post(`/clientes/clientesCrmUpdate/${id}`, clientData);
+    return data;
   },
 
   async deleteClient(id) {
-    return { success: true };
+    const { data } = await api.delete(`/clientes/clientesCrmDelete/${id}`);
+    return data;
   },
 
   async searchCustomers() {
-    return clientsMock;
+    const { data } = await api.get("/clientes/clientesCrmApi");
+    return data;
+  },
+
+  async getMetrics() {
+    const { data } = await api.get("/clientes/clientesCrmMetrics");
+    return data;
   },
 
   async getClientQuotes(id) {

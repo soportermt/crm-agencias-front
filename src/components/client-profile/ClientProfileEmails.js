@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { conectividadService } from "@/services/conectividad.service";
 
-export default function ClientProfileEmails({ clientId }) {
+export default function ClientProfileEmails({ clientId, clientEmail }) {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,7 +12,7 @@ export default function ClientProfileEmails({ clientId }) {
       try {
         setLoading(true);
         if (clientId) {
-          const data = await conectividadService.getClientEmails(clientId);
+          const data = await conectividadService.getClientEmails(clientId, clientEmail);
           setEmails(data);
         }
       } catch (error) {
@@ -22,7 +22,7 @@ export default function ClientProfileEmails({ clientId }) {
       }
     }
     loadEmails();
-  }, [clientId]);
+  }, [clientId, clientEmail]);
 
   if (loading) {
     return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
