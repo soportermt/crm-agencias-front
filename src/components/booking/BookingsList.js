@@ -6,6 +6,7 @@ import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
+import dynamic from "next/dynamic";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -122,13 +123,16 @@ export default function BookingList() {
         currentPage * ITEMS_PER_PAGE
     );
 
+    const PdfViewer = dynamic(
+        () => import("../pdf/PdfViewer"),
+        { ssr: false }
+    );
+
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
                 return (
-                    <a href="#" className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }}>
-                        {row.folio}
-                    </a>
+                    <PdfViewer venta={row} />
                 );
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
