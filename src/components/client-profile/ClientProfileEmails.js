@@ -12,7 +12,7 @@ export default function ClientProfileEmails({ clientId, clientEmail }) {
       try {
         setLoading(true);
         if (clientId) {
-          const data = await conectividadService.getClientEmails(clientId, clientEmail);
+          const data = await conectividadService.getClientEmails(clientId);
           setEmails(data);
         }
       } catch (error) {

@@ -3,19 +3,52 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
   
   // Estado para conmutar visibilidad de contraseña
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("atencion@solucionesid.com");
-  const [password, setPassword] = useState("mipasswordsecreto");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setLoading(true);
+    setError("");
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://crm.2businesstravel.com/admin/";
+      
+      const params = new URLSearchParams();
+      params.append('UserLogin[username]', email);
+      params.append('UserLogin[password]', password);
+
+      const response = await axios.post(`${apiUrl}api/login.html`, params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.data && response.data.success) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        router.push("/dashboard");
+      } else {
+        setError("Credenciales incorrectas. Por favor, inténtelo de nuevo.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error al conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -104,16 +137,22 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleLoginSubmit}>
-              {/* Campo Correo */}
+              {error && (
+                <div className="alert alert-danger py-2 px-3 small font-inter mb-3" role="alert" style={{ borderRadius: "8px", backgroundColor: "#ffebee", color: "#c62828", border: "none" }}>
+                  {error}
+                </div>
+              )}
+
+              {/* Campo Correo / Username */}
               <div style={{ marginBottom: "18px" }}>
                 <label
                   htmlFor="email"
                   className="form-label small fw-medium text-secondary mb-1"
                 >
-                  Correo electrónico
+                  Usuario o Correo electrónico
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   id="email"
                   required
                   placeholder="atencion@solucionesid.com"
@@ -193,9 +232,10 @@ export default function LoginPage() {
               {/* Botón de Enviar */}
               <button
                 type="submit"
+                disabled={loading}
                 className="btn w-100 font-poppins fw-medium transition-smooth"
                 style={{
-                  backgroundColor: "#227cf2",
+                  backgroundColor: loading ? "#90caf9" : "#227cf2",
                   color: "#f2f2f2",
                   borderRadius: "12px",
                   padding: "12px 24px",
@@ -203,7 +243,7 @@ export default function LoginPage() {
                   border: "none",
                 }}
               >
-                Iniciar sesión
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>
             </form>
           </div>
