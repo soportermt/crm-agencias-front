@@ -38,6 +38,16 @@ function formatDateRange(inicio, fin) {
     return `${dInicio} a ${dFin}`;
 }
 
+function formatDate(date) {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
+}
+
 function mapVentaToRow(venta) {
     const servicios = venta.ventasServicioses || [];
     const primero = servicios[0] || {};
@@ -65,6 +75,8 @@ function mapVentaToRow(venta) {
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
+        fecha: formatDate(venta.fecha),
+        desglose: JSON.parse(venta.ventasServicioses[0].desglose),
     };
 }
 
