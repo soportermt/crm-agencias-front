@@ -6,6 +6,7 @@ import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
+import dynamic from "next/dynamic";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -37,6 +38,16 @@ function formatDateRange(inicio, fin) {
     return `${dInicio} a ${dFin}`;
 }
 
+function formatDate(date) {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
+}
+
 function mapVentaToRow(venta) {
     const servicios = venta.ventasServicioses || [];
     const primero = servicios[0] || {};
@@ -64,6 +75,8 @@ function mapVentaToRow(venta) {
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
+        fecha: formatDate(venta.fecha),
+        desglose: JSON.parse(venta.ventasServicioses[0].desglose),
     };
 }
 
@@ -122,13 +135,16 @@ export default function BookingList() {
         currentPage * ITEMS_PER_PAGE
     );
 
+    const PdfViewer = dynamic(
+        () => import("../pdf/PdfViewer"),
+        { ssr: false }
+    );
+
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
                 return (
-                    <a href="#" className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }}>
-                        {row.folio}
-                    </a>
+                    <PdfViewer venta={row} />
                 );
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
