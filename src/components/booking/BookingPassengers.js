@@ -1,31 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "../common/DataTable";
 import { bookingPassengersTableMock } from "@/mocks/bookingMock";
 import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
+import { bookingService } from "@/services/booking.service";
+import Link from "next/link";
 
 const COLUMNS = [
-  { key: "nombre", label: "Pasajero", width: "216px", align: "start" },
-  { key: "reserva", label: "Reserva", width: "216px", align: "start" },
-  { key: "tipo", label: "Tipo", width: "216px", align: "start" },
-  { key: "nacimiento", label: "Nacimiento", width: "216px", align: "start" },
-  { key: "nacionalidad", label: "Nacionalidad", width: "216px", align: "start" },
+  { key: "nombre", label: "Pasajero", width: "50px", align: "start" },
+  { key: "folio", label: "Reserva", width: "50px", align: "start" },
+  { key: "tipo", label: "Tipo", width: "50px", align: "start" },
 ];
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 25;
 
 export default function BookingPassengers() {
   const [searchValue, setSearchValue] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredPassengers = bookingPassengersTableMock[0].pasajeros.filter(
+  const [passengers, setPassengers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function cargarPasajeros() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await bookingService.pasajeros();
+        setPassengers(data);
+      } catch (err) {
+        console.error("Error al cargar pasajeros:", err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    cargarPasajeros();
+  }, []);
+
+  const filteredPassengers = passengers.filter(
     (passenger) => {
       const matchesSearch =
         passenger.nombre.toLowerCase().includes(searchValue.toLowerCase()) ||
-        passenger.reserva.toLowerCase().includes(searchValue.toLowerCase());
+        passenger.folio.toLowerCase().includes(searchValue.toLowerCase());
 
       const matchesType =
         !typeFilter || passenger.tipo === typeFilter;
@@ -49,14 +72,20 @@ export default function BookingPassengers() {
     });
   };
 
+  const adultos = passengers.filter(p => p.tipo === "Adulto").length;
+  const menores = passengers.filter(p => p.tipo === "Menor").length;
 
   const renderCell = (key, row) => {
     switch (key) {
-      case "reserva":
+      case "folio":
         return (
-          <a href="#" className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }}>
-            {row.reserva}
-          </a>
+          <Link
+            href="#"
+            className="font-inter fw-semibold text-brand-blue"
+            style={{ textDecoration: "none" }}
+          >
+            {row.folio}
+          </Link>
         );
 
       case "tipo":
@@ -105,7 +134,7 @@ export default function BookingPassengers() {
               }}
             >
               <span style={{ fontWeight: 600 }}>Adultos</span>
-              <span className="card-passenger-number"> {bookingPassengersTableMock[0].adultos}</span>
+              <span className="card-passenger-number"> {adultos}</span>
             </div>
           </div>
           <div className="col-6">
@@ -118,7 +147,7 @@ export default function BookingPassengers() {
               }}
             >
               <span style={{ fontWeight: 600 }}>Menores</span>
-              <span className="card-passenger-number"> {bookingPassengersTableMock[0].menores}</span>
+              <span className="card-passenger-number"> {menores}</span>
             </div>
           </div>
         </div>
@@ -154,20 +183,16 @@ export default function BookingPassengers() {
             width="300px"
           />
         </div>
-        {bookingPassengersTableMock.map((group, index) => (
-          <div key={index}>
-            <DataTable
-              columns={COLUMNS}
-              data={paginatedPassengers}
-              renderCell={renderCell}
-              pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={filteredPassengers.length}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        ))}
+        <DataTable
+          columns={COLUMNS}
+          data={paginatedPassengers}
+          renderCell={renderCell}
+          pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredPassengers.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
