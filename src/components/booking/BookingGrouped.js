@@ -1,8 +1,9 @@
 "use client";
 
-import { bookingGroupedTableMock } from "@/mocks/bookingMock";
+import { useEffect, useState } from "react";
 import DataTable from "../common/DataTable";
 import StatusBadge from "../common/StatusBadge";
+import { bookingService } from "@/services/booking.service";
 
 const COLUMNS = [
   { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -15,9 +16,32 @@ const COLUMNS = [
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
 ];
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 10;
 
 export default function BookingGrouped() {
+  const [grupos, setGrupos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    bookingService.grupos()
+      .then((res) => {
+        if (isMounted) setGrupos(res || []);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (isMounted) setError("No se pudieron cargar las reservas agrupadas.");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("es-MX", {
       day: "numeric",
@@ -30,18 +54,36 @@ export default function BookingGrouped() {
     switch (key) {
       case "folio":
         return (
-          <a href="#" className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }}>
+          <span className="font-inter fw-semibold text-brand-blue">
             {row.folio}
-          </a>
+          </span>
         );
 
       case "estatus":
-        return <StatusBadge status={row.estatus} />;
+        return <StatusBadge status={row.estatus === "venta" ? "Activo" : row.estatus} />;
 
       default:
         return row[key];
     }
   };
+
+  if (loading) {
+    return <div className="text-center py-5">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Cargando...</span>
+      </div>
+      <p className="text-muted mt-2 font-poppins small">Cargando...</p>
+    </div>;
+  }
+
+  if (error) {
+    return <p className="text-danger">{error}</p>;
+  }
+
+  if (grupos.length === 0) {
+    return <p>No hay reservas agrupadas por el momento.</p>;
+  }
+
   return (
     <div className="container-fluid p-0">
       <p>
@@ -50,12 +92,8 @@ export default function BookingGrouped() {
       </p>
 
       <div className="d-flex flex-column gap-3">
-        {bookingGroupedTableMock.map((group, index) => (
-          <div
-            key={index}
-            className="bg-white p-3 shadow-group"
-            style={{ borderRadius: "12px" }}
-          >
+        {grupos.map((group, index) => (
+          <div key={index} className="bg-white p-3 shadow-group" style={{ borderRadius: "12px" }}>
             <section
               className="d-flex align-items-center justify-content-between"
               data-bs-toggle="collapse"
@@ -66,13 +104,8 @@ export default function BookingGrouped() {
                 <div className="icons-grouped"><i className="bi bi-airplane"></i></div>
                 <div>
                   <p className="m-0">{group.destino} · {formatDate(group.fecha_inicio)}</p>
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      color: "var(--black-rgba-40)",
-                    }}
-                  >
-                    {group.aerolinea} · {group.hotel} · {group.total_pasajeros} pasajeros
+                  <span style={{ fontSize: "14px", color: "var(--black-rgba-40)" }}>
+                    {group.hotel} · {group.total_pasajeros} pasajeros
                   </span>
                 </div>
               </div>
@@ -85,15 +118,15 @@ export default function BookingGrouped() {
               <table className="table mb-3">
                 <thead>
                   <tr>
-                    <th className="collapse-info-table-th">Vuelo</th>
                     <th className="collapse-info-table-th">Hotel</th>
+                    <th className="collapse-info-table-th">Noches</th>
                     <th className="collapse-info-table-th">Operador</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="collapse-info-table">{group.vuelo} · {group.codigo_destino} → {group.codigo_origen}</td>
-                    <td className="collapse-info-table">{group.hotel} · {group.total_noches} noches</td>
+                    <td className="collapse-info-table">{group.hotel}</td>
+                    <td className="collapse-info-table">{group.total_noches}</td>
                     <td className="collapse-info-table">{group.operadora}</td>
                   </tr>
                 </tbody>
