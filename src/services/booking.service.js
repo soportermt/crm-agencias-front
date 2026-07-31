@@ -15,4 +15,18 @@ export const bookingService = {
         const { data } = await api.get("/reservas/getAgencySales");
         return data;
     },
+    async pasajeros() {
+        const { data } = await api.get("/reservas/getPasajeros");
+        return data;
+    },
+
+    async grupos() {
+        const { data } = await api.get("/reservas/getGroupedSales");
+        return data;
+    },
+
+    async metrics() {
+        const { data } = await api.get("/reservas/getSalesStats");
+        return data;
+    },
 };

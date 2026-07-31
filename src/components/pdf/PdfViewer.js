@@ -5,31 +5,31 @@ import BookingPdf from "./BookingPdf";
 import Link from "next/link";
 
 export default function PdfViewer({ venta }) {
-  const handleOpen = async () => {
-    const blob = await pdf(
-      <BookingPdf
-        venta={venta}
-      />
-    ).toBlob();
-
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  };
-
-  
   // const handleOpen = async () => {
   //   const blob = await pdf(
-  //     <BookingPdf venta={venta} />
+  //     <BookingPdf
+  //       venta={venta}
+  //     />
   //   ).toBlob();
-  //   const url = URL.createObjectURL(blob);
 
-  //   const a = document.createElement("a");
-  //   a.href = url;
-  //   a.download = `Reserva-${venta.folio}.pdf`;
-  //   a.click();
-    
-  //   URL.revokeObjectURL(url);
+  //   const url = URL.createObjectURL(blob);
+  //   window.open(url, "_blank");
   // };
+
+  
+  const handleOpen = async () => {
+    const blob = await pdf(
+      <BookingPdf venta={venta} />
+    ).toBlob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Reserva-${venta.folio}.pdf`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Link

@@ -80,6 +80,45 @@ function mapVentaToRow(venta) {
     };
 }
 
+function exportToCSV(data) {
+    if (!data.length) return;
+
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
+
+    const rows = data.map((row) => [
+        row.folio,
+        row.cliente,
+        row.hotel,
+        row.plan,
+        row.estancia,
+        row.destino,
+        row.total,
+        row.estatus === "venta" ? "Activo" : row.estatus,
+    ]);
+
+    const escapeCsvValue = (value) => {
+        const str = String(value ?? "");
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+
+    const csvContent = [headers, ...rows]
+        .map((r) => r.map(escapeCsvValue).join(","))
+        .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `reservaciones_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -120,7 +159,8 @@ export default function BookingList() {
     const filteredData = bookings.filter((row) => {
         const matchesSearch =
             row.cliente?.toLowerCase().includes(searchValue.toLowerCase()) ||
-            row.folio?.toLowerCase().includes(searchValue.toLowerCase());
+            row.folio?.toLowerCase().includes(searchValue.toLowerCase()) ||
+            row.hotel?.toLowerCase().includes(searchValue.toLowerCase());
 
         const matchesStatus = !statusFilter || row.estatus === statusFilter;
         const matchesDestination = !destinationFilter || row.destino === destinationFilter;
@@ -149,7 +189,7 @@ export default function BookingList() {
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
-                return <StatusBadge status={row.estatus} />;
+                return <StatusBadge status={row.estatus === "venta" ? "Activo" : row.estatus} />;
             default:
                 return row[key];
         }
@@ -166,7 +206,7 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <ExportButton onExport={() => console.log("Exportar")} />
+                        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
                         <select name="estado"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
@@ -213,7 +253,7 @@ export default function BookingList() {
                     <SearchBar
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder="Buscar por cliente, folio"
+                        placeholder="Buscar por cliente, folio, hotel"
                         width="300px"
                     />
                 </div>
@@ -223,19 +263,30 @@ export default function BookingList() {
                     </div>
                 )}
 
-                <DataTable
-                    columns={COLUMNS}
-                    data={paginatedData}
-                    renderCell={renderCell}
-                    pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredData.length}
-                    onPageChange={setCurrentPage}
-                    loading={isLoading}
-                    emptyMessage={isLoading ? "Cargando reservaciones..." : "No se encontraron reservas."}
-                    minWidth="1265px"
-                />
+                {isLoading ? (
+                    <div className="text-center py-5">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Cargando...</span>
+                        </div>
+                        <p className="text-muted mt-2 font-poppins small">Cargando...</p>
+                    </div>
+                ) : error ? (
+                    <p className="text-danger">{error}</p>
+                ) : (
+                    <DataTable
+                        columns={COLUMNS}
+                        data={paginatedData}
+                        renderCell={renderCell}
+                        pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredData.length}
+                        onPageChange={setCurrentPage}
+                        loading={isLoading}
+                        emptyMessage={isLoading ? "Cargando reservaciones..." : "No se encontraron reservas."}
+                        minWidth="1265px"
+                    />
+                )}
             </div>
         </div>
     );
