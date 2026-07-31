@@ -120,7 +120,8 @@ export default function BookingList() {
     const filteredData = bookings.filter((row) => {
         const matchesSearch =
             row.cliente?.toLowerCase().includes(searchValue.toLowerCase()) ||
-            row.folio?.toLowerCase().includes(searchValue.toLowerCase());
+            row.folio?.toLowerCase().includes(searchValue.toLowerCase()) ||
+            row.hotel?.toLowerCase().includes(searchValue.toLowerCase());
 
         const matchesStatus = !statusFilter || row.estatus === statusFilter;
         const matchesDestination = !destinationFilter || row.destino === destinationFilter;
@@ -149,7 +150,7 @@ export default function BookingList() {
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
-                return <StatusBadge status={row.estatus} />;
+                return <StatusBadge status={row.estatus === "venta" ? "Activo" : row.estatus} />;
             default:
                 return row[key];
         }
@@ -213,7 +214,7 @@ export default function BookingList() {
                     <SearchBar
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder="Buscar por cliente, folio"
+                        placeholder="Buscar por cliente, folio, hotel"
                         width="300px"
                     />
                 </div>
@@ -223,19 +224,30 @@ export default function BookingList() {
                     </div>
                 )}
 
-                <DataTable
-                    columns={COLUMNS}
-                    data={paginatedData}
-                    renderCell={renderCell}
-                    pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredData.length}
-                    onPageChange={setCurrentPage}
-                    loading={isLoading}
-                    emptyMessage={isLoading ? "Cargando reservaciones..." : "No se encontraron reservas."}
-                    minWidth="1265px"
-                />
+                {isLoading ? (
+                    <div className="text-center py-5">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Cargando...</span>
+                        </div>
+                        <p className="text-muted mt-2 font-poppins small">Cargando...</p>
+                    </div>
+                ) : error ? (
+                    <p className="text-danger">{error}</p>
+                ) : (
+                    <DataTable
+                        columns={COLUMNS}
+                        data={paginatedData}
+                        renderCell={renderCell}
+                        pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredData.length}
+                        onPageChange={setCurrentPage}
+                        loading={isLoading}
+                        emptyMessage={isLoading ? "Cargando reservaciones..." : "No se encontraron reservas."}
+                        minWidth="1265px"
+                    />
+                )}
             </div>
         </div>
     );

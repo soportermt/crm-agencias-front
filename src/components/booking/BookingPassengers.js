@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import DataTable from "../common/DataTable";
-import { bookingPassengersTableMock } from "@/mocks/bookingMock";
 import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import { bookingService } from "@/services/booking.service";
-import Link from "next/link";
 
 const COLUMNS = [
   { key: "nombre", label: "Pasajero", width: "50px", align: "start" },
@@ -79,13 +77,11 @@ export default function BookingPassengers() {
     switch (key) {
       case "folio":
         return (
-          <Link
-            href="#"
+          <span
             className="font-inter fw-semibold text-brand-blue"
-            style={{ textDecoration: "none" }}
           >
             {row.folio}
-          </Link>
+          </span>
         );
 
       case "tipo":
@@ -183,16 +179,28 @@ export default function BookingPassengers() {
             width="300px"
           />
         </div>
-        <DataTable
-          columns={COLUMNS}
-          data={paginatedPassengers}
-          renderCell={renderCell}
-          pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredPassengers.length}
-          onPageChange={setCurrentPage}
-        />
+
+        {isLoading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="text-muted mt-2 font-poppins small">Cargando...</p>
+          </div>
+        ) : error ? (
+          <p className="text-danger">{error}</p>
+        ) : (
+          <DataTable
+            columns={COLUMNS}
+            data={paginatedPassengers}
+            renderCell={renderCell}
+            pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredPassengers.length}
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
     </div>
   );
