@@ -24,4 +24,9 @@ export const bookingService = {
         const { data } = await api.get("/reservas/getGroupedSales");
         return data;
     },
+
+    async metrics() {
+        const { data } = await api.get("/reservas/getSalesStats");
+        return data;
+    },
 };
