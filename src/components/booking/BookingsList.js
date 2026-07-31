@@ -80,6 +80,45 @@ function mapVentaToRow(venta) {
     };
 }
 
+function exportToCSV(data) {
+    if (!data.length) return;
+
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
+
+    const rows = data.map((row) => [
+        row.folio,
+        row.cliente,
+        row.hotel,
+        row.plan,
+        row.estancia,
+        row.destino,
+        row.total,
+        row.estatus === "venta" ? "Activo" : row.estatus,
+    ]);
+
+    const escapeCsvValue = (value) => {
+        const str = String(value ?? "");
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+
+    const csvContent = [headers, ...rows]
+        .map((r) => r.map(escapeCsvValue).join(","))
+        .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `reservaciones_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -167,7 +206,7 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <ExportButton onExport={() => console.log("Exportar")} />
+                        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
                         <select name="estado"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
