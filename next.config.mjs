@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  basePath: '/crm-agencias',
-};
+const nextConfig = {};
 
 export default nextConfig;
