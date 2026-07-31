@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { authService } from "@/services/auth.service";
 import {
   HomeIcon,
   UsersIcon,
@@ -29,6 +30,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
   const isExpanded = isPinned || isHovered;
 
   const handleLogout = () => {
+    authService.logout();
     router.push("/login");
   };
 

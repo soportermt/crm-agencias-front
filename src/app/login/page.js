@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import axios from "axios";
+import { authService } from "@/services/auth.service";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,29 +23,11 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://crm.2businesstravel.com/admin/";
-      
-      const params = new URLSearchParams();
-      params.append('UserLogin[username]', email);
-      params.append('UserLogin[password]', password);
-
-      const response = await axios.post(`${apiUrl}api/login.html`, params, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.data && response.data.success) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        router.push("/dashboard");
-      } else {
-        setError("Credenciales incorrectas. Por favor, inténtelo de nuevo.");
-      }
+      await authService.login(email, password);
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Error al conectar con el servidor.");
+      setError(err.message || "Error al conectar con el servidor.");
     } finally {
       setLoading(false);
     }
