@@ -1,4 +1,5 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
+import TrasladoForm from "@/components/booking/forms/TrasladoForm";
 import { faHotel, faPersonSwimming, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
@@ -27,28 +28,43 @@ export const serviceCatalog = [
     },
     summary: (data) => ({ hotel: data.hotel || "Sin hotel", destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
   },
-  // {
-  //   id: "transporte",
-  //   nombre: "Traslado",
-  //   icon: faVanShuttle,
-  //   Form: TrasladoForm,
-  //   summary: (data) => [
-  //     { label: "Hotel", value: data.hotelLabel || data.hotel },
-  //     { label: "Check-in", value: data.checkIn },
-  //     { label: "Check-out", value: data.checkOut },
-  //     { label: "Pasajeros", value: data.pasajeros?.length ?? 0 },
-  //   ],
-  // },
-  // {
-  //   id: "tour",
-  //   nombre: "Tour",
-  //   icon: faPersonSwimming,
-  //   Form: TourForm,
-  //   summary: (data) => [
-  //     { label: "Hotel", value: data.hotelLabel || data.hotel },
-  //     { label: "Check-in", value: data.checkIn },
-  //     { label: "Check-out", value: data.checkOut },
-  //     { label: "Pasajeros", value: data.pasajeros?.length ?? 0 },
-  //   ],
-  // },
+  {
+    id: "traslado",
+    nombre: "Traslado",
+    icon: faVanShuttle,
+    Form: TrasladoForm,
+    defaultData: {
+      proveedor: null,
+      code: "",
+      origen: "",
+      destino: "",
+      equipaje: [],
+      checkIn: null,
+      checkOut: null,
+      pasajeros: {
+        adultos: [
+          { nombre: "", apellidos: "" },
+          { nombre: "", apellidos: "" },
+        ],
+        menores: [],
+      },
+      salida_origen: "",
+      salida_destino: "",
+      pickup: "",
+      llegada_origen: "",
+      llegada_destino: "",
+      limitePago: null,
+      limiteCliente: null,
+      fee: "",
+      total_publico: "",
+      total_neto: "",
+    },
+    validate: (data) => {
+      const errors = {};
+      if (!data.origen) errors.origen = "Requerido";
+      if (!data.destino) errors.destino = "Requerido";
+      return errors;
+    },
+    summary: (data) => ({ hotel: data.redondo, origen: data.origen, destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
+  },
 ];

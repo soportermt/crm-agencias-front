@@ -48,6 +48,7 @@ export default function ProviderSelect({
                 isLoading={loading}
                 instanceId="provider-select"
                 inputId="provider-select"
+                required
                 value={options.find((o) => o.value === value) || null}
                 onChange={onChange}
                 placeholder="Selecciona un cliente"
