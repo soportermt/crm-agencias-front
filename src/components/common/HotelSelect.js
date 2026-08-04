@@ -31,7 +31,7 @@ export default function HotelSelect({
                 defaultOptions={false}
                 loadOptions={loadOptions}
                 placeholder="Escribe o selecciona un hotel"
-
+                required
                 value={
                     value
                         ? {

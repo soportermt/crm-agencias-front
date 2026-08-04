@@ -92,6 +92,7 @@ export default function HospedajeForm() {
             className="form-control"
             value={data.code}
             onChange={(e) => updateDraftField("code", e.target.value)}
+            required
           />
           {errors.code && <div className="text-danger small">{errors.code}</div>}
         </div>
@@ -113,6 +114,7 @@ export default function HospedajeForm() {
             className="form-control"
             value={data.destino}
             onChange={(e) => setField("destino", e.target.value)}
+            required
           />
 
           {errors.destino && (
@@ -140,6 +142,7 @@ export default function HospedajeForm() {
             isClearable
             className="form-control"
             placeholderText="Selecciona una fecha"
+            required
           />
         </div>
         <div className="col-12 col-md-4">
@@ -307,6 +310,7 @@ export default function HospedajeForm() {
             dateFormat="dd/MM/yyyy"
             className="form-control"
             placeholderText="Selecciona una fecha"
+            required
           />
         </div>
         <div className="col-12 col-md-4">
