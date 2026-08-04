@@ -40,7 +40,7 @@ export default function TrasladoForm() {
                         idAgencia={data.idAgencia || 1}
                         value={data.proveedor}
                         onChange={(provider) => {
-                            updateDraftField("proveedor", provider.value);
+                            updateDraftField("provider", provider.value);
                             updateDraftField("providerData", provider);
                         }}
                     />

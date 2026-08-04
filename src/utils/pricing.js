@@ -29,11 +29,30 @@ function calcularResumenHospedaje(data) {
     return { tarifaPublica, totalNeto, fee, comisionPct };
 }
 
+// export function calcularResumenServicio(item) {
+//     switch (item.tipo) {
+//         case "hospedaje":
+//             return calcularResumenHospedaje(item.data);
+//         default:
+//             return { tarifaPublica: 0, totalNeto: 0, fee: 0, comisionPct: 0 };
+//     }
+// }
+
 export function calcularResumenServicio(item) {
-    switch (item.tipo) {
-        case "hospedaje":
-            return calcularResumenHospedaje(item.data);
-        default:
-            return { tarifaPublica: 0, totalNeto: 0, fee: 0, comisionPct: 0 };
+    const comisionPct = Number(item.data.providerData?.comision) || 0;
+    const fee = Number(item.data.fee) || 0;
+
+    let tarifaPublica = 0;
+    if (item.tipo === "hospedaje") {
+        tarifaPublica = (item.data.habitaciones || []).reduce(
+            (sum, hab) => sum + (Number(hab.total_publico) || 0),
+            0
+        );
+    } else {
+        tarifaPublica = Number(item.data.total_publico) || 0;
     }
+
+    const totalNeto = calcularTotalNeto(tarifaPublica, comisionPct);
+
+    return { tarifaPublica, totalNeto, fee };
 }

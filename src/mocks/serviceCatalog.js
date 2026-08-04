@@ -34,7 +34,8 @@ export const serviceCatalog = [
     icon: faVanShuttle,
     Form: TrasladoForm,
     defaultData: {
-      proveedor: null,
+      provider: "",
+      providerName: "",
       code: "",
       origen: "",
       destino: "",

@@ -3,11 +3,11 @@ import { calcularTotalNeto } from "./pricing";
 
 const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
-  vuelo: 2,
-  grupo: 3,
-  boda: 4,
-  tour: 5,
-  traslado: 6,
+  // vuelo: 2,
+  // grupo: 3,
+  // boda: 4,
+  // tour: 5,
+  traslado: 2,
 };
 
 const TIPOS_CON_MENORES = [2, 5, 6, 7, 8, 9, 10];
@@ -20,22 +20,23 @@ function toISODateOnly(date) {
 
 function buildSale(booking) {
   return {
-    limite_cancelacion: toISODateOnly(booking.limiteCancelacion),
-    id_tipo_venta: booking.idTipoVenta ?? 0,
-    pertenece_a: booking.perteneceA ?? null,
-    id_agencia: booking.idAgencia,
-    id_cliente: booking.customerId,
-    id_usuario: booking.idUsuario,
-    moneda: booking.moneda,
+    id_venta: booking.idVenta ?? 0,
+    folio: booking.folio ?? "",
     fecha: toISODateOnly(booking.fecha),
-    fecha_limite: toISODateOnly(booking.limiteCancelacion),
     pasajero_titular: booking.pasajeroTitular,
     descripcion: booking.descripcion,
     observaciones: booking.observaciones,
     cargo_servicios: booking.cargoServicios ?? 0,
+    limite_cancelacion: toISODateOnly(booking.limiteCancelacion),
+    moneda: booking.moneda,
     estatus: "venta",
-    id_venta: booking.idVenta ?? 0,
-    folio: booking.folio ?? "",
+    id_agencia: booking.idAgencia,
+    id_usuario: booking.idUsuario,
+    id_cliente: booking.customerId,
+    id_tipo_venta: booking.idTipoVenta ?? 0,
+    pertenece_a: booking.perteneceA ?? null,
+
+    // fecha_limite: toISODateOnly(booking.limiteCancelacion),
   };
 }
 
@@ -91,7 +92,7 @@ function buildDesglose(tipoId, data, comisionPct) {
         adultos: data.pasajeros?.adultos ?? [],
         menores: data.pasajeros?.menores ?? [],
       },
-      comision: comisionPct,
+      comision: "%",
       origen: data.origen,
       destino: data.destino,
       salida_origen: data.salida_origen,
@@ -127,6 +128,8 @@ function buildService(item) {
       (sum, hab) => sum + (Number(hab.total_publico) || 0),
       0
     );
+  } else {
+    tarifaPublica = Number(item.data.total_publico) || 0;
   }
 
   const comisionPesos = tarifaPublica * (comisionPct / 100);
