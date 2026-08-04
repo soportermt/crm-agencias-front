@@ -30,10 +30,20 @@ function parseDesglose(desgloseStr) {
 }
 
 function formatDateRange(inicio, fin) {
-    if (!inicio) return "-";
+    if (!inicio || inicio === "0000-00-00") return "-";
+
     const opts = { day: "2-digit", month: "2-digit", year: "numeric" };
     const dInicio = new Date(inicio).toLocaleDateString("es-MX", opts);
-    if (!fin || fin === inicio) return dInicio;
+
+    if (
+        !fin ||
+        fin === "0000-00-00" ||
+        fin === "0000-00-00 00:00:00" ||
+        fin === inicio
+    ) {
+        return dInicio;
+    }
+
     const dFin = new Date(fin).toLocaleDateString("es-MX", opts);
     return `${dInicio} a ${dFin}`;
 }
@@ -71,7 +81,9 @@ function mapVentaToRow(venta) {
         cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
         hotel: hoteles.join(", ") || "-",
         plan: tipos.join(", ") || "-",
-        estancia: formatDateRange(primero.inicio_servicio, primero.fin_servicio),
+        estancia: primero.fin_servicio
+        ? formatDateRange(primero.inicio_servicio, primero.fin_servicio)
+        : "",
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
