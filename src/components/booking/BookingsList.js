@@ -29,11 +29,25 @@ function parseDesglose(desgloseStr) {
     }
 }
 
-function formatDateRange(inicio, fin) {
-    if (!inicio || inicio === "0000-00-00") return "-";
+function parseLocalDate(dateString) {
+    if (!dateString || dateString === "0000-00-00") return null;
 
-    const opts = { day: "2-digit", month: "2-digit", year: "numeric" };
-    const dInicio = new Date(inicio).toLocaleDateString("es-MX", opts);
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function formatDateRange(inicio, fin) {
+    const fechaInicio = parseLocalDate(inicio);
+
+    if (!fechaInicio) return "-";
+
+    const opts = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    };
+
+    const dInicio = fechaInicio.toLocaleDateString("es-MX", opts);
 
     if (
         !fin ||
@@ -44,7 +58,12 @@ function formatDateRange(inicio, fin) {
         return dInicio;
     }
 
-    const dFin = new Date(fin).toLocaleDateString("es-MX", opts);
+    const fechaFin = parseLocalDate(fin);
+
+    if (!fechaFin) return dInicio;
+
+    const dFin = fechaFin.toLocaleDateString("es-MX", opts);
+
     return `${dInicio} a ${dFin}`;
 }
 
@@ -89,6 +108,7 @@ function mapVentaToRow(venta) {
         estatus: venta.estatus,
         fecha: formatDate(venta.fecha),
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
+        _venta: venta
     };
 }
 
@@ -196,7 +216,7 @@ export default function BookingList() {
         switch (key) {
             case "folio":
                 return (
-                    <PdfViewer venta={row} />
+                    <PdfViewer venta={row._venta} />
                 );
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);

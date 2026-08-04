@@ -191,7 +191,43 @@ const styles = StyleSheet.create({
     }
 });
 
+const TIPO_HOSPEDAJE = "1";
+const TIPO_TRASLADO = "2";
+
+function parseDesglose(servicio) {
+    if (!servicio?.desglose) return {};
+    return typeof servicio.desglose === "string"
+        ? JSON.parse(servicio.desglose)
+        : servicio.desglose;
+}
+
+function parseLocalDate(dateString) {
+    if (!dateString || dateString === "0000-00-00") return null;
+
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function formatShortDate(date) {
+    const d = parseLocalDate(date);
+
+    if (!d) return "-";
+
+    return d
+        .toLocaleDateString("es-MX", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        })
+        .replace(".", "");
+}
+
 export default function BookingPdf({ venta }) {
+    const servicios = (venta.ventasServicioses || []).map((s) => ({
+        ...s,
+        desglose: parseDesglose(s),
+    }));
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
@@ -206,7 +242,7 @@ export default function BookingPdf({ venta }) {
                         </Text>
 
                         <Text style={styles.agencyDate}>
-                            {venta.fecha}
+                            {formatShortDate(venta.fecha)}
                         </Text>
                     </View>
                     <View style={styles.folioContainer}>
@@ -229,129 +265,250 @@ export default function BookingPdf({ venta }) {
 
                         <View style={{ width: "100%" }}>
                             <Text style={styles.titleData}>Fecha de reservación</Text>
-                            <Text style={styles.data}>{venta.fecha}</Text>
+                            <Text style={styles.data}>{formatShortDate(venta.fecha)}</Text>
                         </View>
                     </View>
                     <Text style={styles.title}>Descripción de servicios</Text>
 
-                    {/* servicios */}
-                    <View style={styles.serviceHeader}>
-                        <Image
-                            src="/pdf/bed.png"
-                            style={styles.serviceIcon}
-                        />
-                        <Text style={styles.titleService}>
-                            Hotel
-                        </Text>
-                    </View>
-                    <View style={styles.row}>
-                        <View style={{ width: "100%" }}>
-                            <Text style={styles.titleData}>Nombre</Text>
-                            <Text style={styles.data}>{venta.desglose.hotel}</Text>
-                        </View>
+                    {/* servicios: uno o más, hospedaje y/o traslado */}
+                    {servicios.map((servicio, idx) => {
+                        const esHospedaje = String(servicio.id_tipo_servicio) === TIPO_HOSPEDAJE;
+                        const esTraslado = String(servicio.id_tipo_servicio) === TIPO_TRASLADO;
+                        const d = servicio.desglose;
 
-                        <View style={{ width: "100%" }}>
-                            <Text style={styles.titleData}>Destino</Text>
-                            <Text style={styles.data}>{venta.desglose.destino}</Text>
-                        </View>
+                        return (
+                            <View key={servicio.id_ventaservicio ?? idx}>
+                                {esHospedaje && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/bed.png"
+                                                style={styles.serviceIcon}
+                                            />
+                                            <Text style={styles.titleService}>
+                                                Hotel
+                                            </Text>
+                                        </View>
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Nombre</Text>
+                                                <Text style={styles.data}>{d.hotel}</Text>
+                                            </View>
 
-                        <View style={{ width: "100%" }}>
-                            <Text style={styles.titleData}>Fecha de servicio</Text>
-                            <Text style={styles.data}>{venta.estancia}</Text>
-                        </View>
-                    </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Destino</Text>
+                                                <Text style={styles.data}>{d.destino}</Text>
+                                            </View>
 
-                    <Text style={styles.subtitle}>Habitaciones</Text>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                    {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+                                        </View>
 
-                    {venta.desglose.habitaciones.map((habitacion, index) => (
-                        <View key={index} style={styles.rowHab}>
-                            <View style={{ width: "10%" }}>
-                                <Text style={styles.titleData}>No. Hab.</Text>
-                                <Text style={styles.data}>{index + 1}</Text>
+                                        <Text style={styles.subtitle}>Habitaciones</Text>
+
+                                        {(d.habitaciones || []).map((habitacion, index) => (
+                                            <View key={index} style={styles.rowHab}>
+                                                <View style={{ width: "10%" }}>
+                                                    <Text style={styles.titleData}>No. Hab.</Text>
+                                                    <Text style={styles.data}>{index + 1}</Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Ocupación</Text>
+                                                    <Text style={styles.data}>{habitacion.ocupacion}</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Tipo de cama</Text>
+                                                    <Text style={styles.data}>{habitacion.tipo_cama}</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Tipo de habitación</Text>
+                                                    <Text style={styles.data}>{habitacion.tipo_habitacion}</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Plan</Text>
+                                                    <Text style={styles.data}>{habitacion.plan?.toUpperCase()}</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+
+                                        <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
+
+                                        {(d.habitaciones || []).map((hab, habIndex) => (
+                                            <View key={habIndex}>
+                                                {hab.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                                    <View key={`adulto-${habIndex}-${pIndex}`} style={styles.rowHab}>
+                                                        <View style={{ width: "35%" }}>
+                                                            <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                            <Text style={styles.data}>
+                                                                {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                            </Text>
+                                                        </View>
+
+                                                        <View style={{ width: "20%" }}>
+                                                            <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                            <Text style={styles.data}>Adulto</Text>
+                                                        </View>
+
+                                                        <View style={{ width: "25%" }}>
+                                                            <Text style={styles.titleData}>Habitación</Text>
+                                                            <Text style={styles.data}>{hab.tipo_habitacion}</Text>
+                                                        </View>
+                                                    </View>
+                                                ))}
+
+                                                {hab.pasajeros?.menores?.map((pasajero, pIndex) => (
+                                                    <View key={`menor-${habIndex}-${pIndex}`} style={styles.rowHab}>
+                                                        <View style={{ width: "35%" }}>
+                                                            <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                            <Text style={styles.data}>
+                                                                {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                            </Text>
+                                                        </View>
+
+                                                        <View style={{ width: "20%" }}>
+                                                            <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                            <Text style={styles.data}>Menor</Text>
+                                                        </View>
+
+                                                        <View style={{ width: "20%" }}>
+                                                            <Text style={styles.titleData}>Edad</Text>
+                                                            <Text style={styles.data}>{pasajero.edad}</Text>
+                                                        </View>
+
+                                                        <View style={{ width: "25%" }}>
+                                                            <Text style={styles.titleData}>Habitación</Text>
+                                                            <Text style={styles.data}>{hab.tipo_habitacion}</Text>
+                                                        </View>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+
+                                {esTraslado && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/van.png"
+                                                style={[styles.serviceIcon, { backgroundColor: "rgba(117, 191, 6, 0.1)" }]}
+                                            />
+                                            <Text style={[styles.titleService, { color: "#75BF06" }]}>
+                                                Traslado
+                                            </Text>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Origen</Text>
+                                                <Text style={styles.data}>{d.origen}</Text>
+                                            </View>
+
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Destino</Text>
+                                                <Text style={styles.data}>{d.destino}</Text>
+                                            </View>
+
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Salida origen</Text>
+                                                <Text style={styles.data}>{d.salida_origen || "-"}</Text>
+                                            </View>
+
+                                            {!!Number(d.redondo) && (
+                                                <>
+                                                    <View style={{ width: "100%" }}>
+                                                        <Text style={styles.titleData}>Llegada destino</Text>
+                                                        <Text style={styles.data}>{d.llegada_destino || "-"}</Text>
+                                                    </View>
+
+                                                    <View style={{ width: "100%" }}>
+                                                        <Text style={styles.titleData}>Salida destino</Text>
+                                                        <Text style={styles.data}>{d.salida_destino || "-"}</Text>
+                                                    </View>
+                                                </>
+                                            )}
+                                        </View>
+
+                                        {!!Number(d.redondo) && (
+                                            <View style={styles.row}>
+                                                <View style={{ width: "100%" }}>
+                                                    <Text style={styles.titleData}>Llegada origen</Text>
+                                                    <Text style={styles.data}>{d.llegada_origen || "-"}</Text>
+                                                </View>
+                                                <View style={{ width: "100%" }}>
+                                                    <Text style={styles.titleData}>Recogida hotel</Text>
+                                                    <Text style={styles.data}>{d.recogida_hotel || "-"}</Text>
+                                                </View>
+                                                <View style={{ width: "100%" }} />
+                                            </View>
+                                        )}
+
+                                        <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
+
+                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                            <View key={`adulto-${pIndex}`} style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    <Text style={styles.data}>Adulto</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+
+                                        {d.pasajeros?.menores?.map((pasajero, pIndex) => (
+                                            <View key={`menor-${pIndex}`} style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    <Text style={styles.data}>Menor</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Edad</Text>
+                                                    <Text style={styles.data}>{pasajero.edad}</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
                             </View>
-
-                            <View style={{ width: "30%" }}>
-                                <Text style={styles.titleData}>Ocupación</Text>
-                                <Text style={styles.data}>{habitacion.ocupacion}</Text>
-                            </View>
-
-                            <View style={{ width: "20%" }}>
-                                <Text style={styles.titleData}>Tipo de cama</Text>
-                                <Text style={styles.data}>{habitacion.tipo_cama}</Text>
-                            </View>
-
-                            <View style={{ width: "20%" }}>
-                                <Text style={styles.titleData}>Tipo de habitación</Text>
-                                <Text style={styles.data}>{habitacion.tipo_habitacion}</Text>
-                            </View>
-
-                            <View style={{ width: "20%" }}>
-                                <Text style={styles.titleData}>Plan</Text>
-                                <Text style={styles.data}>{habitacion.plan.toUpperCase()}</Text>
-                            </View>
-                        </View>
-                    ))}
-
-                    <Text style={[styles.title, { marginVertical: 8 }]}>datos de pasajeros</Text>
-
-                    {venta.desglose?.habitaciones?.map((hab, habIndex) => (
-                        <View key={habIndex}>
-                            {hab.pasajeros?.adultos?.map((pasajero, pIndex) => (
-                                <View key={`adulto-${habIndex}-${pIndex}`} style={styles.rowHab}>
-                                    <View style={{ width: "35%" }}>
-                                        <Text style={styles.titleData}>Nombre Pasajero</Text>
-                                        <Text style={styles.data}>
-                                            {`${pasajero.nombre} ${pasajero.apellidos}`}
-                                        </Text>
-                                    </View>
-
-                                    <View style={{ width: "20%" }}>
-                                        <Text style={styles.titleData}>Tipo Pasajero</Text>
-                                        <Text style={styles.data}>Adulto</Text>
-                                    </View>
-
-                                    <View style={{ width: "20%" }}>
-                                        <Text style={styles.titleData}>Edad</Text>
-                                        <Text style={styles.data}>+18</Text>
-                                    </View>
-
-                                    <View style={{ width: "25%" }}>
-                                        <Text style={styles.titleData}>Habitación</Text>
-                                        <Text style={styles.data}>{hab.tipo_habitacion}</Text>
-                                    </View>
-
-                                </View>
-                            ))}
-
-                            {hab.pasajeros?.menores?.map((pasajero, pIndex) => (
-                                <View key={`menor-${habIndex}-${pIndex}`} style={styles.rowHab}>
-                                    <View style={{ width: "35%" }}>
-                                        <Text style={styles.titleData}>Nombre Pasajero</Text>
-                                        <Text style={styles.data}>
-                                            {`${pasajero.nombre} ${pasajero.apellidos}`}
-                                        </Text>
-                                    </View>
-
-                                    <View style={{ width: "20%" }}>
-                                        <Text style={styles.titleData}>Tipo Pasajero</Text>
-                                        <Text style={styles.data}>Menor</Text>
-                                    </View>
-
-                                    <View style={{ width: "20%" }}>
-                                        <Text style={styles.titleData}>Edad</Text>
-                                        <Text style={styles.data}>{pasajero.edad}</Text>
-                                    </View>
-
-                                    <View style={{ width: "25%" }}>
-                                        <Text style={styles.titleData}>Habitación</Text>
-                                        <Text style={styles.data}>{hab.tipo_habitacion}</Text>
-                                    </View>
-
-                                </View>
-                            ))}
-                        </View>
-                    ))}
-
+                        );
+                    })}
 
                     {/* <Text style={[styles.title, { marginVertical: 8 }]}>Desglose de pagos</Text>
 
@@ -387,7 +544,7 @@ export default function BookingPdf({ venta }) {
                     <View style={styles.row}>
                         <View style={{ width: "100%" }}>
                             <Text style={styles.titleData}>Términos y condiciones</Text>
-                            <Text style={{fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)"}}>Nuestros términos...</Text>
+                            <Text style={{ fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)" }}>Nuestros términos...</Text>
                         </View>
                     </View>
                 </View>
