@@ -8,9 +8,10 @@ import { useBookingForm } from "../booking-form/BookingFormContext";
 import { calcularTotalNeto } from "@/utils/pricing";
 
 export default function TrasladoForm() {
-    const [isRedondo, setIsRedondo] = useState(false);
     const { draft, updateDraftField } = useBookingForm();
     const { data, errors } = draft;
+    const isRedondo = !!data.redondo;
+    const setIsRedondo = (checked) => updateDraftField("redondo", checked);
 
     const toggleEquipaje = (tipo) => {
         const nuevo = data.equipaje?.includes(tipo)

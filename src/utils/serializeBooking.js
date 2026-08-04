@@ -20,6 +20,7 @@ function toISODateOnly(date) {
 
 function buildSale(booking) {
   return {
+    limite_cancelacion: toISODateOnly(booking.limiteCancelacion),
     id_tipo_venta: booking.idTipoVenta ?? 0,
     pertenece_a: booking.perteneceA ?? null,
     id_agencia: booking.idAgencia,
@@ -32,6 +33,9 @@ function buildSale(booking) {
     descripcion: booking.descripcion,
     observaciones: booking.observaciones,
     cargo_servicios: booking.cargoServicios ?? 0,
+    estatus: "venta",
+    id_venta: booking.idVenta ?? 0,
+    folio: booking.folio ?? "",
   };
 }
 
@@ -77,13 +81,26 @@ function buildDesglose(tipoId, data, comisionPct) {
       menores: desglose.pasajeros?.menores ?? [],
     };
   }
-
-  if (tipoId === TIPO_SERVICIO_MAP.vuelo || tipoId === TIPO_SERVICIO_MAP.traslado) {
-    desglose.redondo = Number(desglose.redondo ?? 0);
-    if (tipoId === TIPO_SERVICIO_MAP.traslado) {
-      desglose.escala = Number(desglose.escala ?? 0);
-      desglose.internacional = Number(desglose.internacional ?? 0);
-    }
+  if (tipoId === TIPO_SERVICIO_MAP.traslado) {
+    return {
+      redondo: data.redondo ? 1 : 0,
+      adultos: data.adultos ?? 0,
+      menores: data.menores ?? 0,
+      ocupacion: `${data.adultos ?? 0} adulto(s), ${data.menores ?? 0} menor(es)`,
+      pasajeros: {
+        adultos: data.pasajeros?.adultos ?? [],
+        menores: data.pasajeros?.menores ?? [],
+      },
+      comision: comisionPct,
+      origen: data.origen,
+      destino: data.destino,
+      salida_origen: data.salida_origen,
+      llegada_destino: data.llegada_destino,
+      salida_destino: data.salida_destino,
+      llegada_origen: data.llegada_origen,
+      equipaje: data.equipaje ?? [],
+      recogida_hotel: data.pickup ?? "",
+    };
   }
 
   return desglose;
@@ -144,7 +161,9 @@ function buildService(item) {
 export function serializeBooking(booking) {
   const payload = {
     sale: buildSale(booking),
-    services: booking.servicios.map(buildService),
+    // services: booking.servicios.map(buildService),
+    services: booking.servicios.map((item) => buildService(item, booking)),
+    ...(booking.idCotizacion ? { price_code: booking.idCotizacion } : {}),
   };
 
   if (booking.idCotizacion) {
