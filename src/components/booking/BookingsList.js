@@ -7,6 +7,7 @@ import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -16,7 +17,8 @@ const COLUMNS = [
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
     { key: "total", label: "Total", width: "130px", align: "start" },
-    { key: "estatus", label: "Estatus", width: "130px", align: "center" },
+    { key: "estatus", label: "Estatus", width: "100px", align: "center" },
+    { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
 const ITEMS_PER_PAGE = 25;
@@ -95,7 +97,7 @@ function mapVentaToRow(venta) {
     );
 
     return {
-        id: venta.id_venta,
+        id_venta: venta.id_venta,
         folio: venta.folio,
         cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
         hotel: hoteles.join(", ") || "-",
@@ -115,7 +117,7 @@ function mapVentaToRow(venta) {
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus", "Acciones"];
 
     const rows = data.map((row) => [
         row.folio,
@@ -126,6 +128,7 @@ function exportToCSV(data) {
         row.destino,
         row.total,
         row.estatus === "venta" ? "Activo" : row.estatus,
+        row.id_venta,
     ]);
 
     const escapeCsvValue = (value) => {
@@ -222,6 +225,8 @@ export default function BookingList() {
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
                 return <StatusBadge status={row.estatus === "venta" ? "Activo" : row.estatus} />;
+            case "acciones":
+                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>Editar</Link>;
             default:
                 return row[key];
         }

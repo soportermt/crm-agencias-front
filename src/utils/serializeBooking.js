@@ -3,10 +3,6 @@ import { calcularTotalNeto } from "./pricing";
 
 const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
-  // vuelo: 2,
-  // grupo: 3,
-  // boda: 4,
-  // tour: 5,
   traslado: 2,
 };
 

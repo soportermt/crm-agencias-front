@@ -15,6 +15,7 @@ export const bookingService = {
         const { data } = await api.get("/reservas/getAgencySales");
         return data;
     },
+
     async pasajeros() {
         const { data } = await api.get("/reservas/getPasajeros");
         return data;
@@ -27,6 +28,11 @@ export const bookingService = {
 
     async metrics() {
         const { data } = await api.get("/reservas/getSalesStats");
+        return data;
+    },
+
+    async getSaleInfo(id) {
+        const { data } = await api.get(`/reservas/getSaleInfo/${id}`);
         return data;
     },
 };

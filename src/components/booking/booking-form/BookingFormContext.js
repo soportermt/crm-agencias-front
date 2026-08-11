@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import { serviceCatalog } from "@/mocks/serviceCatalog";
+import { mapVentaToBooking } from "@/utils/mapVentaToBooking";
 
 const BookingFormContext = createContext(null);
 
@@ -23,8 +24,11 @@ const initialBooking = {
   servicios: [],
 };
 
-export function BookingFormProvider({ children }) {
-  const [booking, setBooking] = useState(initialBooking);
+export function BookingFormProvider({ children, initialData = null }) {
+  // const [booking, setBooking] = useState(initialBooking);
+  const [booking, setBooking] = useState(() =>
+    initialData ? mapVentaToBooking(initialData) : initialBooking
+  );
 
   const updateBooking = (field, value) =>
     setBooking((prev) => ({ ...prev, [field]: value }));
