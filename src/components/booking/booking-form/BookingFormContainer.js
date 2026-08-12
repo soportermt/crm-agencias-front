@@ -9,7 +9,7 @@ import AlertModal from "@/components/common/AlertModal";
 import { bookingService } from "@/services/booking.service";
 import { useRouter } from "next/navigation";
 
-export default function BookingFormContainer() {
+export default function BookingFormContainer({ mode }) {
   const { booking } = useBookingForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -35,7 +35,7 @@ export default function BookingFormContainer() {
     if (!showAlert) return;
     const timer = setTimeout(() => {
       router.push("/reservaciones");
-    }, 2000); 
+    }, 2000);
     return () => clearTimeout(timer);
   }, [showAlert, router]);
 
@@ -50,7 +50,7 @@ export default function BookingFormContainer() {
             className="bg-white shadow-premium p-1"
             style={{ borderRadius: "12px" }}
           >
-            <BookingForm />
+            <BookingForm mode={mode} />
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export default function BookingFormContainer() {
               overflowY: "auto",
             }}
           >
-            <BookingPriceBreakdown isSubmitting={isSubmitting} />
+            <BookingPriceBreakdown isSubmitting={isSubmitting} mode={mode} />
           </div>
         </div>
       </form>

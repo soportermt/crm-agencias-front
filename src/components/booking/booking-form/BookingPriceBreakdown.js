@@ -1,9 +1,16 @@
 import React, { useMemo } from 'react'
 import { useBookingForm } from './BookingFormContext';
-import { calcularResumenServicio, calcularTotalNeto, formatMoney } from "@/utils/pricing";
+import { calcularResumenServicio, formatMoney } from "@/utils/pricing";
+import dynamic from 'next/dynamic';
 
-export default function BookingPriceBreakdown({ isSubmitting }) {
-  const { draft, booking, updateDraftField } = useBookingForm();
+const PdfViewer = dynamic(
+  () => import("@/components/pdf/PdfViewer"),
+  { ssr: false }
+);
+
+export default function BookingPriceBreakdown({ isSubmitting, mode }) {
+  const { draft, booking, rawVenta, updateDraftField } = useBookingForm();
+  const isEditMode = mode === "edit";
   const vendedor = booking.customer;
   // const provider = draft?.data?.providerData;
   // const habitaciones = draft?.data?.habitaciones || [];
@@ -12,10 +19,10 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
   const serviciosParaTotal = useMemo(() => {
     const confirmados = booking.servicios || [];
     if (!draft) return confirmados;
-    
+
     const sinElActivo = draft.editingId != null
-    ? confirmados.filter((s) => s.id !== draft.editingId)
-    : confirmados;
+      ? confirmados.filter((s) => s.id !== draft.editingId)
+      : confirmados;
 
     return [...sinElActivo, draft];
   }, [booking.servicios, draft]);
@@ -120,8 +127,16 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
         style={{ backgroundColor: "var(--brand-blue)" }}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Creando..." : "Crear reservación"}
+        {isSubmitting
+          ? (isEditMode ? "Guardando..." : "Creando...")
+          : (isEditMode ? "Guardar cambios" : "Crear reservación")}
       </button>
+      {/* {isEditMode && (
+        <button type="submit" className='btn btn-outline-primary w-100 mt-2'>Descargar contrato</button>
+      )} */}
+      {isEditMode && (
+        <PdfViewer venta={rawVenta} />
+      )}
     </div >
   )
 }

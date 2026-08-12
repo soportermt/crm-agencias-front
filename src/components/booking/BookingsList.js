@@ -6,7 +6,6 @@ import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 const COLUMNS = [
@@ -18,7 +17,7 @@ const COLUMNS = [
     { key: "destino", label: "Destino", width: "130px", align: "start" },
     { key: "total", label: "Total", width: "130px", align: "start" },
     { key: "estatus", label: "Estatus", width: "100px", align: "center" },
-    { key: "acciones", label: "Acciones", width: "80px", align: "center" },
+    // { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
 const ITEMS_PER_PAGE = 25;
@@ -117,7 +116,7 @@ function mapVentaToRow(venta) {
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus", "Acciones"];
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
 
     const rows = data.map((row) => [
         row.folio,
@@ -210,23 +209,14 @@ export default function BookingList() {
         currentPage * ITEMS_PER_PAGE
     );
 
-    const PdfViewer = dynamic(
-        () => import("../pdf/PdfViewer"),
-        { ssr: false }
-    );
-
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
-                return (
-                    <PdfViewer venta={row._venta} />
-                );
+                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>{row.folio}</Link>;
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
                 return <StatusBadge status={row.estatus === "venta" ? "Activo" : row.estatus} />;
-            case "acciones":
-                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>Editar</Link>;
             default:
                 return row[key];
         }

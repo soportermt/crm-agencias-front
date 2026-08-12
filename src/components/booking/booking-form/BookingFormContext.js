@@ -29,7 +29,7 @@ export function BookingFormProvider({ children, initialData = null }) {
   const [booking, setBooking] = useState(() =>
     initialData ? mapVentaToBooking(initialData) : initialBooking
   );
-
+  const rawVenta = initialData; 
   const updateBooking = (field, value) =>
     setBooking((prev) => ({ ...prev, [field]: value }));
 
@@ -92,6 +92,7 @@ export function BookingFormProvider({ children, initialData = null }) {
         confirmDraft,
         removeService,
         resetBooking,
+        rawVenta
       }}
     >
       {children}
