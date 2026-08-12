@@ -35,4 +35,14 @@ export const bookingService = {
         const { data } = await api.get(`/reservas/getSaleInfo/${id}`);
         return data;
     },
+
+    async update(booking) {
+        const { data } = await api.post("/reservas/updateApi", booking, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
 };

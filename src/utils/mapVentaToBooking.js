@@ -1,5 +1,11 @@
 const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado" };
 
+function parseLocalDate(dateString) {
+    if (!dateString || dateString === "0000-00-00") return null;
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+}
+
 function normalizeHabitacion(hab) {
     const { adultos = [], menores = [] } = hab.pasajeros || {};
     return {
@@ -15,6 +21,7 @@ function mapVentaServicioToItem(vs) {
     const desglose = vs.desglose || {};
 
     let data = {
+        id_ventaservicio: vs.id_ventaservicio,
         tarifa_publica: vs.tarifa_publica,
         fee: vs.fee,
         costo: vs.costo,
@@ -31,10 +38,10 @@ function mapVentaServicioToItem(vs) {
         data = {
             ...data,
             habitaciones: (desglose.habitaciones || []).map(normalizeHabitacion),
-            checkIn: desglose.checkIn ? new Date(desglose.checkIn) : null,
-            checkOut: desglose.checkOut ? new Date(desglose.checkOut) : null,
-            limitePago: desglose.limitePago ? new Date(desglose.limitePago) : null,
-            limiteCliente: desglose.limiteCliente ? new Date(desglose.limiteCliente) : null,
+            checkIn: parseLocalDate(desglose.checkIn),
+            checkOut: parseLocalDate(desglose.checkOut),
+            limitePago: parseLocalDate(desglose.limitePago),
+            limiteCliente: parseLocalDate(desglose.limiteCliente),
             provider: desglose.providerData?.value ?? vs.id_proveedor,
         };
     }
@@ -44,10 +51,10 @@ function mapVentaServicioToItem(vs) {
             ...data,
             redondo: !!desglose.redondo,
             pickup: desglose.recogida_hotel,
-            checkIn: vs.inicio_servicio ? new Date(vs.inicio_servicio) : null,
-            checkOut: vs.fin_servicio ? new Date(vs.fin_servicio) : null,
-            limitePago: vs.fecha_limite ? new Date(vs.fecha_limite) : null,
-            limiteCliente: vs.limite_cliente ? new Date(vs.limite_cliente) : null,
+            checkIn: parseLocalDate(vs.inicio_servicio),
+            checkOut: parseLocalDate(vs.fin_servicio),
+            limitePago: parseLocalDate(vs.fecha_limite),
+            limiteCliente: parseLocalDate(vs.limite_cliente),
             total_publico: vs.tarifa_publica,
             providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
             provider: vs.id_proveedor,
@@ -62,7 +69,7 @@ export function mapVentaToBooking(venta) {
     return {
         idVenta: venta.id_venta,
         folio: venta.folio,
-        fecha: venta.fecha ? new Date(venta.fecha) : new Date(),
+        fecha: parseLocalDate(venta.fecha) ?? new Date(),
         pasajeroTitular: venta.pasajero_titular,
         descripcion: venta.descripcion,
         observaciones: venta.observaciones,
@@ -73,7 +80,7 @@ export function mapVentaToBooking(venta) {
         idTipoVenta: venta.id_tipo_venta,
         perteneceA: venta.pertenece_a,
         cargoServicios: venta.cargo_servicios,
-        limiteCancelacion: venta.limite_cancelacion ? new Date(venta.limite_cancelacion) : null,
+        limiteCancelacion: parseLocalDate(venta.limite_cancelacion),
         customerId: cliente?.id_cliente,
         customer: cliente
             ? {

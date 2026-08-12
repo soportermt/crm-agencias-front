@@ -131,6 +131,7 @@ function buildService(item) {
   const comisionPesos = tarifaPublica * (comisionPct / 100);
   const costo = tarifaPublica - comisionPesos;
   return {
+    id_ventaservicio: item.data.id_ventaservicio ?? null,
     id_tipo_servicio: tipoId,
 
     id_proveedor: Number(item.data.provider) || null,
