@@ -2,17 +2,17 @@ import api from "@/lib/axios";
 
 export const usuariosService = {
   async getUsuarios() {
-    const { data } = await api.get("/usuariosagencias/usuariosApi");
+    const { data } = await api.get("/UsuariosAgencias/usuariosApi");
     return data;
   },
 
   async getCurrentUser() {
-    const { data } = await api.get("/usuariosagencias/usuarioSesionApi");
+    const { data } = await api.get("/UsuariosAgencias/usuarioSesionApi");
     return data;
   },
 
   async createUsuario(usuarioData) {
-    const { data } = await api.post("/usuariosagencias/createApi", usuarioData, {
+    const { data } = await api.post("/UsuariosAgencias/createApi", usuarioData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -21,7 +21,7 @@ export const usuariosService = {
   },
 
   async updateUsuario(id, usuarioData) {
-    const { data } = await api.post(`/usuariosagencias/updateApi/${id}`, usuarioData, {
+    const { data } = await api.post(`/UsuariosAgencias/updateApi/${id}`, usuarioData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -30,7 +30,7 @@ export const usuariosService = {
   },
 
   async deleteUsuario(id) {
-    const { data } = await api.delete(`/usuariosagencias/eliminarUsuario/${id}`);
+    const { data } = await api.delete(`/UsuariosAgencias/eliminarUsuario/${id}`);
     return data;
   }
 };

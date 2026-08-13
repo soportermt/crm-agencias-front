@@ -13,9 +13,13 @@ export default function UsuariosTab() {
 
   const fetchUsuarios = async () => {
     try {
-      const currentUserData = await usuariosService.getCurrentUser();
-      if (Array.isArray(currentUserData) && currentUserData.length > 0) {
-        setIsAdmin(currentUserData[0].rol === 'Administrador');
+      try {
+        const currentUserData = await usuariosService.getCurrentUser();
+        if (Array.isArray(currentUserData) && currentUserData.length > 0) {
+          setIsAdmin(currentUserData[0].rol === 'Administrador');
+        }
+      } catch (err) {
+        console.warn("Could not fetch current user info:", err);
       }
 
       const data = await usuariosService.getUsuarios();
