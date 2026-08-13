@@ -55,6 +55,7 @@ export default function BookingForm({ mode }) {
             dateFormat="dd/MM/yyyy"
             className="form-control"
             placeholderText="Selecciona una fecha"
+            autoComplete='off'
           />
         </div>
         <div className="col-12 col-md-6 col-lg-3">
@@ -69,6 +70,7 @@ export default function BookingForm({ mode }) {
             dateFormat="dd/MM/yyyy"
             className="form-control"
             placeholderText="Selecciona una fecha"
+            autoComplete='off'
           />
         </div>
       </div>
@@ -81,6 +83,7 @@ export default function BookingForm({ mode }) {
             onChange={(customer) => {
               updateBooking("customerId", customer.value);
               updateBooking("customer", customer);
+              updateBooking("pasajeroTitular", customer.label ?? customer.text ?? "");
             }}
           />
         </div>

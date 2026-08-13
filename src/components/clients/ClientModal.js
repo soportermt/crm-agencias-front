@@ -21,27 +21,37 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
 
   if (!show) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const resetForm = () => {
+    setFormData({
+      nombreCompleto: "",
+      correo: "",
+      fechaNacimiento: "",
+      celular: "",
+      sexo: "",
+      estadoCivil: "",
+      codigoPostal: "",
+      ciudad: "",
+      estado: "",
+      pais: "",
+    });
+  };
+
+  const handleSubmit = async () => {
+
+    if (!formData.nombreCompleto || !formData.fechaNacimiento || !formData.celular || !formData.ciudad || !formData.estado || !formData.pais) {
+      setError("Completa los campos obligatorios (*).");
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
-      await clientsService.createClient(formData);
+      const newClient = await clientsService.createClient(formData);
       if (onClientCreated) {
-        await onClientCreated();
+        onClientCreated(newClient);
       }
-      setFormData({
-        nombreCompleto: "",
-        correo: "",
-        fechaNacimiento: "",
-        celular: "",
-        sexo: "",
-        estadoCivil: "",
-        codigoPostal: "",
-        ciudad: "",
-        estado: "",
-        pais: "",
-      });
+
+      resetForm();
       onClose();
     } catch (err) {
       console.error("Error al registrar cliente:", err);
@@ -95,7 +105,7 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="mb-4">
             <h3
               className="font-inter h6 fw-medium mb-3"
@@ -295,7 +305,8 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
           {error && <div className="text-danger mb-3 font-poppins small">{error}</div>}
           <div className="d-flex justify-content-end mt-4">
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={submitting}
               className="btn btn-primary-custom transition-smooth fw-medium d-flex align-items-center justify-content-center"
               style={{
@@ -317,7 +328,7 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
             </button>
           </div>
 
-        </form>
+        </div>
       </div>
     </div>
   );

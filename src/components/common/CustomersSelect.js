@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import { catalogosService } from "@/services/catalogos.service";
+import ClientModal from "../clients/ClientModal";
 
 export default function CustomersSelect({
     value,
@@ -11,6 +12,7 @@ export default function CustomersSelect({
 }) {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         loadCustomers();
@@ -36,9 +38,30 @@ export default function CustomersSelect({
         }
     }
 
+    function handleClientCreated(newClient) {
+        const newOption = {
+            value: newClient.id,
+            label: newClient.text ?? newClient.nombreCompleto,
+            ...newClient,
+        };
+
+        setOptions((prev) => [newOption, ...prev]);
+        onChange(newOption);
+    }
+
     return (
         <>
-            <label className="form-label">Vendido a *</label>
+            <div className="d-flex justify-content-between align-items-center mb-1">
+                <label className="form-label mb-0">Vendido a *</label>
+                <button
+                    type="button"
+                    className="btn btn-link btn-sm p-0"
+                    style={{textDecoration: "none"}}
+                    onClick={() => setShowModal(true)}
+                >
+                    + Agregar cliente
+                </button>
+            </div>
 
             <Select
                 options={options}
@@ -81,6 +104,12 @@ export default function CustomersSelect({
                     {error}
                 </div>
             )}
+
+            <ClientModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                onClientCreated={handleClientCreated}
+            />
         </>
     );
 }

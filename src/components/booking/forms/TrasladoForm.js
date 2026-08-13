@@ -150,6 +150,7 @@ export default function TrasladoForm() {
                         isClearable
                         className="form-control"
                         placeholderText={isRedondo ? "Rango de fechas" : "Selecciona una fecha"}
+                        autoComplete='off'
                     />
                 </div>
 
@@ -290,6 +291,7 @@ export default function TrasladoForm() {
                         dateFormat="dd/MM/yyyy"
                         className="form-control"
                         placeholderText="Selecciona una fecha"
+                        autoComplete='off'
                     />
                 </div>
                 <div className="col-12 col-md-4">
@@ -302,6 +304,7 @@ export default function TrasladoForm() {
                         dateFormat="dd/MM/yyyy"
                         className="form-control"
                         placeholderText="Selecciona una fecha"
+                        autoComplete='off'
                     />
                 </div>
                 <div className="col-12 col-md-4">

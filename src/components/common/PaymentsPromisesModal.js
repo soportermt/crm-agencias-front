@@ -227,6 +227,7 @@ export default function PaymentsPromisesModal({ promesas = [], venta, total, loa
                                     selected={fechaInicio}
                                     onChange={(date) => setFechaInicio(date)}
                                     maxDate={servicioLimiteCliente ? new Date(servicioLimiteCliente) : undefined}
+                                    autoComplete='off'
                                 />
                             </div>
                         </div>
