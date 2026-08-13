@@ -53,4 +53,11 @@ export const bookingService = {
         });
         return data;
     },
+
+    async paymentsPromises(promise) {
+        const { data } = await api.post("/reservas/loadPaymentsPromises", promise, {
+          withCredentials: true,
+        });
+        return data;
+    },
 };
