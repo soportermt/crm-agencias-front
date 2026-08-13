@@ -30,6 +30,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "eslint": "^9",
-    "eslint-config-next": "15.5.19"
+    "eslint-config-next": "15.5.19",
+    "http-proxy-middleware": "^4.2.0"
   }
 }
