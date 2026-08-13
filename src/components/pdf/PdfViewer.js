@@ -12,7 +12,7 @@ export default function PdfViewer({ venta }) {
             return;
         }
 
-        console.log("VENTA PARA PDF:", venta);
+        // console.log("VENTA PARA PDF:", venta);
 
         const blob = await pdf(
             <BookingPdf venta={venta} />

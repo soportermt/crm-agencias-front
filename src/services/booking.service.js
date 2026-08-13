@@ -45,4 +45,12 @@ export const bookingService = {
         });
         return data;
     },
+
+    async paymentsPromises(id_venta) {
+        const params = new URLSearchParams({ id_venta });
+        const { data } = await api.post("/reservas/loadPaymentsPromises", params, {
+          withCredentials: true,
+        });
+        return data;
+    },
 };

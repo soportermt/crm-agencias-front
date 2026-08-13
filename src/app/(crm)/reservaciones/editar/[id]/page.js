@@ -8,11 +8,18 @@ import { useEffect, useState, use } from "react";
 export default function Editar({ params }) {
   const { id } = use(params);
   const [venta, setVenta] = useState(null);
+  const [paymentsPromises, setPaymentsPromises] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    bookingService.getSaleInfo(id)
-      .then(setVenta)
+    Promise.all([
+      bookingService.getSaleInfo(id),
+      // bookingService.paymentsPromises(id),
+    ])
+      .then(([ventaData, promesasData]) => {
+        setVenta(ventaData);
+        // setPaymentsPromises(promesasData);
+      })
       .finally(() => setLoading(false));
   }, [id]);
 

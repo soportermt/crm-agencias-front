@@ -39,7 +39,7 @@ export default function BookingFormContainer({ mode }) {
         setRawVenta(ventaActualizada);
       }
 
-      console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
+      // console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
       setShowAlert(true);
     } catch (error) {
       console.error("Error al crear la reserva: ", error);
