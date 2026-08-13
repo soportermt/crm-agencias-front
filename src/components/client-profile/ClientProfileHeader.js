@@ -77,7 +77,7 @@ export default function ClientProfileHeader({ client }) {
         <div className="col-12 col-sm-6 col-md-3">
           <StatCard
             title="Reservas totales"
-            value="5"
+            value={String(client.reservasTotales || 0)}
             valueColor="#0c5cc6"
             size="sm"
             titleColor="var(--dark-green)"
@@ -87,7 +87,7 @@ export default function ClientProfileHeader({ client }) {
         <div className="col-12 col-sm-6 col-md-3">
           <StatCard
             title="Total comprado"
-            value="$124,800"
+            value={client.totalComprado || "$0"}
             valueColor="#16a34a"
             size="sm"
             titleColor="var(--dark-green)"
@@ -97,7 +97,7 @@ export default function ClientProfileHeader({ client }) {
         <div className="col-12 col-sm-6 col-md-3">
           <StatCard
             title="Último viaje"
-            value="Cancún • mayo 25"
+            value={client.ultimoViaje || "Sin viajes"}
             valueColor="#dc2626"
             size="sm"
             titleColor="var(--dark-green)"
@@ -107,7 +107,7 @@ export default function ClientProfileHeader({ client }) {
         <div className="col-12 col-sm-6 col-md-3">
           <StatCard
             title="Saldo pendiente"
-            value="$0"
+            value={client.saldoPendiente || "$0"}
             valueColor="#d97706"
             size="sm"
             titleColor="var(--dark-green)"
