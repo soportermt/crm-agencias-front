@@ -260,7 +260,7 @@ export default function BookingPdf({ venta }) {
                     <View style={styles.row}>
                         <View style={{ width: "100%" }}>
                             <Text style={styles.titleData}>Fecha límite de pago</Text>
-                            <Text style={styles.data}>05 jul 2026</Text>
+                            <Text style={styles.data}>{formatShortDate(venta.limite_cancelacion)}</Text>
                         </View>
 
                         <View style={{ width: "100%" }}>

@@ -6,7 +6,7 @@ import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
-import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -16,7 +16,8 @@ const COLUMNS = [
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
     { key: "total", label: "Total", width: "130px", align: "start" },
-    { key: "estatus", label: "Estatus", width: "130px", align: "center" },
+    { key: "estatus", label: "Estatus", width: "100px", align: "center" },
+    // { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
 const ITEMS_PER_PAGE = 25;
@@ -95,7 +96,7 @@ function mapVentaToRow(venta) {
     );
 
     return {
-        id: venta.id_venta,
+        id_venta: venta.id_venta,
         folio: venta.folio,
         cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
         hotel: hoteles.join(", ") || "-",
@@ -126,6 +127,7 @@ function exportToCSV(data) {
         row.destino,
         row.total,
         row.estatus === "venta" ? "Activo" : row.estatus,
+        row.id_venta,
     ]);
 
     const escapeCsvValue = (value) => {
@@ -207,17 +209,10 @@ export default function BookingList() {
         currentPage * ITEMS_PER_PAGE
     );
 
-    const PdfViewer = dynamic(
-        () => import("../pdf/PdfViewer"),
-        { ssr: false }
-    );
-
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
-                return (
-                    <PdfViewer venta={row._venta} />
-                );
+                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>{row.folio}</Link>;
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":
