@@ -147,7 +147,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
           ? (isEditMode ? "Guardando..." : "Creando...")
           : (isEditMode ? "Guardar cambios" : "Crear reservación")}
       </button>
-      {/* {isEditMode && (
+      {isEditMode && (
         <button
           type="button"
           className="btn btn-outline-success w-100 mt-2"
@@ -156,7 +156,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
         >
           Promesa de pago
         </button>
-      )} */}
+      )}
       {isEditMode && (
         <PdfViewer venta={rawVenta} />
       )}

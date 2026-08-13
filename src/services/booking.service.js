@@ -54,8 +54,15 @@ export const bookingService = {
         return data;
     },
 
-    async paymentsPromises(promise) {
-        const { data } = await api.post("/reservas/loadPaymentsPromises", promise, {
+    async createPaymentsPromises(promise) {
+        const { data } = await api.post("/reservas/createPaymentsPromises", promise, {
+          withCredentials: true,
+        });
+        return data;
+    },
+
+    async deletePaymentsPromises(id_venta) {
+        const { data } = await api.post("/reservas/deletePaymentsPromises", id_venta, {
           withCredentials: true,
         });
         return data;
