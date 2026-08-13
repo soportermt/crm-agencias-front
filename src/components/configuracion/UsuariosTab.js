@@ -82,7 +82,7 @@ export default function UsuariosTab() {
                   <span className="fw-bold text-dark m-0" style={{ fontSize: "20px", letterSpacing: "-0.14px" }}>
                     {usuario.idUsuario?.profiles?.fullname || usuario.nombre}
                   </span>
-                  <StatusBadge status={usuario.idUsuario?.status === 1 || usuario.status_laboral === "Activo" ? "Activo" : "Inactivo"} />
+                  <StatusBadge status={String(usuario.idUsuario?.status) === "1" ? "Activo" : "Inactivo"} />
                 </div>
                 <div className="d-flex flex-column text-secondary mt-1" style={{ fontSize: "14px", color: "#404040" }}>
                   <span className="fw-medium">{usuario.rol}</span>

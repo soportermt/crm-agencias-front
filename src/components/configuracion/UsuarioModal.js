@@ -29,7 +29,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
         contrasena: "",
         confirmarContrasena: "",
         rol: user.rol || "Administrador",
-        estado: user.idUsuario?.status === 1 || user.status_laboral === "Activo" ? "Activo" : "Inactivo",
+        estado: String(user.idUsuario?.status) === "1" ? "Activo" : "Inactivo",
       });
       setPreview(user.foto ? `${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}` : null);
     } else {
