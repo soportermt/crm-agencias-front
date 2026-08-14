@@ -23,7 +23,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await authService.login(email, password);
+      await authService.login(email, password, rememberMe);
       router.push("/dashboard");
     } catch (err) {
       console.error(err);

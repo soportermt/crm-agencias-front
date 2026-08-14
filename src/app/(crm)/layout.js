@@ -19,11 +19,16 @@ export default function CRMLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
-      router.push("/login");
-      return;
-    }
-    setIsAuthenticated(true);
+    const checkAuth = async () => {
+      const user = await authService.checkSession();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setIsAuthenticated(true);
+    };
+
+    checkAuth();
 
     const leftPinned = localStorage.getItem("leftSidebarPinned");
     const rightPinned = localStorage.getItem("rightSidebarPinned");
