@@ -70,7 +70,7 @@ export default function CustomersSelect({
                 inputId="customers-select"
                 value={options.find((o) => o.value === value) || null}
                 onChange={onChange}
-                placeholder="Selecciona un cliente"
+                placeholder="Selecciona..."
                 styles={{
                     control: (provided, state) => ({
                         ...provided,

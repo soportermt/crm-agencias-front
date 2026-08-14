@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Select from "react-select";
 import { catalogosService } from '@/services/catalogos.service';
+import ProveedorModal from './ProveedorModal';
 
 export default function ProviderSelect({
     value,
@@ -12,6 +13,7 @@ export default function ProviderSelect({
 }) {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (idAgencia) {
@@ -39,9 +41,30 @@ export default function ProviderSelect({
         }
     }
 
+    function handleProveedorCreated(newProveedor) {
+        const newOption = {
+            value: newProveedor.id,
+            label: newProveedor.text ?? newProveedor.nombre_comercial,
+            ...newProveedor,
+        };
+
+        setOptions((prev) => [newOption, ...prev]);
+        onChange(newOption);
+    }
+
     return (
         <>
-            <label className="form-label">Proveedor *</label>
+            <div className="d-flex justify-content-between align-items-center mb-1">
+                <label className="form-label">Proveedor *</label>
+                <button
+                    type="button"
+                    className="btn btn-link btn-sm p-0"
+                    style={{ textDecoration: "none" }}
+                    onClick={() => setShowModal(true)}
+                >
+                    + Agregar proveedor
+                </button>
+            </div>
 
             <Select
                 options={options}
@@ -51,7 +74,7 @@ export default function ProviderSelect({
                 required
                 value={options.find((o) => o.value === value) || null}
                 onChange={onChange}
-                placeholder="Selecciona un cliente"
+                placeholder="Selecciona..."
                 styles={{
                     control: (provided, state) => ({
                         ...provided,
@@ -85,6 +108,12 @@ export default function ProviderSelect({
                     {error}
                 </div>
             )}
+
+            <ProveedorModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                onProveedorCreated={handleProveedorCreated}
+            />
         </>
     )
 }

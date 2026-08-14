@@ -79,11 +79,11 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
       <div
         className="bg-white shadow-premium font-inter w-100 transition-smooth"
         style={{
-          maxWidth: "816px",
+          maxWidth: "500px",
           height: "100vh",
           overflowY: "auto",
           borderRadius: "0",
-          padding: "48px",
+          padding: "24px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -312,7 +312,7 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
               style={{
                 backgroundColor: "var(--primary-color)",
                 borderColor: "var(--primary-color)",
-                width: "359px",
+                width: "215px",
                 height: "43px",
                 borderRadius: "12px",
               }}
