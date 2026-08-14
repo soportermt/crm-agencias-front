@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { usuariosService } from "@/services/usuarios.service";
 
-export default function UsuarioModal({ show, onClose, user }) {
+export default function UsuarioModal({ show, onClose, user, isAdmin }) {
+  const fileInputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     usuario: "",
@@ -17,15 +22,16 @@ export default function UsuarioModal({ show, onClose, user }) {
   useEffect(() => {
     if (user) {
       setFormData({
-        nombreCompleto: user.nombre || "",
-        usuario: user.email ? `@${user.email.split('@')[0]}` : "",
-        email: user.email || "",
-        fechaNacimiento: "20/06/2001", // Mocked
-        contrasena: "•••••••••••••••",
-        confirmarContrasena: "•••••••••••••••",
+        nombreCompleto: user.idUsuario?.profiles?.fullname || user.nombre || "",
+        usuario: user.idUsuario?.username || (user.email ? `@${user.email.split('@')[0]}` : ""),
+        email: user.idUsuario?.email || user.email || "",
+        fechaNacimiento: user.fecha_nacimiento || "",
+        contrasena: "",
+        confirmarContrasena: "",
         rol: user.rol || "Administrador",
-        estado: user.estatus || "Activo",
+        estado: String(user.idUsuario?.status) === "1" ? "Activo" : "Inactivo",
       });
+      setPreview(user.foto ? `${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}` : null);
     } else {
       setFormData({
         nombreCompleto: "",
@@ -37,8 +43,62 @@ export default function UsuarioModal({ show, onClose, user }) {
         rol: "Administrador",
         estado: "Activo",
       });
+      setPreview(null);
     }
+    setSelectedFile(null);
   }, [user]);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSave = async () => {
+    if (formData.contrasena !== formData.confirmarContrasena) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+    setLoading(true);
+    try {
+      const formPayload = new FormData();
+      Object.keys(formData).forEach(key => {
+        formPayload.append(key, formData[key]);
+      });
+      if (selectedFile) {
+        formPayload.append("foto", selectedFile);
+      }
+
+      if (user && (user.id_usuario || user.id)) {
+        await usuariosService.updateUsuario(user.id_usuario || user.id, formPayload);
+      } else {
+        await usuariosService.createUsuario(formPayload);
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error al guardar usuario", error);
+      alert("Error al guardar usuario");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
+      setLoading(true);
+      try {
+        await usuariosService.deleteUsuario(user.id_usuario || user.id);
+        onClose();
+      } catch (error) {
+        console.error("Error al eliminar", error);
+        alert("Error al eliminar usuario");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   if (!show) return null;
 
@@ -73,9 +133,14 @@ export default function UsuarioModal({ show, onClose, user }) {
             Registro de usuarios
           </h2>
           <div className="d-flex gap-2 align-items-center">
-            {user && (
-              <button className="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-0" style={{ color: "#0c5cc6", fontSize: "14px", fontWeight: "500" }}>
-                <i className="bi bi-pencil-fill"></i> Editar datos
+            {user && (user.id_usuario || user.id) && isAdmin && (
+              <button 
+                className="btn btn-link text-danger text-decoration-none d-flex align-items-center gap-2 p-0 me-3" 
+                style={{ fontSize: "14px", fontWeight: "500" }}
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                <i className="bi bi-trash-fill"></i> Eliminar
               </button>
             )}
             <button
@@ -95,8 +160,8 @@ export default function UsuarioModal({ show, onClose, user }) {
             className="rounded-circle overflow-hidden flex-shrink-0"
             style={{ width: "80px", height: "80px", backgroundColor: "#f5f5f5" }}
           >
-            {user && user.avatar ? (
-              <img src={user.avatar} alt="Avatar" className="w-100 h-100 object-fit-cover" />
+            {preview ? (
+              <img src={preview} alt="Avatar" className="w-100 h-100 object-fit-cover" />
             ) : (
               <div className="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
                 <i className="bi bi-person-fill" style={{ fontSize: "40px" }}></i>
@@ -106,11 +171,17 @@ export default function UsuarioModal({ show, onClose, user }) {
           <div className="d-flex flex-column gap-2">
             <span className="font-poppins text-dark" style={{ fontSize: "14px" }}>Selecciona la imagen</span>
             <div className="d-flex align-items-center gap-2 border rounded-3 p-1" style={{ borderColor: "rgba(161, 161, 170, 0.35)" }}>
-              <button className="btn btn-sm flex-shrink-0" style={{ backgroundColor: "#e7f1fe", color: "#0c5cc6", fontWeight: "500", borderRadius: "6px", fontSize: "12px" }}>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept="image/png, image/jpeg, image/jpg" disabled={!isAdmin} />
+              <button 
+                className="btn btn-sm flex-shrink-0" 
+                style={{ backgroundColor: "#e7f1fe", color: "#0c5cc6", fontWeight: "500", borderRadius: "6px", fontSize: "12px" }}
+                onClick={() => fileInputRef.current.click()}
+                disabled={!isAdmin}
+              >
                 Seleccionar archivo
               </button>
               <span className="text-secondary font-poppins text-truncate pe-2" style={{ fontSize: "12px", maxWidth: "150px" }}>
-                {user && user.avatar ? "imagen01.png" : "Ningún archivo seleccionado"}
+                {selectedFile ? selectedFile.name : "Ningún archivo seleccionado"}
               </span>
             </div>
             <span className="text-muted font-poppins" style={{ fontSize: "11px" }}>Tipo de archivos permitidos: jpg, png, jpeg.</span>
@@ -120,34 +191,34 @@ export default function UsuarioModal({ show, onClose, user }) {
         <div className="row g-3">
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Nombre completo *</label>
-            <input type="text" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.nombreCompleto} onChange={(e) => setFormData({...formData, nombreCompleto: e.target.value})} />
+            <input type="text" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.nombreCompleto} onChange={(e) => setFormData({...formData, nombreCompleto: e.target.value})} disabled={!isAdmin} />
           </div>
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Usuario</label>
-            <input type="text" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.usuario} onChange={(e) => setFormData({...formData, usuario: e.target.value})} />
+            <input type="text" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.usuario} onChange={(e) => setFormData({...formData, usuario: e.target.value})} disabled={!isAdmin} />
           </div>
 
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Email *</label>
-            <input type="email" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+            <input type="email" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} disabled={!isAdmin} />
           </div>
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Fecha de nacimiento</label>
-            <input type="text" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.fechaNacimiento} onChange={(e) => setFormData({...formData, fechaNacimiento: e.target.value})} />
+            <input type="date" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.fechaNacimiento} onChange={(e) => setFormData({...formData, fechaNacimiento: e.target.value})} disabled={!isAdmin} />
           </div>
 
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Contraseña *</label>
-            <input type="password" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.contrasena} onChange={(e) => setFormData({...formData, contrasena: e.target.value})} />
+            <input type="password" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.contrasena} onChange={(e) => setFormData({...formData, contrasena: e.target.value})} disabled={!isAdmin} />
           </div>
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Confirmar contraseña *</label>
-            <input type="password" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.confirmarContrasena} onChange={(e) => setFormData({...formData, confirmarContrasena: e.target.value})} />
+            <input type="password" className="form-control" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.confirmarContrasena} onChange={(e) => setFormData({...formData, confirmarContrasena: e.target.value})} disabled={!isAdmin} />
           </div>
 
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Rol</label>
-            <select className="form-select" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.rol} onChange={(e) => setFormData({...formData, rol: e.target.value})}>
+            <select className="form-select" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.rol} onChange={(e) => setFormData({...formData, rol: e.target.value})} disabled={!isAdmin}>
               <option value="Administrador">Administrador</option>
               <option value="Gerente">Gerente</option>
               <option value="Analista">Analista</option>
@@ -156,7 +227,7 @@ export default function UsuarioModal({ show, onClose, user }) {
           </div>
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Estado</label>
-            <select className="form-select" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})}>
+            <select className="form-select" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} disabled={!isAdmin}>
               <option value="Activo">Activo</option>
               <option value="Inactivo">Inactivo</option>
             </select>
@@ -164,14 +235,17 @@ export default function UsuarioModal({ show, onClose, user }) {
         </div>
 
         <div className="d-flex justify-content-end mt-4 pt-2">
-          <button
-            type="button"
-            className="btn btn-primary-custom d-flex align-items-center justify-content-center shadow-premium"
-            style={{ width: "200px", padding: "10px 16px", fontSize: "14px", borderRadius: "8px" }}
-            onClick={onClose}
-          >
-            Guardar
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              className="btn btn-primary-custom d-flex align-items-center justify-content-center shadow-premium"
+              style={{ width: "200px", padding: "10px 16px", fontSize: "14px", borderRadius: "8px" }}
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Guardando..." : "Guardar"}
+            </button>
+          )}
         </div>
       </div>
     </div>

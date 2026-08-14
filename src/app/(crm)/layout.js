@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
 import Sidebar from "@/components/layout/Sidebar";
 import RightBar from "@/components/layout/RightBar";
 import Header from "@/components/layout/Header";
@@ -13,13 +15,37 @@ export default function CRMLayout({ children }) {
   const [rightSidebarPinned, setRightSidebarPinned] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await authService.checkSession();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setIsAuthenticated(true);
+    };
+
+    checkAuth();
+
     const leftPinned = localStorage.getItem("leftSidebarPinned");
     const rightPinned = localStorage.getItem("rightSidebarPinned");
     if (leftPinned !== null) setLeftSidebarPinned(leftPinned === "true");
     if (rightPinned !== null) setRightSidebarPinned(rightPinned === "true");
     setMounted(true);
-  }, []);
+  }, [router]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleToggleLeftSidebar = () => {
     const nextState = !leftSidebarPinned;

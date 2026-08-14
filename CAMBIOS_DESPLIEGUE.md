@@ -30,11 +30,12 @@ Por lo tanto, se migraron las rutas dinámicas al uso de **Parámetros de Consul
 - **A:** `/clientes/detalle?id=123`
 
 ### Pasos aplicados:
-1. Se renombraron las carpetas `[id]` a `detalle` en:
+1. Se crearon las carpetas `detalle` y se movieron los archivos `page.js` a su interior en:
    - `src/app/(crm)/clientes/detalle/page.js`
    - `src/app/(crm)/pagos/detalle/page.js`
-2. En lugar de usar `params.id`, los componentes ahora utilizan el hook `useSearchParams()` de Next.js para leer el `id` desde la URL.
-3. Todo componente cliente (`"use client"`) que haga uso de `useSearchParams()` se envolvió en un bloque `<Suspense fallback={...}>` en su respectivo `page.js`. Esto previene errores de Next.js durante la fase de exportación estática.
+2. **Importante:** Las carpetas antiguas `[id]` fueron eliminadas por completo. Si se dejan en el proyecto, Next.js intentará compilarlas y generará un error de `generateStaticParams()` durante el proceso de build.
+3. En lugar de usar `params.id`, los componentes ahora utilizan el hook `useSearchParams()` de Next.js para leer el `id` desde la URL (`const id = searchParams.get("id")`).
+4. Todo componente que haga uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica, y el componente de página principal exportado (`export default function`) que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación durante la fase de exportación estática.
 
 ## 3. Actualización de Enlaces (`<Link>`)
 
@@ -59,6 +60,11 @@ Cuando se usa `output: 'export'` y `basePath: '/app'`, Next.js no antepone autom
    - Modificado en `ClientProfileHeader.js` y `ClientProfileChat.js` (placeholder) a `src="/app/avatar-placeholder.jpg"`.
    - Modificado en `RightBar.js` para los contactos en la barra lateral derecha a `src="/app/avatars/avatar-female-06.png"`, etc.
    - En `RightBar.js` también se reemplazó la etiqueta nativa `<img>` por el componente de Next.js `<Image>`.
+
+3. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
+   - Al igual que las imágenes normales, la librería de PDFs requiere rutas absolutas exactas cuando hace la petición de red (fetch) para incrustarlas en el documento.
+   - Modificado en `src/components/pdf/fonts.js` reemplazando `/fonts/` por `/app/fonts/` (ej. `/app/fonts/Inter-Regular.ttf`).
+   - Modificado en `src/components/pdf/BookingPdf.js` para los iconos e imágenes estáticas (ej. `/app/pdf/header-pdf.png`, `bed.png`, `location.png`).
 
 ## Instrucciones para el Despliegue
 
