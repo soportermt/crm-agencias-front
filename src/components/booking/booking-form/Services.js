@@ -5,8 +5,9 @@ import { serviceCatalog } from "@/mocks/serviceCatalog";
 import { useBookingForm } from "./BookingFormContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function Services() {
+export default function Services({ mode }) {
   const { booking, draft, startDraft, cancelDraft, confirmDraft, removeService } = useBookingForm();
+  const isEditMode = mode === "edit";
 
   const activeCatalogEntry = draft && serviceCatalog.find((s) => s.id === draft.tipo);
   const FormComponent = activeCatalogEntry?.Form;
@@ -20,22 +21,24 @@ export default function Services() {
 
   return (
     <div className="mt-3">
-      <div className="d-flex flex-wrap gap-2 mb-3">
-        {serviceCatalog.map((service) => {
-          const isSelected = booking.servicios.some((item) => item.tipo === service.id);
-          const isActive = draft?.tipo === service.id;
-          return (
-            <button
-              key={service.id}
-              type="button"
-              className={`btn ${isSelected ? "btn-primary" : "btn-outline-primary"} ${isActive ? "active" : ""}`}
-              onClick={() => toggleService(service)}
-            >
-              <FontAwesomeIcon icon={service.icon} /> {service.nombre}
-            </button>
-          );
-        })}
-      </div>
+      {!isEditMode && (
+        <div className="d-flex flex-wrap gap-2 mb-3">
+          {serviceCatalog.map((service) => {
+            const isSelected = booking.servicios.some((item) => item.tipo === service.id);
+            const isActive = draft?.tipo === service.id;
+            return (
+              <button
+                key={service.id}
+                type="button"
+                className={`btn ${isSelected ? "btn-primary" : "btn-outline-primary"} ${isActive ? "active" : ""}`}
+                onClick={() => toggleService(service)}
+              >
+                <FontAwesomeIcon icon={service.icon} /> {service.nombre}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {draft && (
         <div className="card card-body p-3 d-flex flex-column gap-4">

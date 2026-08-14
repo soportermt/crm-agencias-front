@@ -7,7 +7,7 @@ import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 
 registerLocale("es", es);
-export default function BookingForm() {
+export default function BookingForm({ mode }) {
   const {
     booking,
     updateBooking
@@ -109,7 +109,7 @@ export default function BookingForm() {
           />
         </div>
       </div>
-      <Services />
+      <Services mode={mode} />
     </div>
   )
 }

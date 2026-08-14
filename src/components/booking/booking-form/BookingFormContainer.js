@@ -9,11 +9,12 @@ import AlertModal from "@/components/common/AlertModal";
 import { bookingService } from "@/services/booking.service";
 import { useRouter } from "next/navigation";
 
-export default function BookingFormContainer() {
-  const { booking } = useBookingForm();
+export default function BookingFormContainer({ mode }) {
+  const { booking, setRawVenta } = useBookingForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const router = useRouter();
+  const isEditMode = mode === "edit";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +22,24 @@ export default function BookingFormContainer() {
 
     try {
       const payload = serializeBookingToForm(booking);
-      const result = await bookingService.create(payload);
-      console.log("Reserva creada en prueba", result);
+
+      // const result = await bookingService.create(payload);
+
+      const result = mode === "edit"
+        ? await bookingService.update(payload)
+        : await bookingService.create(payload);
+
+      if (!result.success) {
+        console.error("Error al guardar:", result.error, result);
+        return;
+      }
+
+      if (isEditMode) {
+        const ventaActualizada = await bookingService.getSaleInfo(booking.idVenta);
+        setRawVenta(ventaActualizada);
+      }
+
+      // console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
       setShowAlert(true);
     } catch (error) {
       console.error("Error al crear la reserva: ", error);
@@ -33,11 +50,12 @@ export default function BookingFormContainer() {
 
   useEffect(() => {
     if (!showAlert) return;
+    if (isEditMode) return;
     const timer = setTimeout(() => {
       router.push("/reservaciones");
-    }, 2000); 
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [showAlert, router]);
+  }, [showAlert, isEditMode, router]);
 
   return (
     <>
@@ -50,7 +68,7 @@ export default function BookingFormContainer() {
             className="bg-white shadow-premium p-1"
             style={{ borderRadius: "12px" }}
           >
-            <BookingForm />
+            <BookingForm mode={mode} />
           </div>
         </div>
 
@@ -64,7 +82,7 @@ export default function BookingFormContainer() {
               overflowY: "auto",
             }}
           >
-            <BookingPriceBreakdown isSubmitting={isSubmitting} />
+            <BookingPriceBreakdown isSubmitting={isSubmitting} mode={mode} />
           </div>
         </div>
       </form>
@@ -73,9 +91,12 @@ export default function BookingFormContainer() {
           icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={50} color="#0c5cc6" stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
           </svg>}
-          title="¡Reservación exitosa!"
-          description="Tu reservación se ha realizado correctamente"
-          onClose={() => router.push("/reservaciones")}
+          title={isEditMode ? "¡Cambios guardados!" : "¡Reservación exitosa!"}
+          description={isEditMode ? "Tu reservación se ha actualizado correctamente" : "Tu reservación se ha realizado correctamente"}
+          onClose={() => {
+            setShowAlert(false);
+            if (!isEditMode) router.push("/reservaciones");
+          }}
         />
       )}
     </>

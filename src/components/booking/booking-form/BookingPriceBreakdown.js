@@ -1,21 +1,44 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useBookingForm } from './BookingFormContext';
-import { calcularResumenServicio, calcularTotalNeto, formatMoney } from "@/utils/pricing";
+import { calcularResumenServicio, formatMoney } from "@/utils/pricing";
+import dynamic from 'next/dynamic';
+import PaymentsPromisesModal from '@/components/common/PaymentsPromisesModal';
+import { bookingService } from '@/services/booking.service';
 
-export default function BookingPriceBreakdown({ isSubmitting }) {
-  const { draft, booking, updateDraftField } = useBookingForm();
+const PdfViewer = dynamic(
+  () => import("@/components/pdf/PdfViewer"),
+  { ssr: false }
+);
+
+export default function BookingPriceBreakdown({ isSubmitting, mode }) {
+  const { draft, booking, rawVenta, updateDraftField } = useBookingForm();
+  const isEditMode = mode === "edit";
   const vendedor = booking.customer;
-  // const provider = draft?.data?.providerData;
-  // const habitaciones = draft?.data?.habitaciones || [];
-  // const fee = Number(draft?.data?.fee) || 0;
+
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+  const [paymentsPromises, setPaymentsPromises] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+
+  const handleOpenPaymentsModal = async () => {
+    setShowPaymentsModal(true);
+    setLoadingPayments(true);
+    try {
+      const data = await bookingService.paymentsPromises(rawVenta.id_venta);
+      setPaymentsPromises(data);
+    } catch (error) {
+      console.error("Error al cargar promesas de pago:", error);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
 
   const serviciosParaTotal = useMemo(() => {
     const confirmados = booking.servicios || [];
     if (!draft) return confirmados;
-    
+
     const sinElActivo = draft.editingId != null
-    ? confirmados.filter((s) => s.id !== draft.editingId)
-    : confirmados;
+      ? confirmados.filter((s) => s.id !== draft.editingId)
+      : confirmados;
 
     return [...sinElActivo, draft];
   }, [booking.servicios, draft]);
@@ -120,8 +143,35 @@ export default function BookingPriceBreakdown({ isSubmitting }) {
         style={{ backgroundColor: "var(--brand-blue)" }}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Creando..." : "Crear reservación"}
+        {isSubmitting
+          ? (isEditMode ? "Guardando..." : "Creando...")
+          : (isEditMode ? "Guardar cambios" : "Crear reservación")}
       </button>
+      {isEditMode && (
+        <button
+          type="button"
+          className="btn btn-outline-success w-100 mt-2"
+          disabled={isSubmitting}
+          onClick={handleOpenPaymentsModal}
+        >
+          Promesa de pago
+        </button>
+      )}
+      {isEditMode && (
+        <PdfViewer venta={rawVenta} />
+      )}
+
+
+
+      {showPaymentsModal && (
+        <PaymentsPromisesModal
+          promesas={paymentsPromises}
+          venta={rawVenta}
+          total={totalFinal}
+          loading={loadingPayments}
+          onClose={() => setShowPaymentsModal(false)}
+        />
+      )}
     </div >
   )
 }

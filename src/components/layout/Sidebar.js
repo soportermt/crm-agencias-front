@@ -184,6 +184,9 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           <div className="mb-3">
             {renderCategoryHeader("Servicios")}
             {renderNavLink("/productos", "Productos", BriefcaseIcon)}
+            {/* <div className="mt-1">
+              {renderNavLink("/caja", "Caja", CurrencyDollarIcon)}
+            </div> */}
           </div>
 
           <div className="mb-3">
