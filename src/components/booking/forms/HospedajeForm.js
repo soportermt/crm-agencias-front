@@ -77,7 +77,6 @@ export default function HospedajeForm() {
       <div className="row g-3 mb-2 justify-content-end align-items-end">
         <div className="col-12 col-md-4">
           <ProviderSelect
-            idAgencia={data.idAgencia || 1}
             value={data.provider}
             onChange={(provider) => {
               updateDraftField("provider", provider.value);
@@ -143,6 +142,7 @@ export default function HospedajeForm() {
             className="form-control"
             placeholderText="Selecciona una fecha"
             required
+            autoComplete='off'
           />
         </div>
         <div className="col-12 col-md-4">
@@ -243,7 +243,7 @@ export default function HospedajeForm() {
                   value={calcularTotalNeto(p.total_publico, data.providerData?.comision).toFixed(2)}
                   readOnly
                   disabled
-                  style={{ borderLeft: "1px solid var(--primary-color)", color: "rgba(64, 64, 64, .8)"}}
+                  style={{ borderLeft: "1px solid var(--primary-color)", color: "rgba(64, 64, 64, .8)" }}
                 />
               </div>
             </div>
@@ -311,6 +311,7 @@ export default function HospedajeForm() {
             className="form-control"
             placeholderText="Selecciona una fecha"
             required
+            autoComplete='off'
           />
         </div>
         <div className="col-12 col-md-4">
@@ -323,6 +324,7 @@ export default function HospedajeForm() {
             dateFormat="dd/MM/yyyy"
             className="form-control"
             placeholderText="Selecciona una fecha"
+            autoComplete='off'
           />
         </div>
         <div className="col-12 col-md-4">

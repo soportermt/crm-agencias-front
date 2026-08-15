@@ -16,13 +16,21 @@ export const catalogosService = {
         return data;
     },
 
-    async searchProviders(idAgencia = 1) {
+    async searchProviders() {
         const { data } = await api.get("/reservas/getProviders", {
-            params: {
-                id_agencia: idAgencia,
-            },
         });
-    
+
         return data;
     },
+
+    async createProveedor(proveedorData) {
+        const { data } = await api.post("/proveedores/createApi/", proveedorData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
+
 };
