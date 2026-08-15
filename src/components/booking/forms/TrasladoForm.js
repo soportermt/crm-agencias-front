@@ -37,7 +37,6 @@ export default function TrasladoForm() {
             <div className="row g-3 mb-2 align-items-end">
                 <div className="col-12 col-md-4">
                     <ProviderSelect
-                        idAgencia={data.idAgencia || 1}
                         value={data.provider}
                         onChange={(provider) => {
                             updateDraftField("provider", provider.value);

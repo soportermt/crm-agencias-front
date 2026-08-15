@@ -45,7 +45,7 @@ export default function ConfigSidebar({ activeTab, setActiveTab }) {
           );
         })}
       </div>
-      <div>
+      {/* <div>
         <button
           className="btn text-start border-0 w-100 p-2 font-inter"
           style={{
@@ -57,7 +57,7 @@ export default function ConfigSidebar({ activeTab, setActiveTab }) {
         >
           Eliminar cuenta
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -9,22 +9,19 @@ export default function ProviderSelect({
     value,
     onChange,
     error,
-    idAgencia,
 }) {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        if (idAgencia) {
-            loadProvider();
-        }
-    }, [idAgencia]);
+        loadProvider();
+    }, []);
 
     async function loadProvider() {
         try {
             setLoading(true);
-            const provider = await catalogosService.searchProviders(idAgencia);
+            const provider = await catalogosService.searchProviders();
 
             setOptions(
                 provider.map((provider) => ({
