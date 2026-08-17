@@ -148,20 +148,23 @@ export default function VendedoresModal({ show, onClose }) {
                   <option value="identificacion_oficial">Identificación Oficial</option>
                 </select>
               </div>
-              <div className="col-12 mb-2">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFilePick}
-                  hidden
-                />
-                <div
-                  onClick={() => tipoSeleccionado && fileInputRef.current.click()}
-                  style={{ cursor: tipoSeleccionado ? "pointer" : "not-allowed", opacity: tipoSeleccionado ? 1 : 0.5 }}
-                >
-                  <i className="bi bi-plus-lg me-2"></i>
-                  Agregar documento
+              <div>
+                <div className="d-flex align-items-center justify-content-center w-100"
+                  style={{ backgroundColor: tipoSeleccionado ? "#e7f1fe" : "#eee", border: tipoSeleccionado ? "1px solid #0c5cc6" : "rgba(0, 0, 0, 0.8)", borderRadius: "8px", height: "70px", cursor: "pointer" }}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFilePick}
+                    hidden
+                  />
+                  <div
+                    onClick={() => tipoSeleccionado && fileInputRef.current.click()}
+                    style={{ cursor: tipoSeleccionado ? "pointer" : "not-allowed", opacity: tipoSeleccionado ? 1 : 0.5, color: tipoSeleccionado ? "#0c5cc6" : "rgba(64, 64, 64, .8)" }}
+                  >
+                    <i className="bi bi-plus-lg me-2"></i>
+                    Agregar documento
+                  </div>
                 </div>
               </div>
 
@@ -180,14 +183,12 @@ export default function VendedoresModal({ show, onClose }) {
           <div className="d-flex justify-content-end mt-2">
             <button type="submit"
               disabled={submitting}
-              className="btn btn-primary-custom transition-smooth fw-medium d-flex align-items-center justify-content-center"
-            // style={{
-            //   backgroundColor: "var(--primary-color)",
-            //   borderColor: "var(--primary-color)",
-            //   width: "215px",
-            //   height: "43px",
-            //   borderRadius: "12px",
-            // }}
+              className="btn btn-primary transition-smooth fw-medium d-flex align-items-center justify-content-center"
+              style={{
+                width: "220px",
+                height: "43px",
+                borderRadius: "12px",
+              }}
             >
               {submitting ? "Guardando..." : "Confirmar"}
             </button>

@@ -1,25 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import DataTable from "@/components/common/DataTable";
 import StatusBadge from "@/components/common/StatusBadge";
 
+const ITEMS_PER_PAGE = 10;
+
 export default function VendedoresTable({ vendedores }) {
+  const [currentPage, setCurrentPage] = useState(1);
+
   const columns = [
-    { key: "id", label: "ID", sortable: true, align: "center", width: "118px" },
+    { key: "id", label: "ID", sortable: true, align: "center", width: "80px" },
     { key: "nombre", label: "Nombre Completo", sortable: true, align: "center", width: "225px" },
-    { key: "celular", label: "Num. Celular", sortable: true, align: "center", width: "155px" },
-    { key: "correo", label: "Correo", sortable: true, align: "center", width: "155px" },
-    { key: "nivel", label: "Nivel", sortable: true, align: "center", width: "155px" },
-    { key: "estatus", label: "Estatus", sortable: true, align: "center", width: "130px" },
-    { key: "acciones", label: "Acciones", align: "center" },
+    { key: "correo", label: "Correo electrónico", sortable: true, align: "center", width: "225px" },
+    { key: "telefono", label: "Télefono", sortable: true, align: "center", width: "110px" },
+    { key: "estatus", label: "Estatus", sortable: true, align: "center", width: "110px" },
+    { key: "acciones", label: "Acciones", align: "center", width: "110px" },
   ];
 
   const renderCell = (colKey, row) => {
     if (colKey === "estatus") {
       return (
         <div className="d-flex justify-content-center">
-          <StatusBadge status={row.estatus} />
+          <StatusBadge status={row.estatus === "1" ? "Activo" : "Eliminado"} />
         </div>
       );
     }
@@ -43,14 +46,22 @@ export default function VendedoresTable({ vendedores }) {
     return row[colKey];
   };
 
+  const totalPages = Math.max(1, Math.ceil(vendedores.length / ITEMS_PER_PAGE));
+
+  const paginatedVendedores = vendedores.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <DataTable
       columns={columns}
-      data={vendedores}
+      data={paginatedVendedores}
       renderCell={renderCell}
       pagination={true}
-      currentPage={1}
-      totalPages={2}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
       emptyMessage="No se encontraron vendedores."
     />
   );

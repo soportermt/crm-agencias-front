@@ -12,4 +12,14 @@ export const vendedoresService = {
 
     return data;
   },
+
+  async get() {
+    const {data} = await api.get("/vendedores/get", 
+      {
+        withCredentials: true,
+      }
+    );
+
+    return data;
+  }
 };
