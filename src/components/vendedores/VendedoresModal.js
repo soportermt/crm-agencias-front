@@ -1,20 +1,61 @@
 "use client";
 
-import React, { useState } from "react";
+import { vendedoresService } from "@/services/vendedores.service";
+import React, { useRef, useState } from "react";
 
 export default function VendedoresModal({ show, onClose }) {
   const [submitting, setSubmitting] = useState(false);
+  const [documentos, setDocumentos] = useState([]);
+
+  const fileInputRef = useRef(null);
+  const [tipoSeleccionado, setTipoSeleccionado] = useState("");
 
   if (!show) return null;
+
+  const handleFilePick = (e) => {
+    const file = e.target.files[0];
+    if (!file || !tipoSeleccionado) return;
+    setDocumentos((prev) => [...prev, { file, tipo: tipoSeleccionado }]);
+    e.target.value = ""; // permite volver a elegir el mismo archivo si se borra
+  };
+
+  const removeDoc = (idx) => {
+    setDocumentos((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    // TODO: implement API call
-    setTimeout(() => {
-      setSubmitting(false);
+
+    const form = e.target;
+    const fd = new FormData();
+    fd.append("nombre", form.nombre.value);
+    fd.append("correo", form.correo.value);
+    fd.append("telefono", form.telefono.value);
+    fd.append("direccion", form.direccion.value);
+
+    documentos.forEach((doc, i) => {
+      fd.append(`documentos[${i}][archivo]`, doc.file);
+      fd.append(`documentos[${i}][tipo]`, doc.tipo);
+    });
+
+    try {
+      const result = await vendedoresService.create(fd);
+
+      if (!result.success) {
+        throw new Error(
+          result.message || "Error al guardar"
+        );
+      }
+
+
       onClose();
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -34,11 +75,11 @@ export default function VendedoresModal({ show, onClose }) {
       <div
         className="bg-white shadow-premium font-inter w-100 transition-smooth"
         style={{
-          maxWidth: "816px",
+          maxWidth: "500px",
           height: "100vh",
           overflowY: "auto",
           borderRadius: "0",
-          padding: "48px",
+          padding: "24px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -47,7 +88,7 @@ export default function VendedoresModal({ show, onClose }) {
             className="font-inter h4 mb-0 fw-medium"
             style={{ color: "#0f1901" }}
           >
-            Registro de nuevo empleado
+            Registro de empleado
           </h2>
           <button
             type="button"
@@ -60,261 +101,93 @@ export default function VendedoresModal({ show, onClose }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="form-booking">
           {/* General */}
-          <div className="mb-4">
-            <h3 className="font-inter h6 fw-medium mb-3" style={{ color: "#0f1901" }}>
-              General
-            </h3>
+          <div className="mb-2">
             <div className="row">
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Usuario *</label>
-                <input type="text" required className="form-control input-custom" />
+              <div className="col-12 col-md-12 mb-2">
+                <label className="form-label">Nombre completo *</label>
+                <input type="text" name="nombre" required className="form-control" />
               </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Contraseña *</label>
-                <input type="password" required className="form-control input-custom" />
+              <div className="col-12 col-md-6 mb-2">
+                <label className="form-label">Correo electrónico *</label>
+                <input type="email" name="correo" required className="form-control" />
               </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Sucursal *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                  <option value="1">Sucursal 1</option>
+              <div className="col-12 col-md-6 mb-2">
+                <label className="form-label">Teléfono</label>
+                <input type="tel" name="telefono" required className="form-control" />
+              </div>
+              <div className="col-12 col-md-12 mb-2">
+                <label className="form-label">Dirección</label>
+                <input type="text" name="direccion" required className="form-control" />
+              </div>
+              {/* <div className="col-12 col-md-6 mb-2">
+                <label className="form-label">Estatus</label>
+                <select name="estatus" className="form-select">
+                  <option value="1">Activo</option>
+                  <option value="0">Desactivado</option>
                 </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Foto de perfil</label>
-                <input type="file" className="form-control input-custom" />
-              </div>
+              </div> */}
             </div>
           </div>
 
-          {/* Datos personales */}
-          <div className="mb-4">
-            <h3 className="font-inter h6 fw-medium mb-3" style={{ color: "#0f1901" }}>
-              Datos personales
-            </h3>
-            <div className="row">
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Nombre completo *</label>
-                <input type="text" required placeholder="Elías Salazar" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Correo electrónico</label>
-                <input type="email" placeholder="@" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Fecha de nacimiento *</label>
-                <input type="text" required placeholder="dd/mm/aaaa" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Celular *</label>
-                <input type="tel" required placeholder="+52" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">RFC</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Sexo</label>
-                <select className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Estado civil</label>
-                <select className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                  <option value="S">Soltero</option>
-                  <option value="C">Casado</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Datos de domicilio */}
-          <div className="mb-4">
-            <h3 className="font-inter h6 fw-medium mb-3" style={{ color: "#0f1901" }}>
-              Datos de domicilio
-            </h3>
-            <div className="row">
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Calle *</label>
-                <input type="text" required className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Número Ext.</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Número Int.</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Colonia *</label>
-                <input type="text" required className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Código postal</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Ciudad *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Estado *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">País *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Datos laborales */}
-          <div className="mb-4">
-            <h3 className="font-inter h6 fw-medium mb-3" style={{ color: "#0f1901" }}>
-              Datos laborales
-            </h3>
-            <div className="row">
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Fecha de Ingreso *</label>
-                <input type="text" required placeholder="dd/mm/aaaa" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Sueldo Base *</label>
-                <input type="text" required className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Porcentaje de Comisión</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">CURP</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">NSS (Número de seguro social)</label>
-                <input type="text" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Rol de acceso *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Departamento *</label>
-                <select required className="form-select input-custom">
-                  <option value="">Seleccionar</option>
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Horario de entrada *</label>
-                <input type="text" required placeholder="--:-- ----" className="form-control input-custom" />
-              </div>
-              <div className="col-12 col-md-6 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Horario de salida *</label>
-                <input type="text" required placeholder="--:-- ----" className="form-control input-custom" />
-              </div>
-            </div>
-          </div>
-
-          {/* Documentación */}
-          <div className="mb-4">
-            <h3 className="font-inter h6 fw-medium mb-3" style={{ color: "#0f1901" }}>
+          <div className="mb-3">
+            <h3 className="font-inter h6 fw-medium mb-2" style={{ color: "#0f1901" }}>
               Documentación
             </h3>
             <div className="row">
-              <div className="col-12 mb-3">
-                <label className="form-label text-black small font-poppins mb-1">Tipo de documento</label>
-                <select className="form-select input-custom w-50">
+              <div className="col-6 mb-3">
+                <label className="form-label">Tipo de documento</label>
+                <select
+                  className="form-select"
+                  value={tipoSeleccionado}
+                  onChange={(e) => setTipoSeleccionado(e.target.value)}
+                >
                   <option value="">Seleccionar</option>
-                  <option value="comprobante">Comprobante de Domicilio</option>
-                  <option value="ine">Identificación Oficial</option>
+                  <option value="comprobante_domicilio">Comprobante de Domicilio</option>
+                  <option value="identificacion_oficial">Identificación Oficial</option>
                 </select>
               </div>
-              <div className="col-12 mb-3">
-                <div 
-                  className="d-flex align-items-center justify-content-center w-100" 
-                  style={{ backgroundColor: "#e7f1fe", border: "1px solid #0c5cc6", borderRadius: "8px", height: "100px", cursor: "pointer" }}
+              <div className="col-12 mb-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleFilePick}
+                  hidden
+                />
+                <div
+                  onClick={() => tipoSeleccionado && fileInputRef.current.click()}
+                  style={{ cursor: tipoSeleccionado ? "pointer" : "not-allowed", opacity: tipoSeleccionado ? 1 : 0.5 }}
                 >
-                  <div className="text-center" style={{ color: "#0c5cc6" }}>
-                    <i className="bi bi-plus-lg me-2"></i>
-                    <span className="font-inter fw-medium" style={{ fontSize: "13px" }}>Comprobante de Domicilio</span>
-                  </div>
+                  <i className="bi bi-plus-lg me-2"></i>
+                  Agregar documento
                 </div>
               </div>
-              
+
               <div className="col-12">
-                {/* Mock Uploaded Files */}
-                <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded" style={{ backgroundColor: "#f5f5f5" }}>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="bg-danger text-white rounded p-2 d-flex align-items-center justify-content-center" style={{ width: "32px", height: "32px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: "bold" }}>PDF</span>
-                    </div>
-                    <div>
-                      <div className="font-inter fw-medium text-dark" style={{ fontSize: "12px" }}>Documento.pdf</div>
-                      <div className="text-muted" style={{ fontSize: "11px" }}>290 kb</div>
-                    </div>
+                {documentos.map((doc, i) => (
+                  <div key={i} className="d-flex justify-content-between p-2">
+                    <span>{doc.file.name} ({Math.round(doc.file.size / 1024)} kb)</span>
+                    <span>{doc.tipo}</span>
+                    <button type="button" onClick={() => removeDoc(i)}>Eliminar</button>
                   </div>
-                  <div className="font-inter text-dark" style={{ fontSize: "14px" }}>Comprobante de Domicilio</div>
-                  <button type="button" className="btn btn-link text-decoration-none p-0" style={{ color: "#0c5cc6", fontSize: "14px", fontWeight: "600" }}>Eliminar</button>
-                </div>
-
-                <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded" style={{ backgroundColor: "#f5f5f5" }}>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="bg-danger text-white rounded p-2 d-flex align-items-center justify-content-center" style={{ width: "32px", height: "32px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: "bold" }}>PDF</span>
-                    </div>
-                    <div>
-                      <div className="font-inter fw-medium text-dark" style={{ fontSize: "12px" }}>Documento02.pdf</div>
-                      <div className="text-muted" style={{ fontSize: "11px" }}>290 kb</div>
-                    </div>
-                  </div>
-                  <div className="font-inter text-dark" style={{ fontSize: "14px" }}>Identificación oficial</div>
-                  <button type="button" className="btn btn-link text-decoration-none p-0" style={{ color: "#0c5cc6", fontSize: "14px", fontWeight: "600" }}>Eliminar</button>
-                </div>
-
-                <div className="d-flex align-items-center justify-content-between p-3 rounded" style={{ backgroundColor: "#f5f5f5" }}>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="bg-danger text-white rounded p-2 d-flex align-items-center justify-content-center" style={{ width: "32px", height: "32px" }}>
-                      <span style={{ fontSize: "10px", fontWeight: "bold" }}>PDF</span>
-                    </div>
-                    <div>
-                      <div className="font-inter fw-medium text-dark" style={{ fontSize: "12px" }}>Documento03.pdf</div>
-                      <div className="text-muted" style={{ fontSize: "11px" }}>290 kb</div>
-                    </div>
-                  </div>
-                  <div className="font-inter text-dark" style={{ fontSize: "14px" }}>Carta de recomendación</div>
-                  <button type="button" className="btn btn-link text-decoration-none p-0" style={{ color: "#0c5cc6", fontSize: "14px", fontWeight: "600" }}>Eliminar</button>
-                </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="d-flex justify-content-end mt-4">
-            <button
-              type="submit"
+          <div className="d-flex justify-content-end mt-2">
+            <button type="submit"
               disabled={submitting}
               className="btn btn-primary-custom transition-smooth fw-medium d-flex align-items-center justify-content-center"
-              style={{
-                backgroundColor: "#227cf2",
-                borderColor: "#227cf2",
-                width: "359px",
-                height: "43px",
-                borderRadius: "12px",
-              }}
+            // style={{
+            //   backgroundColor: "var(--primary-color)",
+            //   borderColor: "var(--primary-color)",
+            //   width: "215px",
+            //   height: "43px",
+            //   borderRadius: "12px",
+            // }}
             >
               {submitting ? "Guardando..." : "Confirmar"}
             </button>
