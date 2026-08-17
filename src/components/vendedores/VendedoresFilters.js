@@ -8,17 +8,17 @@ export default function VendedoresFilters({ searchTerm, onSearchChange, filtered
 
   function exportToCSV(data) {
     if (!data.length) return;
-  
+
     const headers = ["Id", "Nombre Completo", "Correo electrónico", "Télefono", "Estatus"];
-  
+
     const rows = data.map((row) => [
       row.id,
       row.nombre,
       row.correo,
       row.telefono,
-      row.estatus = "1" ? "Activo" : "Inactivo",
+      row.estatus === "1" ? "Activo" : "Inactivo",
     ]);
-  
+
     const escapeCsvValue = (value) => {
       const str = String(value ?? "");
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -26,11 +26,11 @@ export default function VendedoresFilters({ searchTerm, onSearchChange, filtered
       }
       return str;
     };
-  
+
     const csvContent = [headers, ...rows]
       .map((r) => r.map(escapeCsvValue).join(","))
       .join("\n");
-  
+
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -50,8 +50,8 @@ export default function VendedoresFilters({ searchTerm, onSearchChange, filtered
       <div className="w-100" style={{ maxWidth: "300px" }}>
         <SearchBar
           value={searchTerm}
-          onChange={onSearchChange}
-          placeholder="Buscar por nombre, correo o télefono"
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Buscar vendedor..."
         />
       </div>
     </div>
