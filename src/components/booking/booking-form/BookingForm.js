@@ -5,6 +5,7 @@ import { useBookingForm } from './BookingFormContext';
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+import VendedoresSelect from '@/components/common/VendedoresSelect';
 
 registerLocale("es", es);
 export default function BookingForm({ mode }) {
@@ -17,18 +18,13 @@ export default function BookingForm({ mode }) {
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Información general</h5>
       <div className="row g-3">
-        <div className="col-12 col-md-6 col-lg-3">
-          <label htmlFor="agente" className="form-label">
-            Agente *
-          </label>
-          <select
-            id="agente"
-            className="form-select"
-            value={booking.idUsuario}
-            onChange={(e) => updateBooking("idUsuario", e.target.value)}
-          >
-            <option value={1}>Agente de prueba</option>
-          </select>
+        <div className="col-12 col-md-6 col-lg-4">
+          <VendedoresSelect
+           value={booking.idUsuario}
+            onChange={(vendedor) => {
+              updateBooking("idUsuario", vendedor.id)
+            }}
+          />
         </div>
         <div className="col-12 col-md-6 col-lg-3">
           <label htmlFor="moneda" className="form-label">
