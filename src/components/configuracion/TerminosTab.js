@@ -1,8 +1,62 @@
 "use client";
 
-import React from "react";
+import { configService } from "@/services/config.service";
+import React, { useEffect, useState } from "react";
 
 export default function TerminosTab() {
+  const [term, setTerm] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null); // 'success' | 'error' | null
+
+  useEffect(() => {
+    async function loadTerm() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await configService.term();
+        setTerm(data);
+      } catch (err) {
+        console.error("Error al cargar datos de term:", err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadTerm();
+  }, []);
+
+  const handleChange = (e) => {
+    setTerm((prev) => ({ ...prev, terminos_general: e.target.value }));
+    if (saveStatus) setSaveStatus(null);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveStatus(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("terminos_general", term.terminos_general ?? "");
+
+      await configService.updateTerms(formData);
+      setSaveStatus("success");
+    } catch (err) {
+      console.error("Error al guardar términos:", err);
+      setSaveStatus("error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading || !term) {
+    return <div className="d-flex flex-column h-100 font-inter w-100">Cargando...</div>;
+  }
+
   return (
     <div className="d-flex flex-column h-100 font-inter w-100">
       <div className="mb-4 d-flex align-items-center justify-content-between">
@@ -10,14 +64,14 @@ export default function TerminosTab() {
           Términos y Condiciones
         </h5>
       </div>
-      
+
       <div className="d-flex flex-column gap-3 w-100" style={{ maxWidth: "100%" }}>
         <div className="d-flex flex-column gap-2">
           <label className="font-poppins" style={{ fontSize: "14px", color: "rgba(64, 64, 64, 0.8)" }}>
             General
           </label>
-          <div 
-            className="border rounded-3 w-100 d-flex flex-column overflow-hidden" 
+          <div
+            className="border rounded-3 w-100 d-flex flex-column overflow-hidden"
             style={{ borderColor: "#e1e1e1", minHeight: "222px", borderRadius: "12px" }}
           >
             {/* Mockup Toolbar */}
@@ -36,21 +90,28 @@ export default function TerminosTab() {
               </div>
             </div>
             {/* Text Area */}
-            <textarea 
-              className="form-control border-0 shadow-none flex-grow-1 p-3 font-poppins" 
+            <textarea
+              className="form-control border-0 shadow-none flex-grow-1 p-3 font-poppins"
               style={{ resize: "none", fontSize: "14px", color: "rgba(64, 64, 64, 0.8)", backgroundColor: "transparent", minHeight: "180px" }}
-              defaultValue=""
+              value={term.terminos_general ?? ""}
+              onChange={handleChange}
             />
           </div>
         </div>
 
-        <div className="d-flex justify-content-end mt-2">
+        <div className="d-flex align-items-center justify-content-end gap-3 mt-2">
+          {saveStatus === "success" && (
+            <span className="text-success" style={{ fontSize: "13px" }}>Guardado correctamente</span>
+          )}
+          {saveStatus === "error" && (
+            <span className="text-danger" style={{ fontSize: "13px" }}>Error al guardar, intenta de nuevo</span>
+          )}
           <button
-            className="btn btn-primary-custom d-flex align-items-center justify-content-center shadow-premium"
-            style={{ padding: "10px 24px", fontSize: "14px", borderRadius: "8px", width: "200px" }}
-            onClick={() => console.log("Guardar Términos")}
+            className="btn btn-primary d-flex align-items-center justify-content-center shadow-premium"
+            onClick={handleSave}
+            disabled={isSaving}
           >
-            Guardar
+            {isSaving ? "Guardando..." : "Guardar"}
           </button>
         </div>
       </div>

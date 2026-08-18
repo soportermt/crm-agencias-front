@@ -60,4 +60,22 @@ export const configService = {
         });
         return data;
     },
+
+    async term() {
+        const { data } = await api.get("/terminos/getToS", {
+            withCredentials: true,
+        });
+        return data;
+    },
+
+    async updateTerms(datos) {
+        const { data } = await api.post("/terminos/saveToS", datos, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return data;
+    },
+
 }
