@@ -13,19 +13,24 @@ export default function ClientProfileHeader({ client }) {
       <div className="d-flex align-items-start justify-content-between mb-4">
         <div className="d-flex align-items-center gap-3">
           <div
-            className="rounded-circle overflow-hidden position-relative"
-            style={{ width: "64px", height: "64px", flexShrink: 0 }}
+            className="rounded-circle overflow-hidden position-relative d-flex align-items-center justify-content-center"
+            style={{ width: "64px", height: "64px", flexShrink: 0, backgroundColor: "#f3f4f6" }}
           >
-            <Image
-              src="/avatar-placeholder.jpg"
-              alt="Avatar de cliente"
-              fill
-              className="object-fit-cover"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.parentElement.style.backgroundColor = "#e1e1e1";
-              }}
-            />
+            {client.foto || client.avatar ? (
+              <img
+                src={client.foto || client.avatar || "/avatar-placeholder.jpg"}
+                alt="Avatar de cliente"
+                className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
+                style={{ zIndex: 2 }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : null}
+            <div className="w-100 h-100 d-flex align-items-center justify-content-center">
+              <i className="bi bi-person-fill text-secondary" style={{ fontSize: "36px" }}></i>
+            </div>
           </div>
 
           <div>

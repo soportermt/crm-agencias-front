@@ -1,9 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { usuariosService } from "@/services/usuarios.service";
 
 export default function Header({ onToggleMobileSidebar }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await usuariosService.getCurrentUser();
+        if (Array.isArray(data) && data.length > 0) {
+          setUser(data[0]);
+        } else if (data && !Array.isArray(data)) {
+          setUser(data);
+        }
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  };
+
+  const userName = user?.idUsuario?.profiles?.fullname || user?.nombre || "Usuario";
+  const userRole = user?.rol || "Rol no asignado";
+  const initials = getInitials(userName);
   return (
     <header
       className="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between position-sticky top-0 shadow-premium"
@@ -50,14 +77,28 @@ export default function Header({ onToggleMobileSidebar }) {
 
         <div className="d-flex align-items-center gap-2 border-start ps-3">
           <div className="text-end d-none d-sm-block">
-            <p className="mb-0 fw-semibold text-dark small">Vanessa Fuentes</p>
-            <p className="mb-0 text-muted" style={{ fontSize: "10px" }}>Administrador</p>
+            <p className="mb-0 fw-semibold text-dark small">{userName}</p>
+            <p className="mb-0 text-muted" style={{ fontSize: "10px" }}>{userRole}</p>
           </div>
           <div
-            className="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center fw-bold text-primary font-poppins"
+            className="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center fw-bold text-primary font-poppins position-relative overflow-hidden flex-shrink-0"
             style={{ width: "32px", height: "32px", fontSize: "13px" }}
           >
-            VF
+            {user?.foto ? (
+              <img 
+                src={`${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}`} 
+                alt={userName} 
+                className="w-100 h-100 object-fit-cover position-absolute top-0 start-0" 
+                style={{ zIndex: 2 }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : null}
+            <span className="position-relative d-flex align-items-center justify-content-center w-100 h-100" style={{ zIndex: 1 }}>
+              {initials}
+            </span>
           </div>
         </div>
       </div>

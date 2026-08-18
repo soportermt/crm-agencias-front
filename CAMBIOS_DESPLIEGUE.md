@@ -30,9 +30,10 @@ Por lo tanto, se migraron las rutas dinámicas al uso de **Parámetros de Consul
 - **A:** `/clientes/detalle?id=123`
 
 ### Pasos aplicados:
-1. Se crearon las carpetas `detalle` y se movieron los archivos `page.js` a su interior en:
+1. Se crearon las carpetas `detalle` (o se usó la carpeta principal) y se movieron los archivos `page.js` a su interior en:
    - `src/app/(crm)/clientes/detalle/page.js`
    - `src/app/(crm)/pagos/detalle/page.js`
+   - `src/app/(crm)/reservaciones/editar/page.js`
 2. **Importante:** Las carpetas antiguas `[id]` fueron eliminadas por completo. Si se dejan en el proyecto, Next.js intentará compilarlas y generará un error de `generateStaticParams()` durante el proceso de build.
 3. En lugar de usar `params.id`, los componentes ahora utilizan el hook `useSearchParams()` de Next.js para leer el `id` desde la URL (`const id = searchParams.get("id")`).
 4. Todo componente que haga uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica, y el componente de página principal exportado (`export default function`) que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación durante la fase de exportación estática.
@@ -43,6 +44,7 @@ Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas
 
 - Se cambió ``href={`/clientes/${row.id}`}`` a ``href={`/clientes/detalle?id=${row.id}`}`` en `ClientTable.js`.
 - Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}`` en `IngresosTable.js` y `EgresosTable.js`.
+- Se cambió ``href={`reservaciones/editar/${row.id_venta}`}`` a ``href={`/reservaciones/editar?id=${row.id_venta}`}`` en `BookingsList.js`.
 
 Adicionalmente, se corrigió un problema de rutas relativas:
 - En `BookingTableHeader.js`, el botón de nueva reserva usaba una etiqueta HTML nativa `<a href="reservaciones/crear">`. Estando en `/reservaciones`, esto provocaba que el navegador navegara hacia `/reservaciones/reservaciones/crear`.

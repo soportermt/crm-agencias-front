@@ -117,18 +117,17 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
       onClick={onClose}
     >
       <div
-        className="bg-white shadow-premium font-inter transition-smooth d-flex flex-column"
+        className="bg-white shadow-premium font-inter transition-smooth d-flex flex-column p-3 p-md-4"
         style={{
           width: "100%",
           maxWidth: "500px",
           maxHeight: "90vh",
           overflowY: "auto",
           borderRadius: "20px",
-          padding: "32px 24px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="d-flex align-items-center justify-content-between mb-4">
+        <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4 gap-2">
           <h2 className="font-inter h4 mb-0 fw-medium" style={{ color: "#0f1901", fontSize: "22px", letterSpacing: "-0.2px" }}>
             Registro de usuarios
           </h2>
@@ -155,7 +154,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
           </div>
         </div>
 
-        <div className="d-flex align-items-center gap-3 mb-4">
+        <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3 mb-4 text-center text-sm-start">
           <div
             className="rounded-circle overflow-hidden flex-shrink-0"
             style={{ width: "80px", height: "80px", backgroundColor: "#f5f5f5" }}
@@ -168,19 +167,19 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
               </div>
             )}
           </div>
-          <div className="d-flex flex-column gap-2">
+          <div className="d-flex flex-column gap-2 w-100 align-items-center align-items-sm-start">
             <span className="font-poppins text-dark" style={{ fontSize: "14px" }}>Selecciona la imagen</span>
-            <div className="d-flex align-items-center gap-2 border rounded-3 p-1" style={{ borderColor: "rgba(161, 161, 170, 0.35)" }}>
+            <div className="d-flex flex-column flex-sm-row align-items-center gap-2 border rounded-3 p-1 w-100" style={{ borderColor: "rgba(161, 161, 170, 0.35)" }}>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept="image/png, image/jpeg, image/jpg" disabled={!isAdmin} />
               <button 
                 className="btn btn-sm flex-shrink-0" 
-                style={{ backgroundColor: "#e7f1fe", color: "#0c5cc6", fontWeight: "500", borderRadius: "6px", fontSize: "12px" }}
+                style={{ backgroundColor: "#e7f1fe", color: "#0c5cc6", fontWeight: "500", borderRadius: "6px", fontSize: "12px", width: "100%", maxWidth: "150px" }}
                 onClick={() => fileInputRef.current.click()}
                 disabled={!isAdmin}
               >
                 Seleccionar archivo
               </button>
-              <span className="text-secondary font-poppins text-truncate pe-2" style={{ fontSize: "12px", maxWidth: "150px" }}>
+              <span className="text-secondary font-poppins text-truncate pe-2 text-center text-sm-start" style={{ fontSize: "12px", maxWidth: "100%" }}>
                 {selectedFile ? selectedFile.name : "Ningún archivo seleccionado"}
               </span>
             </div>
