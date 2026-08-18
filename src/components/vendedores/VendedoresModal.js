@@ -181,10 +181,10 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
 
               <div className="col-12">
                 {documentos.map((doc, i) => (
-                  <div key={i} className="d-flex justify-content-between p-2">
+                  <div key={i} className="d-flex justify-content-between align-items-center p-2" style={{fontSize: 14, color: "rgba(64, 64, 64, .8)"}}>
                     <span>{doc.file.name} ({Math.round(doc.file.size / 1024)} kb)</span>
                     <span>{doc.tipo}</span>
-                    <button type="button" onClick={() => removeDoc(i)}>Eliminar</button>
+                    <button type="button" className="btn btn-outline-danger" onClick={() => removeDoc(i)}>Eliminar</button>
                   </div>
                 ))}
               </div>
