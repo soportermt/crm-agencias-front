@@ -3,11 +3,15 @@
 import { vendedoresService } from "@/services/vendedores.service";
 import React, { useRef, useState } from "react";
 
-export default function VendedoresModal({ show, onClose }) {
+export default function VendedoresModal({ show, onClose, onClientCreated }) {
   const [submitting, setSubmitting] = useState(false);
   const [documentos, setDocumentos] = useState([]);
 
   const fileInputRef = useRef(null);
+  const nombreRef = useRef(null);
+  const correoRef = useRef(null);
+  const telefonoRef = useRef(null);
+  const direccionRef = useRef(null);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
 
   if (!show) return null;
@@ -29,10 +33,10 @@ export default function VendedoresModal({ show, onClose }) {
 
     const form = e.target;
     const fd = new FormData();
-    fd.append("nombre", form.nombre.value);
-    fd.append("correo", form.correo.value);
-    fd.append("telefono", form.telefono.value);
-    fd.append("direccion", form.direccion.value);
+    fd.append("nombre", nombreRef.current.value);
+    fd.append("correo", correoRef.current.value);
+    fd.append("telefono", telefonoRef.current.value);
+    fd.append("direccion", direccionRef.current.value);
 
     documentos.forEach((doc, i) => {
       fd.append(`documentos[${i}][archivo]`, doc.file);
@@ -48,7 +52,14 @@ export default function VendedoresModal({ show, onClose }) {
         );
       }
 
-
+      onClientCreated?.({
+        id: result.id_vendedor,
+        nombre: nombreRef.current.value,
+        correo: correoRef.current.value,
+        telefono: telefonoRef.current.value,
+        direccion: direccionRef.current.value,
+        estatus: "1",
+      });
       onClose();
     } catch (err) {
       console.error(err);
@@ -101,25 +112,25 @@ export default function VendedoresModal({ show, onClose }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="form-booking">
+        <div className="form-booking">
           {/* General */}
           <div className="mb-2">
             <div className="row">
               <div className="col-12 col-md-12 mb-2">
                 <label className="form-label">Nombre completo *</label>
-                <input type="text" name="nombre" required className="form-control" />
+                <input type="text" name="nombre" ref={nombreRef} required className="form-control" />
               </div>
               <div className="col-12 col-md-6 mb-2">
                 <label className="form-label">Correo electrónico *</label>
-                <input type="email" name="correo" required className="form-control" />
+                <input type="email" name="correo" ref={correoRef} required className="form-control" />
               </div>
               <div className="col-12 col-md-6 mb-2">
                 <label className="form-label">Teléfono</label>
-                <input type="tel" name="telefono" required className="form-control" />
+                <input type="tel" name="telefono" ref={telefonoRef} required className="form-control" />
               </div>
               <div className="col-12 col-md-12 mb-2">
                 <label className="form-label">Dirección</label>
-                <input type="text" name="direccion" required className="form-control" />
+                <input type="text" name="direccion" ref={direccionRef} required className="form-control" />
               </div>
               {/* <div className="col-12 col-md-6 mb-2">
                 <label className="form-label">Estatus</label>
@@ -181,8 +192,9 @@ export default function VendedoresModal({ show, onClose }) {
           </div>
 
           <div className="d-flex justify-content-end mt-2">
-            <button type="submit"
+            <button type="button"
               disabled={submitting}
+              onClick={handleSubmit}
               className="btn btn-primary transition-smooth fw-medium d-flex align-items-center justify-content-center"
               style={{
                 width: "220px",
@@ -193,7 +205,7 @@ export default function VendedoresModal({ show, onClose }) {
               {submitting ? "Guardando..." : "Confirmar"}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
