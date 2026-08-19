@@ -22,6 +22,18 @@ export const catalogosService = {
 
         return data;
     },
+    async agencias() {
+        const { data } = await api.get("/agencia/get", {
+        });
+
+        return data;
+    },
+    // async roles() {
+    //     const { data } = await api.get("/reservas/getProviders", {
+    //     });
+
+    //     return data;
+    // },
 
     async createProveedor(proveedorData) {
         const { data } = await api.post("/proveedores/createApi/", proveedorData, {

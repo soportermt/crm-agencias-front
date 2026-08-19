@@ -399,3 +399,13 @@ body {
   color: var(--brand-blue) !important;
   border: 1px solid #DCDFF5 !important;
 }
+
+/* VENDEDORES */
+
+.ven-cat {
+  font-size: 12px;
+  background-color: #F5F5F5;
+  color: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  border-radius: 8px;
+}
