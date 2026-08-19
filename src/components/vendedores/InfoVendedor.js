@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { vendedoresService } from "@/services/vendedores.service";
 import { catalogosService } from '@/services/catalogos.service';
 
 function formatearFecha(fechaString) {
-    if (!fechaString) return "-";
+    if (!fechaString || typeof fechaString !== "string") return "-";
     const fecha = new Date(fechaString.replace(" ", "T"));
     if (isNaN(fecha.getTime())) return fechaString;
 
@@ -17,18 +17,27 @@ function formatearFecha(fechaString) {
     }).format(fecha);
 }
 
-export default function InfoVendedor({ data, onUpdated }) {
+export default function InfoVendedor({ data, documentos = [], onUpdated }) {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState(data || {});
+    const [descargandoId, setDescargandoId] = useState(null);
 
     const [agencias, setAgencias] = useState([]);
     const [loading2, setLoading2] = useState(true);
     const [error, setError] = useState(null);
 
+    const [nuevoTipo, setNuevoTipo] = useState("");
+    const [subiendo, setSubiendo] = useState(false);
+    const nuevoFileRef = useRef(null);
+    const [listaDocumentos, setListaDocumentos] = useState(documentos);
+
+    const [eliminandoId, setEliminandoId] = useState(null);
+
     useEffect(() => {
         setFormData(data || {});
-    }, [data]);
+        setListaDocumentos(documentos);
+    }, [data, documentos]);
 
 
     useEffect(() => {
@@ -92,6 +101,70 @@ export default function InfoVendedor({ data, onUpdated }) {
         }
     };
 
+    const handleDescargar = async (idDocumento, nombreArchivo) => {
+        try {
+            setDescargandoId(idDocumento);
+            const blob = await vendedoresService.descargarDocumento(idDocumento);
+            const blobUrl = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.setAttribute('download', nombreArchivo || `documento_${idDocumento}`);
+            document.body.appendChild(link);
+            link.click();
+
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            console.error("Error al descargar documento:", err);
+            alert("No se pudo descargar el documento.");
+        } finally {
+            setDescargandoId(null);
+        }
+    };
+
+    const handleNuevoArchivo = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !nuevoTipo) return;
+
+        try {
+            setSubiendo(true);
+            const result = await vendedoresService.agregarDocumento(
+                data.id_vendedor,
+                nuevoTipo,
+                file
+            );
+
+            if (!result.success) throw new Error(result.message || "Error al subir");
+
+            setListaDocumentos((prev) => [...prev, result.documento]);
+            setNuevoTipo("");
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        } finally {
+            setSubiendo(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleEliminar = async (idDocumento) => {
+        // if (!window.confirm("¿Eliminar este documento?")) return;
+
+        try {
+            setEliminandoId(idDocumento);
+            const result = await vendedoresService.eliminarDocumento(idDocumento);
+
+            if (!result.success) throw new Error(result.message || "Error al eliminar");
+
+            setListaDocumentos((prev) => prev.filter((doc) => doc.id_documento !== idDocumento));
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        } finally {
+            setEliminandoId(null);
+        }
+    };
+
     return (
         <div className='p-3'>
             <div className='d-flex justify-content-between align-items-start'>
@@ -100,7 +173,7 @@ export default function InfoVendedor({ data, onUpdated }) {
                         <input
                             type="text"
                             name="nombre"
-                            className="form-control form-control-sm mb-1 fw-bold"
+                            className="form-control form-control-sm m-0 fw-bold"
                             value={formData.nombre || ""}
                             onChange={handleChange}
                             placeholder="Nombre del vendedor"
@@ -156,9 +229,10 @@ export default function InfoVendedor({ data, onUpdated }) {
                         </div>
                     )}
                 </div>
+                <p style={{ fontWeight: 600 }}>Información general</p>
                 <div className='row g-3'>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Correo electrónico</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Correo electrónico</label>
                         {isEditing ? (
                             <input
                                 type="email"
@@ -168,11 +242,11 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 onChange={handleChange}
                             />
                         ) : (
-                            <p className='m-0 fw-medium small'>{formData.correo || "-"}</p>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>{formData.correo || "-"}</p>
                         )}
                     </div>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Dirección</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Dirección</label>
                         {isEditing ? (
                             <input
                                 type="text"
@@ -182,11 +256,11 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 onChange={handleChange}
                             />
                         ) : (
-                            <p className='m-0 fw-medium small'>{formData.direccion || "-"}</p>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>{formData.direccion || "-"}</p>
                         )}
                     </div>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Teléfono</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Teléfono</label>
                         {isEditing ? (
                             <input
                                 type="text"
@@ -196,11 +270,11 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 onChange={handleChange}
                             />
                         ) : (
-                            <p className='m-0 fw-medium small'>{formData.telefono || "-"}</p>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>{formData.telefono || "-"}</p>
                         )}
                     </div>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Sucursal</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Sucursal</label>
                         {isEditing ? (
                             <select
                                 name="sucursal"
@@ -222,11 +296,11 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 ))}
                             </select>
                         ) : (
-                            <p className='m-0 fw-medium small'>{formData.sucursal || "-"}</p>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>{formData.sucursal || "-"}</p>
                         )}
                     </div>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Departamento</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Departamento</label>
                         {isEditing ? (
                             <select
                                 name="rol"
@@ -239,11 +313,11 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 <option value="Ventas">Ventas</option>
                             </select>
                         ) : (
-                            <p className='m-0 fw-medium small'>{formData.rol || "-"}</p>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>{formData.rol || "-"}</p>
                         )}
                     </div>
                     <div className='col-6 mt-1'>
-                        <label className='form-label text-muted small mb-1'>Estatus</label>
+                        <label className='form-label text-muted small m-0' style={{ fontSize: 13 }}>Estatus</label>
                         {isEditing ? (
                             <select
                                 name="estatus"
@@ -255,12 +329,98 @@ export default function InfoVendedor({ data, onUpdated }) {
                                 <option value="0">Inactivo</option>
                             </select>
                         ) : (
-                            <p className='m-0 fw-medium small'>
+                            <p className='m-0 fw-medium small' style={{ fontSize: 13 }}>
                                 {formData.estatus === "1" || formData.estatus === 1 ? "Activo" : "Inactivo"}
                             </p>
                         )}
                     </div>
                 </div>
+                <p className='my-2' style={{ fontWeight: 600 }}>Documentos</p>
+
+                <div className='d-flex gap-2 mb-2'>
+                    <select
+                        className="form-select form-select-sm"
+                        value={nuevoTipo}
+                        onChange={(e) => setNuevoTipo(e.target.value)}
+                        style={{ maxWidth: 220 }}
+                    >
+                        <option value="">Seleccionar tipo</option>
+                        <option value="comprobante_domicilio">Comprobante de Domicilio</option>
+                        <option value="identificacion_oficial">Identificación Oficial</option>
+                    </select>
+
+                    <input
+                        type="file"
+                        ref={nuevoFileRef}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleNuevoArchivo}
+                        hidden
+                    />
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary"
+                        disabled={!nuevoTipo || subiendo}
+                        onClick={() => nuevoFileRef.current.click()}
+                    >
+                        {subiendo ? "Subiendo..." : "+ Agregar documento"}
+                    </button>
+                </div>
+
+
+                {listaDocumentos.length === 0 ? (
+                    <div className='p-3 text-center' style={{ fontSize: 13, color: "#404040" }}>Sin documentos aún</div>
+                ) : (
+                    <div className='d-flex flex-column gap-2'>
+                        {listaDocumentos.map((doc) => (
+                            <div
+                                key={doc.id_documento}
+                                className='d-flex justify-content-between align-items-center p-2 rounded'
+                                style={{ backgroundColor: "#F5F5F5" }}
+                            >
+                                <div className='d-flex align-items-center gap-2'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={20} height={20} color="#0C5CC6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                    </svg>
+                                    <div>
+                                        <span className='d-block text-capitalize' style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>
+                                            {doc.tipo ? doc.tipo.replaceAll('_', ' ') : 'Documento'}
+                                        </span>
+                                        <small className='text-muted' style={{ fontSize: 11 }}>
+                                            Subido el: {formatearFecha(doc.fecha_subida)}
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div className='d-flex gap-3'>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDescargar(doc.id_documento, doc.nombre_archivo)}
+                                        disabled={descargandoId === doc.id_documento}
+                                        className='btn btn-sm btn-outline-primary d-flex align-items-center gap-1'
+                                        style={{ fontSize: 12 }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={14} height={14}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                        </svg>
+                                        {descargandoId === doc.id_documento ? "Descargando..." : "Descargar"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEliminar(doc.id_documento)}
+                                        disabled={eliminandoId === doc.id_documento}
+                                        className='btn btn-sm btn-outline-danger d-flex align-items-center gap-1'
+                                        style={{ fontSize: 12 }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={14} height={14}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        {eliminandoId === doc.id_documento ? "..." : "Eliminar"}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

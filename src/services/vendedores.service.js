@@ -47,4 +47,38 @@ export const vendedoresService = {
 
     return data;
   },
+
+  async getDocId(id) {
+    const { data } = await api.get(`/vendedores/listarDocumentos?id_vendedor=${id}`, {
+      withCredentials: true,
+    });
+    return data;
+  },
+
+  async descargarDocumento(idDocumento) {
+    const response = await api.get(`/vendedores/descargar/${idDocumento}`, {
+      withCredentials: true,
+      responseType: 'blob', 
+    });
+    return response.data;
+  },
+
+  async agregarDocumento(idVendedor, tipo, archivo) {
+    const fd = new FormData();
+    fd.append("id_vendedor", idVendedor);
+    fd.append("tipo", tipo);
+    fd.append("archivo", archivo);
+  
+    const { data } = await api.post("/vendedores/agregarDocumento", fd, {
+      withCredentials: true,
+    });
+    return data;
+  },
+
+  async eliminarDocumento(idDocumento) {
+    const { data } = await api.post(`/vendedores/eliminarDocumento/${idDocumento}`, null, {
+      withCredentials: true,
+    });
+    return data;
+  },
 };

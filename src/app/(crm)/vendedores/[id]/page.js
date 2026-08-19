@@ -8,28 +8,43 @@ export default function VendedoresInfo({ params }) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
 
-  const [vendedores, setVendedores] = useState([]);
+  const [vendedor, setVendedor] = useState(null);
+  const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function loadVendedores() {
+    async function loadData() {
       try {
         setLoading(true);
-        const data = await vendedoresService.getId(id);
-        setVendedores(data);
+        setError(null);
+        const [dataVendedor, dataDocs] = await Promise.all([
+          vendedoresService.getId(id),
+          vendedoresService.getDocId(id),
+        ]);
+
+        setVendedor(dataVendedor);
+        setDocs(dataDocs?.documentos || []);
       } catch (err) {
-        console.error("Error al cargar detalles del cliente:", err);
-        setError("No se pudo cargar la información del cliente.");
+        console.error("Error al cargar datos del vendedor:", err);
+        setError("No se pudo cargar la información del vendedor.");
       } finally {
         setLoading(false);
       }
     }
 
     if (id) {
-      loadVendedores();
+      loadData();
     }
   }, [id]);
+
+  if (loading) {
+    return <div className="p-4 text-center">Cargando información...</div>;
+  }
+
+  if (error || !vendedor) {
+    return <div className="p-4 text-center text-danger">{error || "No se encontró el registro."}</div>;
+  }
 
   return (
     <div className="container-fluid py-1">
@@ -43,7 +58,7 @@ export default function VendedoresInfo({ params }) {
             overflowY: "auto",
           }}
         >
-          <InfoVendedor data={vendedores}/>
+          <InfoVendedor data={vendedor} documentos={docs}/>
         </div>
       </div>
     </div>
