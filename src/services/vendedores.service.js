@@ -81,4 +81,10 @@ export const vendedoresService = {
     });
     return data;
   },
+  async listaVentas(id) {
+    const { data } = await api.get(`/vendedores/getVentasVendedor/${id}`, {
+      withCredentials: true,
+    });
+    return data;
+  },
 };

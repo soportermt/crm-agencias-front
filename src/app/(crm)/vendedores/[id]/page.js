@@ -10,6 +10,7 @@ export default function VendedoresInfo({ params }) {
 
   const [vendedor, setVendedor] = useState(null);
   const [docs, setDocs] = useState([]);
+  const [lista, setLista] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,13 +19,15 @@ export default function VendedoresInfo({ params }) {
       try {
         setLoading(true);
         setError(null);
-        const [dataVendedor, dataDocs] = await Promise.all([
+        const [dataVendedor, dataDocs, dataLista] = await Promise.all([
           vendedoresService.getId(id),
           vendedoresService.getDocId(id),
+          vendedoresService.listaVentas(id),
         ]);
 
         setVendedor(dataVendedor);
         setDocs(dataDocs?.documentos || []);
+        setLista(Array.isArray(dataLista) ? dataLista : []);
       } catch (err) {
         console.error("Error al cargar datos del vendedor:", err);
         setError("No se pudo cargar la información del vendedor.");
