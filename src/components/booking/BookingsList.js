@@ -212,7 +212,7 @@ export default function BookingList() {
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
-                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>{row.folio}</Link>;
+                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":

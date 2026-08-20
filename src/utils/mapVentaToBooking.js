@@ -1,4 +1,4 @@
-const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado" };
+const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "5": "tour" };
 
 function parseLocalDate(dateString) {
     if (!dateString || dateString === "0000-00-00") return null;
