@@ -4,6 +4,7 @@ import { calcularTotalNeto } from "./pricing";
 const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
   traslado: 2,
+  tour: 5,
 };
 
 const TIPOS_CON_MENORES = [2, 5, 6, 7, 8, 9, 10];
@@ -100,6 +101,21 @@ function buildDesglose(tipoId, data, comisionPct) {
     };
   }
 
+  if (tipoId === TIPO_SERVICIO_MAP.tour) {
+    return {
+      adultos: data.adultos ?? 0,
+      menores: data.menores ?? 0,
+      ocupacion: `${data.adultos ?? 0} adulto(s), ${data.menores ?? 0} menor(es)`,
+      pasajeros: {
+        adultos: data.pasajeros?.adultos ?? [],
+        menores: data.pasajeros?.menores ?? [],
+      },
+      comision: "%",
+      origen: data.origen,
+      // descripcion: data.descripcion,
+    }
+  }
+
   return desglose;
 }
 
@@ -128,6 +144,18 @@ function buildService(item) {
     tarifaPublica = Number(item.data.total_publico) || 0;
   }
 
+  let descripcion;
+
+  if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
+    descripcion = item.data.hotel;
+  } else if (tipoId === TIPO_SERVICIO_MAP.tour) {
+    descripcion = item.data.descripcion;
+  } else if (tipoId === TIPO_SERVICIO_MAP.traslado) {
+    descripcion = "";
+  } else {
+    descripcion = "";
+  }
+
   const comisionPesos = tarifaPublica * (comisionPct / 100);
   const costo = tarifaPublica - comisionPesos;
   return {
@@ -136,7 +164,7 @@ function buildService(item) {
 
     id_proveedor: Number(item.data.provider) || null,
     codigo: item.data.code ?? "",
-    descripcion: item.data.hotel ?? "",
+    descripcion: descripcion,
     limite_cliente: item.data.limiteCliente
       ? toISODateOnly(item.data.limiteCliente)
       : null,

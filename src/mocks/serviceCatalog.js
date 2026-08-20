@@ -1,4 +1,5 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
+import TourForm from "@/components/booking/forms/TourForm";
 import TrasladoForm from "@/components/booking/forms/TrasladoForm";
 import { faHotel, faMap, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
@@ -26,7 +27,13 @@ export const serviceCatalog = [
       if (!data.checkOut) errors.checkOut = "Requerido";
       return errors;
     },
-    summary: (data) => ({ hotel: data.hotel || "Sin hotel", destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
+    summary: (data) => ({ 
+      title: data.hotel || "Sin hotel", 
+      subtitle: data.destino || "Sin destino", 
+      dateStart: data.checkIn, 
+      dateEnd: data.checkOut,
+      precio: data.total_publico 
+    }),
   },
   {
     id: "traslado",
@@ -66,13 +73,19 @@ export const serviceCatalog = [
       if (!data.destino) errors.destino = "Requerido";
       return errors;
     },
-    summary: (data) => ({ hotel: data.redondo, origen: data.origen, destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
+    summary: (data) => ({ 
+      title: (data.origen && data.destino) ? `${data.origen} a ${data.destino}` : "Ruta sin definir", 
+      subtitle: data.redondo ? "Traslado Redondo" : "Traslado Sencillo", 
+      dateStart: data.checkIn, 
+      dateEnd: data.checkOut,
+      precio: data.total_publico
+    }),
   },
   {
     id: "tour",
     nombre: "Tour",
     icon: faMap,
-    Form: TrasladoForm,
+    Form: TourForm,
     defaultData: {
       provider: "",
       providerName: "",
@@ -98,5 +111,12 @@ export const serviceCatalog = [
       if (!data.descripcion) errors.descripcion = "Requerido";
       return errors;
     },
+    summary: (data) => ({ 
+      title: data.descripcion || "Tour sin nombre", 
+      subtitle: "Actividad / Excursión", 
+      dateStart: data.checkIn, 
+      dateEnd: data.checkOut,
+      precio: data.total_publico
+    }),
   }
 ];

@@ -11,6 +11,16 @@ export default function TrasladoForm() {
     const { draft, updateDraftField } = useBookingForm();
     const { data, errors } = draft;
     const isRedondo = !!data.redondo;
+    const setIsRedondo = (checked) => updateDraftField("redondo", checked);
+
+    const toggleEquipaje = (tipo) => {
+        const nuevo = data.equipaje?.includes(tipo)
+            ? data.equipaje.filter((t) => t !== tipo)
+            : [...(data.equipaje ?? []), tipo];
+        updateDraftField("equipaje", nuevo);
+    };
+
+    const setField = (name, value) => updateDraftField(name, value);
 
     const updatePassenger = (grupo, index, field, value) => {
         const pasajeros = {
@@ -24,7 +34,7 @@ export default function TrasladoForm() {
 
     return (
         <div className="form-booking">
-            <div className="row g-3 mb-2 align-items-start">
+            <div className="row g-3 mb-2 align-items-end">
                 <div className="col-12 col-md-4">
                     <ProviderSelect
                         value={data.provider}
@@ -47,22 +57,75 @@ export default function TrasladoForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <PassengersInput
-                        room={{ adultos: data.adultos ?? 2, menores: data.menores ?? 0 }}
-                        onChange={(adultos, menores) => {
-                            updateDraftField("adultos", adultos);
-                            updateDraftField("menores", menores);
-                            updateDraftField("pasajeros", {
-                                adultos: Array.from({ length: adultos }, (_, i) =>
-                                    data.pasajeros?.adultos?.[i] ?? { nombre: "", apellidos: "" }
-                                ),
-                                menores: Array.from({ length: menores }, (_, i) =>
-                                    data.pasajeros?.menores?.[i] ?? { nombre: "", apellidos: "", edad: "" }
-                                ),
-                            });
-                        }}
+                    <div className="d-flex gap-1 mb-1">
+                        <div className="form-check">
+                            <input
+                                className="form-check-input p-0"
+                                type="checkbox"
+                                id="checkRedondo"
+                                checked={isRedondo}
+                                onChange={(e) => setIsRedondo(e.target.checked)}
+                            />
+                            <label className="form-check-label" htmlFor="checkRedondo">
+                                Redondo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-12 col-md-4">
+                    <label className="form-label">Origen</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={data.origen}
+                        onChange={(e) => updateDraftField("origen", e.target.value)}
                     />
                 </div>
+
+                <div className="col-12 col-md-4">
+                    <label className="form-label">Destino</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={data.destino}
+                        onChange={(e) => updateDraftField("destino", e.target.value)}
+                    />
+                </div>
+
+                <div className="col-12 col-md-4">
+                    <label className="form-label">Equipaje</label>
+                    <div className="d-flex gap-2">
+                        <div className="form-check">
+                            <input
+                                className="form-check-input p-0"
+                                type="checkbox"
+                                checked={!!data.equipaje?.includes("mano-10k")}
+                                onChange={() => toggleEquipaje("mano-10k")}
+                            />
+                            <label className="form-check-label">Mano 10kg</label>
+                        </div>
+                        <div className="form-check">
+                            <input
+                                className="form-check-input p-0"
+                                type="checkbox"
+                                checked={!!data.equipaje?.includes("doc-25k")}
+                                onChange={() => toggleEquipaje("doc-25k")}
+                            />
+                            <label className="form-check-label">Doc 25kg</label>
+                        </div>
+                        <div className="form-check">
+                            <input
+                                className="form-check-input p-0"
+                                type="checkbox"
+                                checked={!!data.equipaje?.includes("otro")}
+                                onChange={() => toggleEquipaje("otro")}
+                            />
+                            <label className="form-check-label">Otro</label>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div className="col-12 col-md-4">
                     <label className="form-label">Fecha de servicio *</label>
@@ -91,16 +154,33 @@ export default function TrasladoForm() {
                         autoComplete='off'
                     />
                 </div>
-
-                <div className="col-12 col-md-8">
-                    <label className="form-label">Descripción *</label>
-                    <textarea
-                        className="form-control"
-                        value={data.descripcion}
-                        onChange={(e) => updateDraftField("descripcion", e.target.value)}
+                <div className="col-12 col-md-4">
+                    <PassengersInput
+                        room={{ adultos: data.adultos ?? 2, menores: data.menores ?? 0 }}
+                        onChange={(adultos, menores) => {
+                            updateDraftField("adultos", adultos);
+                            updateDraftField("menores", menores);
+                            updateDraftField("pasajeros", {
+                                adultos: Array.from({ length: adultos }, (_, i) =>
+                                    data.pasajeros?.adultos?.[i] ?? { nombre: "", apellidos: "" }
+                                ),
+                                menores: Array.from({ length: menores }, (_, i) =>
+                                    data.pasajeros?.menores?.[i] ?? { nombre: "", apellidos: "", edad: "" }
+                                ),
+                            });
+                        }}
                     />
                 </div>
 
+                <div className="col-12 col-md-4">
+                    <label className="form-label">Salida origen *</label>
+                    <input
+                        type="time"
+                        className="form-control"
+                        value={data.salida_origen}
+                        onChange={(e) => updateDraftField("salida_origen", e.target.value)}
+                    />
+                </div>
                 {isRedondo && (
                     <>
                         <div className="col-12 col-md-4">

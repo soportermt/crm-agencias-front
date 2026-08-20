@@ -11,7 +11,7 @@ import Link from "next/link";
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
     { key: "cliente", label: "Cliente", width: "225px", align: "start" },
-    { key: "hotel", label: "Hotel", width: "155px", align: "start" },
+    { key: "hotel", label: "Descripción", width: "155px", align: "start" },
     { key: "plan", label: "Servicio", width: "130px", align: "start" },
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
