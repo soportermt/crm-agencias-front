@@ -11,14 +11,14 @@ export default function VendedoresTable({ vendedores }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const columns = [
-    { key: "id", label: "ID", sortable: true, align: "center", width: "80px" },
-    { key: "nombre", label: "Nombre Completo", sortable: true, align: "center", width: "225px" },
-    { key: "correo", label: "Correo electrónico", sortable: true, align: "center", width: "225px" },
-    { key: "telefono", label: "Télefono", sortable: true, align: "center", width: "110px" },
-    { key: "sucursal", label: "Sucursal", sortable: true, align: "center", width: "110px" },
-    { key: "rol", label: "Rol", sortable: true, align: "center", width: "110px" },
+    // { key: "id", label: "ID", sortable: true, align: "center", width: "80px" },
+    { key: "nombre", label: "Nombre Completo", sortable: true, width: "180px" },
+    { key: "correo", label: "Correo electrónico", sortable: true, width: "180px" },
+    { key: "telefono", label: "Télefono", sortable: true, width: "110px" },
+    { key: "sucursal", label: "Sucursal", sortable: true, width: "110px" },
+    { key: "rol", label: "Rol", sortable: true, width: "110px" },
     { key: "estatus", label: "Estatus", sortable: true, align: "center", width: "110px" },
-    { key: "acciones", label: "Acciones", align: "center", width: "80px" },
+    // { key: "acciones", label: "Acciones", align: "center", width: "80px" },
   ];
 
   const renderCell = (colKey, row) => {
@@ -29,22 +29,13 @@ export default function VendedoresTable({ vendedores }) {
         </div>
       );
     }
-    if (colKey === "acciones") {
+    if (colKey === "nombre") {
       return (
-        <div className="d-flex justify-content-center">
-          <Link href={`/vendedores/${row.id}`} passHref>
-            <button
-              className="btn"
-              style={{
-                fontSize: 13,
-                padding: 0,
-                color: "var(--primary-color)"
-              }}
-            >
-              Ver más
-            </button>
-          </Link>
-        </div>
+        <Link href={`/vendedores/${row.id}`} passHref target="_blank">
+          <button className="btn ven-table-nombre">
+            {row.nombre}
+          </button>
+        </Link>
       );
     }
     return row[colKey];

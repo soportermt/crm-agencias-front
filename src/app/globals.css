@@ -444,3 +444,10 @@ body {
   box-shadow: none;
   border: 1px solid #D0D5DD;
 }
+
+.ven-table-nombre {
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: rgb(12, 92, 198);
+}
