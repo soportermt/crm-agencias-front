@@ -1,5 +1,6 @@
 "use client";
 
+import InfoTableVendedor from '@/components/vendedores/InfoTableVendedor';
 import InfoVendedor from '@/components/vendedores/InfoVendedor';
 import { vendedoresService } from '@/services/vendedores.service';
 import React, { use, useEffect, useState } from 'react'
@@ -51,18 +52,44 @@ export default function VendedoresInfo({ params }) {
 
   return (
     <div className="container-fluid py-1">
-      <div className="col-12 col-xl-9 my-2">
-        <div
-          className="bg-white shadow-premium p-1 position-sticky"
-          style={{
-            borderRadius: "8px",
-            top: "1rem",
-            maxHeight: "calc(100vh - 2rem)",
-            overflowY: "auto",
-          }}
-        >
-          <InfoVendedor data={vendedor} documentos={docs}/>
+      <div className='row'>
+        <div className="col-12 col-xl-9 my-2">
+          <div
+            className="bg-white shadow-premium p-1 position-sticky"
+            style={{
+              borderRadius: "8px",
+              top: "1rem",
+              maxHeight: "calc(100vh - 2rem)",
+              overflowY: "auto",
+            }}
+          >
+            <InfoVendedor data={vendedor} documentos={docs} />
+          </div>
         </div>
+        <div className="col-12 col-xl-3 my-2">
+          <div
+            className="bg-white shadow-premium p-1 position-sticky"
+            style={{
+              borderRadius: "8px",
+              top: "1rem",
+              maxHeight: "calc(100vh - 2rem)",
+              overflowY: "auto",
+            }}
+          >
+            {/* <InfoVendedor data={vendedor} documentos={docs}/> */}
+          </div>
+        </div>
+      </div>
+      <div
+        className="bg-white shadow-premium p-1 position-sticky my-3"
+        style={{
+          borderRadius: "8px",
+          top: "1rem",
+          maxHeight: "calc(100vh - 2rem)",
+          overflowY: "auto",
+        }}
+      >
+        <InfoTableVendedor data={lista}/>
       </div>
     </div>
   )
