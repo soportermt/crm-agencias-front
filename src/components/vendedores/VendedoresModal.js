@@ -1,18 +1,46 @@
 "use client";
 
+import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function VendedoresModal({ show, onClose, onClientCreated }) {
   const [submitting, setSubmitting] = useState(false);
   const [documentos, setDocumentos] = useState([]);
+
+  const [agencias, setAgencias] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
 
   const fileInputRef = useRef(null);
   const nombreRef = useRef(null);
   const correoRef = useRef(null);
   const telefonoRef = useRef(null);
   const direccionRef = useRef(null);
+  const sucursalRef = useRef(null);
+  const rolRef = useRef(null);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
+
+  useEffect(() => {
+    async function loadAgencias() {
+      try {
+        setLoading(true);
+        const data = await catalogosService.agencias();
+        setAgencias(Array.isArray(data) ? data : data?.data || []);
+      } catch (err) {
+        console.error("Error al cargar agencias:", err);
+        setError("No se pudo cargar la información de las agencias.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (show) {
+      loadAgencias();
+    }
+  }, [show]);
 
   if (!show) return null;
 
@@ -20,7 +48,7 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
     const file = e.target.files[0];
     if (!file || !tipoSeleccionado) return;
     setDocumentos((prev) => [...prev, { file, tipo: tipoSeleccionado }]);
-    e.target.value = ""; // permite volver a elegir el mismo archivo si se borra
+    e.target.value = "";
   };
 
   const removeDoc = (idx) => {
@@ -31,12 +59,13 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
     e.preventDefault();
     setSubmitting(true);
 
-    const form = e.target;
     const fd = new FormData();
     fd.append("nombre", nombreRef.current.value);
     fd.append("correo", correoRef.current.value);
     fd.append("telefono", telefonoRef.current.value);
     fd.append("direccion", direccionRef.current.value);
+    fd.append("sucursal", sucursalRef.current.value);
+    fd.append("rol", rolRef.current.value);
 
     documentos.forEach((doc, i) => {
       fd.append(`documentos[${i}][archivo]`, doc.file);
@@ -58,6 +87,8 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
         correo: correoRef.current.value,
         telefono: telefonoRef.current.value,
         direccion: direccionRef.current.value,
+        sucursal: sucursalRef.current.value,
+        rol: rolRef.current.value,
         estatus: "1",
       });
       onClose();
@@ -68,6 +99,8 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
       setSubmitting(false);
     }
   };
+
+
 
   return (
     <div
@@ -132,13 +165,36 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
                 <label className="form-label">Dirección</label>
                 <input type="text" name="direccion" ref={direccionRef} required className="form-control" />
               </div>
-              {/* <div className="col-12 col-md-6 mb-2">
-                <label className="form-label">Estatus</label>
-                <select name="estatus" className="form-select">
-                  <option value="1">Activo</option>
-                  <option value="0">Desactivado</option>
+              <div className="col-12 col-md-6 mb-2">
+                <label className="form-label">Sucursal *</label>
+                <select
+                  name="sucursal"
+                  ref={sucursalRef}
+                  className="form-select"
+                  required
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    {loading ? "Cargando agencias..." : "Selecciona una sucursal"}
+                  </option>
+                  {agencias.map((agencia) => (
+                    <option
+                      key={agencia.id || agencia.id_agencia || agencia.nombre_comercial}
+                      value={agencia.nombre_comercial}
+                    >
+                      {agencia.nombre_comercial}
+                    </option>
+                  ))}
                 </select>
-              </div> */}
+              </div>
+              <div className="col-12 col-md-6 mb-2">
+                <label className="form-label">Departamento *</label>
+                <select name="rol" ref={rolRef} className="form-select">
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Agente">Agente</option>
+                  <option value="Ventas">Ventas</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -181,7 +237,7 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
 
               <div className="col-12">
                 {documentos.map((doc, i) => (
-                  <div key={i} className="d-flex justify-content-between align-items-center p-2" style={{fontSize: 14, color: "rgba(64, 64, 64, .8)"}}>
+                  <div key={i} className="d-flex justify-content-between align-items-center p-2" style={{ fontSize: 14, color: "rgba(64, 64, 64, .8)" }}>
                     <span>{doc.file.name} ({Math.round(doc.file.size / 1024)} kb)</span>
                     <span>{doc.tipo}</span>
                     <button type="button" className="btn btn-outline-danger" onClick={() => removeDoc(i)}>Eliminar</button>

@@ -20,9 +20,9 @@ export default function BookingForm({ mode }) {
       <div className="row g-3">
         <div className="col-12 col-md-6 col-lg-4">
           <VendedoresSelect
-           value={booking.idUsuario}
+           value={booking.idVendedor}
             onChange={(vendedor) => {
-              updateBooking("idUsuario", vendedor.id)
+              updateBooking("idVendedor", vendedor.id)
             }}
           />
         </div>
