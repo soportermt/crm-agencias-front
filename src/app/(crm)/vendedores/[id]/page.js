@@ -43,7 +43,11 @@ export default function VendedoresInfo({ params }) {
   }, [id]);
 
   if (loading) {
-    return <div className="p-4 text-center">Cargando información...</div>;
+    return (<div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Cargando...</span>
+      </div>
+    </div>);
   }
 
   if (error || !vendedor) {
@@ -52,36 +56,9 @@ export default function VendedoresInfo({ params }) {
 
   return (
     <div className="container-fluid py-1">
-      <div className='row'>
-        <div className="col-12 col-xl-9 my-2">
-          <div
-            className="bg-white shadow-premium p-1 position-sticky"
-            style={{
-              borderRadius: "8px",
-              top: "1rem",
-              maxHeight: "calc(100vh - 2rem)",
-              overflowY: "auto",
-            }}
-          >
-            <InfoVendedor data={vendedor} documentos={docs} />
-          </div>
-        </div>
-        <div className="col-12 col-xl-3 my-2">
-          <div
-            className="bg-white shadow-premium p-1 position-sticky"
-            style={{
-              borderRadius: "8px",
-              top: "1rem",
-              maxHeight: "calc(100vh - 2rem)",
-              overflowY: "auto",
-            }}
-          >
-            {/* <InfoVendedor data={vendedor} documentos={docs}/> */}
-          </div>
-        </div>
-      </div>
+      <InfoVendedor data={vendedor} documentos={docs} />
       <div
-        className="bg-white shadow-premium p-1 position-sticky my-3"
+        className="bg-white shadow-premium p-1 my-3"
         style={{
           borderRadius: "8px",
           top: "1rem",
@@ -89,7 +66,7 @@ export default function VendedoresInfo({ params }) {
           overflowY: "auto",
         }}
       >
-        <InfoTableVendedor data={lista}/>
+        <InfoTableVendedor data={lista} />
       </div>
     </div>
   )

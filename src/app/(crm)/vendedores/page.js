@@ -39,7 +39,11 @@ export default function VendedoresPage() {
     v.telefono.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) return <div className="d-flex justify-content-center py-5">Cargando...</div>;
+  if (isLoading) return (<div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Cargando...</span>
+    </div>
+  </div>);
   if (error || !vendedores) return <div className="text-danger">No se pudo cargar la información.</div>;
 
   return (
