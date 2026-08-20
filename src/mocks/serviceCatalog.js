@@ -1,6 +1,6 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
 import TrasladoForm from "@/components/booking/forms/TrasladoForm";
-import { faHotel, faPersonSwimming, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import { faHotel, faMap, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
   {
@@ -68,4 +68,35 @@ export const serviceCatalog = [
     },
     summary: (data) => ({ hotel: data.redondo, origen: data.origen, destino: data.destino, dateStart: data.checkIn, dateEnd: data.checkOut }),
   },
+  {
+    id: "tour",
+    nombre: "Tour",
+    icon: faMap,
+    Form: TrasladoForm,
+    defaultData: {
+      provider: "",
+      providerName: "",
+      code: "",
+      descripcion: "",
+      checkIn: null,
+      checkOut: null,
+      pasajeros: {
+        adultos: [
+          { nombre: "", apellidos: "" },
+          { nombre: "", apellidos: "" },
+        ],
+        menores: [],
+      },
+      limitePago: null,
+      limiteCliente: null,
+      fee: "",
+      total_publico: "",
+      total_neto: "",
+    },
+    validate: (data) => {
+      const errors = {};
+      if (!data.descripcion) errors.descripcion = "Requerido";
+      return errors;
+    },
+  }
 ];
