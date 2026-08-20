@@ -43,7 +43,7 @@ export default function ClienteDetailPage({ params }) {
   if (loading) {
     return (
       <div className="container-fluid p-0 d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}>
-        <div className="spinner-border text-success" role="status">
+        <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Cargando...</span>
         </div>
       </div>

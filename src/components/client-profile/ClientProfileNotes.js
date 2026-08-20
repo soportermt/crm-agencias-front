@@ -32,7 +32,7 @@ export default function ClientProfileNotes({ clientId }) {
 
       <div className="d-flex flex-column gap-4 flex-grow-1 font-inter" style={{ fontSize: "13px", color: "var(--grey-text)" }}>
         {loading ? (
-          <div className="text-center py-2"><div className="spinner-border spinner-border-sm text-success" role="status"></div></div>
+          <div className="text-center py-2"><div className="spinner-border spinner-border-sm text-primary" role="status"></div></div>
         ) : notes.length > 0 ? (
           notes.map((note) => (
             <p key={note.id} className="mb-0 lh-base">

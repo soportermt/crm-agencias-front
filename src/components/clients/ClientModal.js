@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { clientsService } from "@/services/clients.service";
 
-export default function ClientModal({ show, onClose, onClientCreated }) {
+export default function ClientModal({ show, onClose, onClientCreated, client }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
@@ -17,10 +17,8 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
     ciudad: "",
     estado: "",
     pais: "",
+    rfc: "",
   });
-
-  if (!show) return null;
-
   const resetForm = () => {
     setFormData({
       nombreCompleto: "",
@@ -33,8 +31,31 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
       ciudad: "",
       estado: "",
       pais: "",
+      rfc: "",
     });
   };
+
+  useEffect(() => {
+    if (show) {
+      if (client) {
+        setFormData({
+          nombreCompleto: client.nombreCompleto || client.name || "",
+          correo: client.correo || "",
+          fechaNacimiento: client.fechaNacimiento || client.fecha_nacimiento || "",
+          celular: client.celular || client.telefono || "",
+          sexo: client.sexo || "",
+          estadoCivil: client.estadoCivil || client.estado_civil || "",
+          codigoPostal: client.codigoPostal || client.codigo_postal || "",
+          ciudad: client.ciudad || "",
+          estado: client.estado || "",
+          pais: client.pais || "",
+          rfc: client.rfc || "",
+        });
+      } else {
+        resetForm();
+      }
+    }
+  }, [show, client]);
 
   const handleSubmit = async () => {
 
@@ -46,21 +67,25 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
     try {
       setSubmitting(true);
       setError(null);
-      const newClient = await clientsService.createClient(formData);
-      if (onClientCreated) {
-        onClientCreated(newClient);
+      
+      if (client) {
+        const updatedClient = await clientsService.updateClient(client.id, formData);
+        if (onClientCreated) onClientCreated(updatedClient);
+      } else {
+        const newClient = await clientsService.createClient(formData);
+        if (onClientCreated) onClientCreated(newClient);
       }
 
       resetForm();
       onClose();
     } catch (err) {
-      console.error("Error al registrar cliente:", err);
+      console.error("Error al guardar cliente:", err);
       setError("Error al guardar cliente en el backend. Intenta nuevamente.");
     } finally {
       setSubmitting(false);
     }
   };
-
+  if (!show) return null;
 
   return (
     <div
@@ -92,7 +117,7 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
             className="font-inter h4 mb-0 fw-medium"
             style={{ color: "var(--dark-green)" }}
           >
-            Registro de nuevo cliente
+            {client ? "Editar cliente" : "Registro de nuevo cliente"}
           </h2>
           <button
             type="button"
@@ -141,6 +166,21 @@ export default function ClientModal({ show, onClose, onClientCreated }) {
                   value={formData.correo}
                   onChange={(e) =>
                     setFormData({ ...formData, correo: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="col-6 mb-3">
+                <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
+                  RFC
+                </label>
+                <input
+                  type="text"
+                  placeholder="Escribe el RFC"
+                  className="form-control input-custom text-uppercase"
+                  value={formData.rfc}
+                  onChange={(e) =>
+                    setFormData({ ...formData, rfc: e.target.value.toUpperCase() })
                   }
                 />
               </div>

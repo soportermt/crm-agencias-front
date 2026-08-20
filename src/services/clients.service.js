@@ -65,7 +65,8 @@ export const clientsService = {
   },
 
   async getClientPurchases(id) {
-    return purchasesMock;
+    const { data } = await api.get(`/clientes/clientePurchases/${id}`);
+    return data;
   },
 
   async getClientDocuments(id) {

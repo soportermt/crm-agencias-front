@@ -15,7 +15,7 @@ const COLUMNS = [
   { key: "actions", label: "Acciones", sortable: false, align: "center", width: "120px" },
 ];
 
-export default function ClientTable({ clients = [], currentPage, totalPages, totalItems, onPageChange }) {
+export default function ClientTable({ clients = [], currentPage, totalPages, totalItems, onPageChange, onEdit }) {
 
   const renderCell = (key, row) => {
     if (key === "status") {
@@ -32,6 +32,7 @@ export default function ClientTable({ clients = [], currentPage, totalPages, tot
               borderRadius: "8px",
               border: "none",
             }}
+            onClick={() => onEdit && onEdit(row)}
           >
             <i className="bi bi-pencil" style={{ fontSize: "12px" }}></i>
           </button>

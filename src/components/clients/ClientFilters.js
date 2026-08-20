@@ -12,6 +12,7 @@ export default function ClientFilters({
   startDate,
   endDate,
   onDateRangeChange,
+  onExport,
 }) {
   const isActivosActive = activeFilter === "Activos";
 
@@ -27,7 +28,7 @@ export default function ClientFilters({
           </p>
         </div>
         <div>
-          <ExportButton onExport={() => console.log("Exportando clientes...")} />
+          <ExportButton onExport={onExport} />
         </div>
       </div>
 

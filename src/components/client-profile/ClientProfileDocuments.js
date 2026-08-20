@@ -33,7 +33,7 @@ export default function ClientProfileDocuments({ clientId }) {
   }, [clientId]);
 
   if (loading) {
-    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+    return <div className="text-center py-4"><div className="spinner-border text-primary" role="status"></div></div>;
   }
 
 

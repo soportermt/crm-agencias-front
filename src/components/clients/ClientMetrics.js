@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import StatCard from "@/components/common/StatCard";
 import { clientsService } from "@/services/clients.service";
 
+const SKELETON_KEYS = ["total", "pendientes", "salidas", "recurrentes"];
+
 export default function ClientMetrics() {
+  const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({
     totalClientes: 0,
     clientesNuevosMes: 0,
@@ -17,14 +20,45 @@ export default function ClientMetrics() {
   useEffect(() => {
     async function fetchMetrics() {
       try {
+        setLoading(true);
         const data = await clientsService.getMetrics();
         setMetrics(data);
       } catch (err) {
         console.error("Error al cargar métricas:", err);
+      } finally {
+        setLoading(false);
       }
     }
     fetchMetrics();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="row g-3 mb-4">
+        {SKELETON_KEYS.map((key) => (
+          <div className="col-12 col-sm-6 col-xl-3" key={key}>
+            <div
+              className="p-3"
+              style={{
+                borderRadius: "12px",
+                backgroundColor: "#f2f2f2",
+                minHeight: "96px",
+              }}
+            >
+              <div
+                className="placeholder-glow"
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                <span className="placeholder col-6" style={{ height: "14px", borderRadius: "4px" }} />
+                <span className="placeholder col-4" style={{ height: "24px", borderRadius: "4px" }} />
+                <span className="placeholder col-8" style={{ height: "12px", borderRadius: "4px" }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="row g-3 mb-4">

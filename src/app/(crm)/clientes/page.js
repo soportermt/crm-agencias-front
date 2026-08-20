@@ -13,6 +13,7 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Todos");
@@ -65,10 +66,70 @@ export default function ClientesPage() {
     loadClients(page);
   };
 
+  const exportToCSV = (data) => {
+    if (!data.length) return;
+
+    const headers = ["Nombre", "Correo", "Teléfono", "Estatus"];
+
+    const rows = data.map((row) => [
+      row.nombre || "",
+      row.correo || "",
+      row.telefono || "",
+      row.status || "",
+    ]);
+
+    const escapeCsvValue = (value) => {
+      const str = String(value ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const csvContent = [headers, ...rows]
+      .map((r) => r.map(escapeCsvValue).join(","))
+      .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `clientes_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = async () => {
+    try {
+      setLoading(true);
+      const response = await clientsService.getClients({
+        page: 1,
+        perPage: 100000,
+        search: debouncedSearch,
+        filter: activeFilter,
+      });
+      const dataToExport = Array.isArray(response.data) ? response.data : [];
+      if (dataToExport.length === 0) {
+        alert("No hay clientes para exportar con los filtros actuales.");
+        return;
+      }
+      exportToCSV(dataToExport);
+    } catch (err) {
+      console.error("Error al exportar clientes:", err);
+      alert("No se pudieron exportar los clientes.");
+    } finally {
+      setLoading(false);
+      // Reload current page to restore the table state
+      loadClients(currentPage);
+    }
+  };
+
   return (
     <div className="container-fluid p-0">
       <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "12px" }}>
-        <ClientHeader onRegisterClientClick={() => setShowModal(true)} />
+        <ClientHeader onRegisterClientClick={() => { setEditingClient(null); setShowModal(true); }} />
 
         <ClientMetrics />
 
@@ -80,11 +141,12 @@ export default function ClientesPage() {
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}
           onDateRangeChange={setDateRange}
+          onExport={handleExport}
         />
 
         {loading ? (
           <div className="text-center py-5">
-            <div className="spinner-border text-success" role="status">
+            <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Cargando...</span>
             </div>
             <p className="text-muted mt-2 font-poppins small">Cargando clientes desde el backend...</p>
@@ -103,6 +165,7 @@ export default function ClientesPage() {
             totalPages={totalPages}
             totalItems={totalItems}
             onPageChange={handlePageChange}
+            onEdit={(client) => { setEditingClient(client); setShowModal(true); }}
           />
         )}
       </div>
@@ -111,6 +174,7 @@ export default function ClientesPage() {
         show={showModal} 
         onClose={() => setShowModal(false)} 
         onClientCreated={() => loadClients(1)}
+        client={editingClient}
       />
     </div>
   );

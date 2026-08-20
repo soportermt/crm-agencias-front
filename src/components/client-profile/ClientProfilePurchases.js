@@ -29,12 +29,12 @@ export default function ClientProfilePurchases({ clientId }) {
           // For demo mapping, ensure we format them for the table
           const formattedData = data.map((d) => ({
             id: d.id,
-            code: "SID384373" + d.id,
-            date: d.date ? d.date.split("-").reverse().join("/") : "20/02/2026",
-            destination: d.title || "Destino",
-            description: d.details || "Descripción",
-            total: "$ 1,000.00",
-            currency: "MXN",
+            code: d.title || `Folio ${d.id}`,
+            date: d.date ? d.date.split("-").reverse().join("/") : "N/A",
+            destination: d.destination || "No especificado",
+            description: d.details || "Sin descripción",
+            total: d.total || "$ 0.00",
+            currency: d.currency || "MXN",
           }));
           setPurchases(formattedData);
         }
@@ -48,7 +48,7 @@ export default function ClientProfilePurchases({ clientId }) {
   }, [clientId]);
 
   if (loading) {
-    return <div className="text-center py-4"><div className="spinner-border text-success" role="status"></div></div>;
+    return <div className="text-center py-4"><div className="spinner-border text-primary" role="status"></div></div>;
   }
 
 
