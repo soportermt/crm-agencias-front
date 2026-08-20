@@ -33,4 +33,49 @@ export const configService = {
 
         return data;
     },
+
+    async bancos() {
+        const { data } = await api.get("/cuentasAgencia/getAgencyAccounts", {
+            withCredentials: true,
+        });
+        return data;
+    },
+
+    async createCuenta(datos) {
+        const { data } = await api.post("/cuentasAgencia/create", datos, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return data;
+    },
+
+    async updateCuenta(datos) {
+        const { data } = await api.post("/cuentasAgencia/update", datos, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return data;
+    },
+
+    async term() {
+        const { data } = await api.get("/terminos/getToS", {
+            withCredentials: true,
+        });
+        return data;
+    },
+
+    async updateTerms(datos) {
+        const { data } = await api.post("/terminos/saveToS", datos, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return data;
+    },
+
 }

@@ -211,6 +211,7 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -221,14 +222,17 @@ body {
     padding: 16px;
     border-radius: 24px;
   }
+
   .title-login {
     font-size: 24px;
   }
+
   .subtitle-login {
     font-size: 14px;
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
+
   .input-custom {
     width: 100%;
     font-size: 13px;
@@ -301,7 +305,7 @@ body {
 }
 
 .form-booking input[type="date"]:required:invalid {
-  color: rgba(0, 0, 0, 0.4); 
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .form-booking input:focus,
@@ -309,7 +313,7 @@ body {
 .form-booking textarea:focus {
   outline: none;
   box-shadow: none;
-  border-color: 2px solid #227cf2; 
+  border-color: 2px solid #227cf2;
 }
 
 .form-booking textarea {
@@ -394,8 +398,56 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.btn-bg-style:hover, .btn-bg-style:active {
+.btn-bg-style:hover,
+.btn-bg-style:active {
   background-color: #DCDFF5 !important;
   color: var(--brand-blue) !important;
   border: 1px solid #DCDFF5 !important;
+}
+
+/* VENDEDORES */
+
+.ven-cat {
+  font-size: 12px;
+  background-color: #F5F5F5;
+  color: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  border-radius: 8px;
+}
+
+.vet-btn-notas {
+  padding: 8px 0px;
+  font-size: 14px;
+}
+
+.vet-btn-notas:disabled {
+  background-color: rgba(34, 124, 242, 0.1);
+  font-size: 14px;
+  border: 1px solid rgba(34, 124, 242, 0.05);
+  color: rgba(34, 124, 242, 0.24);
+}
+
+.ven-notas {
+  max-height: 200px;
+  height: auto;
+  width: 100%;
+  border: transparent;
+  font-size: 14px;
+  border-radius: 12px;
+  padding: 8px;
+  /* resize: none; */
+  color: #404040;
+}
+
+.ven-notas:focus {
+  outline: none;
+  box-shadow: none;
+  border: 1px solid #D0D5DD;
+}
+
+.ven-table-nombre {
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: rgb(12, 92, 198);
 }

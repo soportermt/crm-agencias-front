@@ -27,7 +27,7 @@ function buildSale(booking) {
     moneda: booking.moneda,
     estatus: "venta",
     id_agencia: booking.idAgencia,
-    id_vendedor: booking.idUsuario,
+    id_vendedor: booking.idVendedor,
     id_cliente: booking.customerId,
     id_tipo_venta: booking.idTipoVenta ?? 0,
     pertenece_a: booking.perteneceA ?? null,
