@@ -76,6 +76,7 @@ export function mapVentaToBooking(venta) {
         moneda: venta.moneda,
         idAgencia: venta.id_agencia,
         idUsuario: venta.id_usuario,
+        idVendedor: venta.id_vendedor,
         idCliente: venta.id_cliente,
         idTipoVenta: venta.id_tipo_venta,
         perteneceA: venta.pertenece_a,
