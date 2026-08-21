@@ -6,6 +6,11 @@ export const usuariosService = {
     return data;
   },
 
+  async getRoles() {
+    const { data } = await api.get("/UsuariosAgencias/rolesApi");
+    return data;
+  },
+
   async getCurrentUser() {
     const { data } = await api.get("/UsuariosAgencias/usuarioSesionApi");
     return data;
