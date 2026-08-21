@@ -193,6 +193,7 @@ const styles = StyleSheet.create({
 
 const TIPO_HOSPEDAJE = "1";
 const TIPO_TRASLADO = "2";
+const TIPO_TOUR = "5";
 
 function parseDesglose(servicio) {
     if (!servicio?.desglose) return {};
@@ -274,6 +275,7 @@ export default function BookingPdf({ venta }) {
                     {servicios.map((servicio, idx) => {
                         const esHospedaje = String(servicio.id_tipo_servicio) === TIPO_HOSPEDAJE;
                         const esTraslado = String(servicio.id_tipo_servicio) === TIPO_TRASLADO;
+                        const esTour = String(servicio.id_tipo_servicio) === TIPO_TOUR;
                         const d = servicio.desglose;
 
                         return (
@@ -423,7 +425,7 @@ export default function BookingPdf({ venta }) {
                                             <View style={{ width: "100%" }}>
                                                 <Text style={styles.titleData}>Fecha de servicio</Text>
                                                 <Text style={styles.data}>
-                                                {formatShortDate(servicio.inicio_servicio)}
+                                                    {formatShortDate(servicio.inicio_servicio)}
                                                     {servicio.fin_servicio &&
                                                         servicio.fin_servicio !== "0000-00-00" &&
                                                         ` - ${formatShortDate(servicio.fin_servicio)}`}
@@ -465,6 +467,76 @@ export default function BookingPdf({ venta }) {
                                                 <View style={{ width: "100%" }} />
                                             </View>
                                         )}
+
+                                        <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
+
+                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                            <View key={`adulto-${pIndex}`} style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    <Text style={styles.data}>Adulto</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+
+                                        {d.pasajeros?.menores?.map((pasajero, pIndex) => (
+                                            <View key={`menor-${pIndex}`} style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    <Text style={styles.data}>Menor</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Edad</Text>
+                                                    <Text style={styles.data}>{pasajero.edad}</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+
+                                {esTour && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/map.png"
+                                                style={[styles.serviceIcon, { backgroundColor: "rgba(231, 241, 254, 0.6)" }]}
+                                            />
+                                            <Text style={[styles.titleService, { color: "#0C5CC6" }]}>
+                                                Tour
+                                            </Text>
+                                        </View>
+
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                    {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Descripción</Text>
+                                                <Text style={styles.data}>{servicio.descripcion}</Text>
+                                            </View>
+                                        </View>
 
                                         <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
 
