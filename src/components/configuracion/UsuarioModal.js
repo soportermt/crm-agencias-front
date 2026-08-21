@@ -8,6 +8,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [rolesList, setRolesList] = useState([]);
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     usuario: "",
@@ -15,9 +16,23 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
     fechaNacimiento: "",
     contrasena: "",
     confirmarContrasena: "",
-    rol: "Administrador",
+    rol: 1,
     estado: "Activo",
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const data = await usuariosService.getRoles();
+        if (Array.isArray(data)) {
+          setRolesList(data);
+        }
+      } catch (err) {
+        console.error("Error fetching roles", err);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -28,7 +43,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
         fechaNacimiento: user.fecha_nacimiento || "",
         contrasena: "",
         confirmarContrasena: "",
-        rol: user.rol || "Administrador",
+        rol: user.id_rol || 1,
         estado: String(user.idUsuario?.status) === "1" ? "Activo" : "Inactivo",
       });
       setPreview(user.foto ? `${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}` : null);
@@ -40,7 +55,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
         fechaNacimiento: "",
         contrasena: "",
         confirmarContrasena: "",
-        rol: "Administrador",
+        rol: 1,
         estado: "Activo",
       });
       setPreview(null);
@@ -218,10 +233,9 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
           <div className="col-12 col-md-6">
             <label className="form-label font-poppins mb-1" style={{ fontSize: "13px", color: "#0f1901" }}>Rol</label>
             <select className="form-select" style={{ borderRadius: "10px", fontSize: "13px" }} value={formData.rol} onChange={(e) => setFormData({...formData, rol: e.target.value})} disabled={!isAdmin}>
-              <option value="Administrador">Administrador</option>
-              <option value="Gerente">Gerente</option>
-              <option value="Analista">Analista</option>
-              <option value="Coordinadora">Coordinadora</option>
+              {rolesList.map(r => (
+                <option key={r.id} value={r.id}>{r.nombre}</option>
+              ))}
             </select>
           </div>
           <div className="col-12 col-md-6">

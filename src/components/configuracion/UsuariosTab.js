@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import StatusBadge from "@/components/common/StatusBadge";
 import UsuarioModal from "@/components/configuracion/UsuarioModal";
 import { usuariosService } from "@/services/usuarios.service";
+import { authService } from "@/services/auth.service";
 
 export default function UsuariosTab() {
   const [showModal, setShowModal] = useState(false);
@@ -14,6 +15,7 @@ export default function UsuariosTab() {
   const fetchUsuarios = async () => {
     try {
       try {
+        // Consulta directa al backend para validar el rol de forma segura
         const currentUserData = await usuariosService.getCurrentUser();
         if (Array.isArray(currentUserData) && currentUserData.length > 0) {
           setIsAdmin(currentUserData[0].rol === 'Administrador');

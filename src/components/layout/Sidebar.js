@@ -173,13 +173,6 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             )}
           </div>
 
-          <div className="mb-3">
-            {renderCategoryHeader("Catálogos")}
-            {renderNavLink("/destinos", "Destinos", MapPinIcon)}
-            <div className="mt-1">
-              {renderNavLink("/hoteles", "Hoteles", BuildingOfficeIcon)}
-            </div>
-          </div>
 {/* 
           <div className="mb-3">
             {renderCategoryHeader("Servicios")}
