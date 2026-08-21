@@ -180,14 +180,11 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               {renderNavLink("/hoteles", "Hoteles", BuildingOfficeIcon)}
             </div>
           </div>
-
+{/* 
           <div className="mb-3">
             {renderCategoryHeader("Servicios")}
             {renderNavLink("/productos", "Productos", BriefcaseIcon)}
-            {/* <div className="mt-1">
-              {renderNavLink("/caja", "Caja", CurrencyDollarIcon)}
-            </div> */}
-          </div>
+          </div> */}
 
           <div className="mb-3">
             {renderCategoryHeader("Utilidad por venta")}
