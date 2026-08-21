@@ -2,7 +2,7 @@
 
 import PassengersInput from "@/components/common/PassengersInput";
 import ProviderSelect from "@/components/common/ProviderSelect";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React from "react";
 import DatePicker from "react-datepicker";
 import { useBookingForm } from "../booking-form/BookingFormContext";
 import { calcularTotalNeto } from "@/utils/pricing";
@@ -125,6 +125,8 @@ export default function TrasladoForm() {
                         </div>
                     </div>
                 </div>
+
+
                 <div className="col-12 col-md-4">
                     <label className="form-label">Fecha de servicio *</label>
                     <DatePicker
@@ -152,7 +154,6 @@ export default function TrasladoForm() {
                         autoComplete='off'
                     />
                 </div>
-
                 <div className="col-12 col-md-4">
                     <PassengersInput
                         room={{ adultos: data.adultos ?? 2, menores: data.menores ?? 0 }}
@@ -180,7 +181,6 @@ export default function TrasladoForm() {
                         onChange={(e) => updateDraftField("salida_origen", e.target.value)}
                     />
                 </div>
-
                 {isRedondo && (
                     <>
                         <div className="col-12 col-md-4">

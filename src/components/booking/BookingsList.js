@@ -11,7 +11,7 @@ import Link from "next/link";
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
     { key: "cliente", label: "Cliente", width: "225px", align: "start" },
-    { key: "hotel", label: "Hotel", width: "155px", align: "start" },
+    { key: "hotel", label: "Descripción", width: "155px", align: "start" },
     { key: "plan", label: "Servicio", width: "130px", align: "start" },
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
@@ -212,7 +212,7 @@ export default function BookingList() {
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
-                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`}>{row.folio}</Link>;
+                return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
             case "total":
                 return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total);
             case "estatus":

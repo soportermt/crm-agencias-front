@@ -1,4 +1,4 @@
-const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado" };
+const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "5": "tour" };
 
 function parseLocalDate(dateString) {
     if (!dateString || dateString === "0000-00-00") return null;
@@ -38,11 +38,14 @@ function mapVentaServicioToItem(vs) {
         data = {
             ...data,
             habitaciones: (desglose.habitaciones || []).map(normalizeHabitacion),
-            checkIn: parseLocalDate(desglose.checkIn),
-            checkOut: parseLocalDate(desglose.checkOut),
-            limitePago: parseLocalDate(desglose.limitePago),
-            limiteCliente: parseLocalDate(desglose.limiteCliente),
-            provider: desglose.providerData?.value ?? vs.id_proveedor,
+            checkIn: parseLocalDate(vs.inicio_servicio),
+            checkOut: parseLocalDate(vs.fin_servicio),
+            limitePago: parseLocalDate(vs.fecha_limite),
+            limiteCliente: parseLocalDate(vs.limite_cliente),
+            total_publico: vs.tarifa_publica,
+            providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
+            provider: vs.id_proveedor,
+            fee: vs.fee,
         };
     }
 
@@ -56,8 +59,24 @@ function mapVentaServicioToItem(vs) {
             limitePago: parseLocalDate(vs.fecha_limite),
             limiteCliente: parseLocalDate(vs.limite_cliente),
             total_publico: vs.tarifa_publica,
+            fee: vs.fee,
             providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
             provider: vs.id_proveedor,
+        };
+    }
+
+    if (tipo === "tour") {
+        data = {
+            ...data,
+            descripcion: vs.descripcion,
+            checkIn: parseLocalDate(vs.inicio_servicio),
+            checkOut: parseLocalDate(vs.fin_servicio),
+            limitePago: parseLocalDate(vs.fecha_limite),
+            limiteCliente: parseLocalDate(vs.limite_cliente),
+            total_publico: vs.tarifa_publica,
+            providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
+            provider: vs.id_proveedor,
+            fee: vs.fee,
         };
     }
 
