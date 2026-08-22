@@ -104,7 +104,7 @@ export default function StatCard({
                 className="font-inter fw-semibold text-decoration-none hover-underline"
                 style={{
                   color: "rgba(0, 0, 0, 0.4)",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   lineHeight: "1.2",
                 }}
               >

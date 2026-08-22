@@ -11,9 +11,6 @@ import {
   IdentificationIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  BriefcaseIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
   ChartPieIcon,
@@ -42,13 +39,14 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
   const getLinkClass = (path, extraClass = "") => {
     const baseClass = "d-flex align-items-center px-3 py-2 text-decoration-none rounded hover-light fw-medium";
-    const activeClass = isActive(path) ? "bg-light text-dark fw-bold" : "";
+    const activeClass = isActive(path) ? "text-dark fw-bolder" : "";
     return `${baseClass} ${activeClass} ${extraClass}`.trim();
   };
 
   const getLinkStyle = (path) => ({
     fontSize: "13px",
-    color: isActive(path) ? "#18181b" : "#374151",
+    color: isActive(path) ? "#09489A" : "#374151",
+    backgroundColor: isActive(path) ? "#F0F2FE80" : "transparent",
   });
 
   const renderNavLink = (href, label, IconComponent, badge = null) => {
@@ -61,8 +59,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
         style={getLinkStyle(href)}
         title={!isExpanded ? label : undefined}
       >
-        <IconComponent className="flex-shrink-0" style={{ width: "18px", height: "18px", color: active ? "#18181b" : "#374151" }} />
-        {isExpanded && <span className="text-truncate">{label}</span>}
+        <IconComponent className="flex-shrink-0" style={{ width: "18px", height: "18px", color: active ? "#09489A" : "#374151" }} />
+        {isExpanded && <span className="text-truncate" style={{ color: active ? "#09489A" : "#374151" }}>{label}</span>}
         {isExpanded && badge}
       </Link>
     );

@@ -1,56 +1,140 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import StatCard from "@/components/common/StatCard";
 import DataTable from "@/components/common/DataTable";
 import ExportButton from "@/components/common/ExportButton";
 import { reservationsMock, dailySalesMock, pendingTasksMock } from "@/mocks/dashboardMock";
+import { usuariosService } from "@/services/usuarios.service";
+import { dashboardService } from "@/services/dashboard.service";
+
+const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
+
 export default function DashboardPage() {
   const reservations = reservationsMock;
   const dailySales = dailySalesMock;
   const pendingTasks = pendingTasksMock;
+  const [user, setUser] = useState(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await dashboardService.getSalesStats();
+        setData(data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchUser = async () => {
+      try {
+        const data = await usuariosService.getCurrentUser();
+        if (Array.isArray(data) && data.length > 0) {
+          setUser(data[0]);
+        } else if (data && !Array.isArray(data)) {
+          setUser(data);
+        }
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
+    fetchData();
+    fetchUser();
+  }, []);
+
+
+  const rawDate = new Intl.DateTimeFormat("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+
+  const fecha = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
+
+  const userName = user?.idUsuario?.profiles?.fullname || user?.nombre || "Usuario";
+
+  const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return "$0.00";
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(value);
+  };
+  
   return (
     <div className="container-fluid p-0">
       <div className="mb-4">
-        <p className="text-secondary small mb-1" style={{ fontFamily: "var(--font-inter)" }}>Martes, 16 de abril 2026</p>
-        <h1 className="h4 fw-semibold font-poppins text-dark m-0">Bienvenido de vuelta, Vanessa</h1>
+        <p className="text-secondary small mb-1" style={{ fontFamily: "var(--font-inter)" }}>{fecha}</p>
+        <h1 className="h4 fw-semibold font-poppins text-dark m-0">Bienvenido de vuelta, {userName}</h1>
       </div>
 
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-sm-6 col-md-3">
-          <StatCard
-            title="Total a Cobrar"
-            value="$15,769,184.91"
-            trend="up"
-            hasShadow={true}
-          />
+      {loading || !data ? (
+        <div className="row g-3 mb-4">
+          {SKELETON_KEYS.map((key) => (
+            <div className="col-12 col-sm-6 col-xl-3" key={key}>
+              <div
+                className="p-3"
+                style={{
+                  borderRadius: "12px",
+                  backgroundColor: "#f2f2f2",
+                  minHeight: "96px",
+                }}
+              >
+                <div
+                  className="placeholder-glow"
+                  style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+                >
+                  <span className="placeholder col-6" style={{ height: "14px", borderRadius: "4px" }} />
+                  <span className="placeholder col-4" style={{ height: "24px", borderRadius: "4px" }} />
+                  <span className="placeholder col-8" style={{ height: "12px", borderRadius: "4px" }} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="col-12 col-sm-6 col-md-3">
-          <StatCard
-            title="Total a Pagar"
-            value="$700,457.30"
-            trend="down"
-            hasShadow={true}
-          />
+      ) : (
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-sm-6 col-md-3">
+            <StatCard
+              title="Total a Cobrar"
+              value={formatCurrency(data?.total_a_cobrar)}
+              trend="up"
+              hasShadow={true}
+            />
+          </div>
+          <div className="col-12 col-sm-6 col-md-3">
+            <StatCard
+              title="Total a Pagar"
+              value={formatCurrency(data?.total_a_pagar)}
+              trend="down"
+              hasShadow={true}
+            />
+          </div>
+          <div className="col-12 col-sm-6 col-md-3">
+            <StatCard
+              title="Total Generado en Ventas"
+              value={formatCurrency(data?.total_generado)}
+              trend="up"
+              hasShadow={true}
+            />
+          </div>
+          <div className="col-12 col-sm-6 col-md-3">
+            <StatCard
+              title="Clientes Registrados"
+              value={data?.clientes_registrados?.toLocaleString("es-MX") || "0"}
+              trend="user"
+              hasShadow={true}
+            />
+          </div>
         </div>
-        <div className="col-12 col-sm-6 col-md-3">
-          <StatCard
-            title="Total Generado en Ventas"
-            value="$36,978,278.74"
-            trend="up"
-            hasShadow={true}
-          />
-        </div>
-        <div className="col-12 col-sm-6 col-md-3">
-          <StatCard
-            title="Clientes Registrados"
-            value="630"
-            trend="user"
-            hasShadow={true}
-          />
-        </div>
-      </div>
+      )}
 
       <div className="row g-3 mb-4">
         <div className="col-12 col-md-7">
@@ -69,7 +153,7 @@ export default function DashboardPage() {
                 <i className="bi bi-arrow-up-right"></i>
               </a>
             </div>
-            
+
             <div className="d-flex flex-column" style={{ gap: "6px" }}>
               {dailySales.map((sale, index) => (
                 <div
@@ -159,10 +243,10 @@ export default function DashboardPage() {
               <span className="fw-normal" style={{ color: "#0f1901" }}>reservas del mes</span>
             </h2>
           </div>
-          
+
           <div className="d-flex align-items-center gap-2">
             <ExportButton onExport={() => console.log("Exportando reservas del dashboard...")} />
-            
+
             <a
               href="#"
               className="text-decoration-none fw-medium d-flex align-items-center gap-1 px-3 py-2 transition-smooth hover-underline"
