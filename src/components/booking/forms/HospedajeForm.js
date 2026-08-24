@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import PassengersInput from "@/components/common/PassengersInput";
 import { calcularTotalNeto, formatMoney } from "@/utils/pricing";
+import { cleanDecimalInput } from "@/utils/inputFormatters";
 
 registerLocale("es", es);
 export default function HospedajeForm() {
@@ -228,7 +229,7 @@ export default function HospedajeForm() {
                   type="text"
                   className="form-control"
                   value={p.total_publico}
-                  onChange={(e) => updateRoom(i, "total_publico", e.target.value)}
+                  onChange={(e) => updateRoom(i, "total_publico", cleanDecimalInput(e.target.value))}
                   style={{ borderLeft: "1px solid var(--primary-color)" }}
                 />
               </div>
@@ -335,7 +336,7 @@ export default function HospedajeForm() {
               type="text"
               className="form-control"
               value={data.fee}
-              onChange={(e) => updateDraftField("fee", e.target.value)}
+              onChange={(e) => updateDraftField("fee", cleanDecimalInput(e.target.value))}
               style={{ borderLeft: "1px solid var(--primary-color)" }}
             />
           </div>

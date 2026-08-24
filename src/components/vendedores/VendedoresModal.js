@@ -12,15 +12,12 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
-
   const fileInputRef = useRef(null);
   const nombreRef = useRef(null);
   const correoRef = useRef(null);
   const telefonoRef = useRef(null);
   const direccionRef = useRef(null);
   const sucursalRef = useRef(null);
-  const rolRef = useRef(null);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
 
   useEffect(() => {
@@ -65,7 +62,6 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
     fd.append("telefono", telefonoRef.current.value);
     fd.append("direccion", direccionRef.current.value);
     fd.append("sucursal", sucursalRef.current.value);
-    fd.append("rol", rolRef.current.value);
 
     documentos.forEach((doc, i) => {
       fd.append(`documentos[${i}][archivo]`, doc.file);
@@ -88,7 +84,6 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
         telefono: telefonoRef.current.value,
         direccion: direccionRef.current.value,
         sucursal: sucursalRef.current.value,
-        rol: rolRef.current.value,
         estatus: "1",
       });
       onClose();
@@ -132,7 +127,7 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
             className="font-inter h4 mb-0 fw-medium"
             style={{ color: "#0f1901" }}
           >
-            Registro de empleado
+            Crear nuevo vendedor
           </h2>
           <button
             type="button"
@@ -185,14 +180,6 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
                       {agencia.nombre_comercial}
                     </option>
                   ))}
-                </select>
-              </div>
-              <div className="col-12 col-md-6 mb-2">
-                <label className="form-label">Departamento *</label>
-                <select name="rol" ref={rolRef} className="form-select">
-                  <option value="Administrativo">Administrativo</option>
-                  <option value="Agente">Agente</option>
-                  <option value="Ventas">Ventas</option>
                 </select>
               </div>
             </div>

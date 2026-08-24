@@ -27,13 +27,20 @@ export const serviceCatalog = [
       if (!data.checkOut) errors.checkOut = "Requerido";
       return errors;
     },
-    summary: (data) => ({ 
-      title: data.hotel || "Sin hotel", 
-      subtitle: data.destino || "Sin destino", 
-      dateStart: data.checkIn, 
-      dateEnd: data.checkOut,
-      precio: data.total_publico 
-    }),
+    summary: (data) => {
+      const totalHabitaciones = (data.habitaciones || []).reduce(
+        (acc, hab) => acc + (parseFloat(hab.total_publico) || 0),
+        0
+      );
+  
+      return {
+        title: data.hotel || "Sin hotel",
+        subtitle: data.destino || "Sin destino",
+        dateStart: data.checkIn,
+        dateEnd: data.checkOut,
+        precio: totalHabitaciones > 0 ? totalHabitaciones : null,
+      };
+    },
   },
   {
     id: "traslado",

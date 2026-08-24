@@ -16,7 +16,6 @@ export default function VendedoresTable({ vendedores }) {
     { key: "correo", label: "Correo electrónico", sortable: true, width: "180px" },
     { key: "telefono", label: "Télefono", sortable: true, width: "110px" },
     { key: "sucursal", label: "Sucursal", sortable: true, width: "110px" },
-    { key: "rol", label: "Rol", sortable: true, width: "110px" },
     { key: "estatus", label: "Estatus", sortable: true, align: "center", width: "110px" },
     // { key: "acciones", label: "Acciones", align: "center", width: "80px" },
   ];

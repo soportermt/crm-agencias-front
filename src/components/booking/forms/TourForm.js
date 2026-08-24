@@ -6,6 +6,7 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import { useBookingForm } from "../booking-form/BookingFormContext";
 import { calcularTotalNeto } from "@/utils/pricing";
+import { cleanDecimalInput } from "@/utils/inputFormatters";
 
 export default function TourForm() {
     const { draft, updateDraftField } = useBookingForm();
@@ -185,7 +186,7 @@ export default function TourForm() {
                             type="text"
                             className="form-control"
                             value={data.total_publico}
-                            onChange={(e) => updateDraftField("total_publico", e.target.value)}
+                            onChange={(e) => updateDraftField("total_publico", cleanDecimalInput(e.target.value))}
                             style={{ borderLeft: "1px solid var(--primary-color)" }}
                         />
                     </div>
@@ -212,7 +213,7 @@ export default function TourForm() {
                             type="text"
                             className="form-control"
                             value={data.fee}
-                            onChange={(e) => updateDraftField("fee", e.target.value)}
+                            onChange={(e) => updateDraftField("fee", cleanDecimalInput(e.target.value))}
                             style={{ borderLeft: "1px solid var(--primary-color)" }}
                         />
                     </div>
