@@ -8,6 +8,16 @@ import { authService } from "@/services/auth.service";
 export default function LoginPage() {
   const router = useRouter();
   
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await authService.checkSession();
+      if (user) {
+        router.push("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   // Estado para conmutar visibilidad de contraseña
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
