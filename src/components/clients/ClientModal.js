@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { clientsService } from "@/services/clients.service";
 
 export default function ClientModal({ show, onClose, onClientCreated, client }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const locationInputRef = useRef(null);
+  const debounceTimer = useRef(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     correo: "",
@@ -36,12 +42,102 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
   };
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (window.google && window.google.maps && window.google.maps.places) {
+      setMapsLoaded(true);
+      return;
+    }
+
+    const scriptId = 'google-maps-script';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => setMapsLoaded(true);
+      document.head.appendChild(script);
+    } else {
+      const script = document.getElementById(scriptId);
+      script.addEventListener('load', () => setMapsLoaded(true));
+    }
+  }, []);
+
+  const handleLocationSearch = (value, field, types) => {
+    setFormData({ ...formData, [field]: value });
+    setActiveField(field);
+    
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    
+    if (value && mapsLoaded && window.google) {
+      debounceTimer.current = setTimeout(() => {
+        const service = new window.google.maps.places.AutocompleteService();
+        service.getPlacePredictions({ input: value, types: types }, (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setSuggestions(predictions);
+            setShowSuggestions(true);
+          } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }
+        });
+      }, 500); // 500ms debounce
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectSuggestion = (placeId, description, field) => {
+    setFormData(prev => ({ ...prev, [field]: description.split(',')[0] }));
+    setShowSuggestions(false);
+
+    if (window.google) {
+      const map = new window.google.maps.Map(document.createElement('div'));
+      const service = new window.google.maps.places.PlacesService(map);
+      service.getDetails({ placeId, fields: ['address_components'] }, (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place.address_components) {
+          let city = '';
+          let state = '';
+          let country = '';
+          let postalCode = '';
+
+          place.address_components.forEach(component => {
+            const types = component.types;
+            if (types.includes('locality') || types.includes('administrative_area_level_2')) {
+              city = city || component.long_name;
+            }
+            if (types.includes('administrative_area_level_1')) {
+              state = component.long_name;
+            }
+            if (types.includes('country')) {
+              country = component.long_name;
+            }
+            if (types.includes('postal_code')) {
+              postalCode = component.long_name;
+            }
+          });
+
+          setFormData(prev => ({
+            ...prev,
+            ciudad: city || prev.ciudad,
+            estado: state || prev.estado,
+            pais: country || prev.pais,
+            codigoPostal: postalCode || prev.codigoPostal
+          }));
+        }
+      });
+    }
+  };
+
+  useEffect(() => {
     if (show) {
       if (client) {
         setFormData({
           nombreCompleto: client.nombreCompleto || client.name || "",
           correo: client.correo || "",
-          fechaNacimiento: client.fechaNacimiento || client.fecha_nacimiento || "",
+          fechaNacimiento: (client.fechaNacimiento || client.fecha_nacimiento || "").split("T")[0].split(" ")[0],
           celular: client.celular || client.telefono || "",
           sexo: client.sexo || "",
           estadoCivil: client.estadoCivil || client.estado_civil || "",
@@ -146,7 +242,6 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 <input
                   type="text"
                   required
-                  placeholder="Elías Salazar"
                   className="form-control input-custom"
                   value={formData.nombreCompleto}
                   onChange={(e) =>
@@ -161,7 +256,6 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 </label>
                 <input
                   type="email"
-                  placeholder="@"
                   className="form-control input-custom"
                   value={formData.correo}
                   onChange={(e) =>
@@ -176,7 +270,6 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 </label>
                 <input
                   type="text"
-                  placeholder="Escribe el RFC"
                   className="form-control input-custom text-uppercase"
                   value={formData.rfc}
                   onChange={(e) =>
@@ -190,9 +283,8 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                   Fecha de nacimiento *
                 </label>
                 <input
-                  type="text"
+                  type="date"
                   required
-                  placeholder="dd/mm/aaaa"
                   className="form-control input-custom"
                   value={formData.fechaNacimiento}
                   onChange={(e) =>
@@ -208,7 +300,6 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 <input
                   type="tel"
                   required
-                  placeholder="+52"
                   className="form-control input-custom"
                   value={formData.celular}
                   onChange={(e) =>
@@ -269,75 +360,109 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Código postal
                 </label>
-                <input
-                  type="text"
-                  placeholder="Escribe el código"
-                  className="form-control input-custom"
-                  value={formData.codigoPostal}
-                  onChange={(e) =>
-                    setFormData({ ...formData, codigoPostal: e.target.value })
-                  }
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    className="form-control input-custom"
+                    value={formData.codigoPostal}
+                    onChange={(e) => handleLocationSearch(e.target.value, 'codigoPostal', ['(regions)'])}
+                    onFocus={() => {
+                      setActiveField('codigoPostal');
+                      if (suggestions.length > 0) setShowSuggestions(true);
+                    }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    autoComplete="off"
+                  />
+                  {showSuggestions && activeField === 'codigoPostal' && suggestions.length > 0 && (
+                    <ul
+                      className="list-group position-absolute w-100 shadow-sm"
+                      style={{ zIndex: 1060, top: '100%', maxHeight: '200px', overflowY: 'auto' }}
+                    >
+                      {suggestions.map((suggestion) => (
+                        <li
+                          key={suggestion.place_id}
+                          className="list-group-item list-group-item-action font-poppins small"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleSelectSuggestion(suggestion.place_id, suggestion.description, 'codigoPostal')}
+                        >
+                          {suggestion.description}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
+
 
               <div className="col-6 mb-3">
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Ciudad *
                 </label>
-                <select
-                  required
-                  className="form-select input-custom"
-                  value={formData.ciudad}
-                  onChange={(e) =>
-                    setFormData({ ...formData, ciudad: e.target.value })
-                  }
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="Cancun">Cancún</option>
-                  <option value="CDMX">CDMX</option>
-                  <option value="Guadalajara">Guadalajara</option>
-                  <option value="Monterrey">Monterrey</option>
-                  <option value="Tulum">Tulum</option>
-                </select>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    required
+                    ref={locationInputRef}
+                    className="form-control input-custom"
+                    value={formData.ciudad}
+                    onChange={(e) => handleLocationSearch(e.target.value, 'ciudad', ['(cities)'])}
+                    onFocus={() => {
+                      setActiveField('ciudad');
+                      if (suggestions.length > 0) setShowSuggestions(true);
+                    }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    autoComplete="off"
+                  />
+                  {showSuggestions && activeField === 'ciudad' && suggestions.length > 0 && (
+                    <ul
+                      className="list-group position-absolute w-100 shadow-sm"
+                      style={{ zIndex: 1060, top: '100%', maxHeight: '200px', overflowY: 'auto' }}
+                    >
+                      {suggestions.map((suggestion) => (
+                        <li
+                          key={suggestion.place_id}
+                          className="list-group-item list-group-item-action font-poppins small"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleSelectSuggestion(suggestion.place_id, suggestion.description, 'ciudad')}
+                        >
+                          {suggestion.description}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
+
 
               <div className="col-6 mb-3">
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Estado *
                 </label>
-                <select
+                <input
+                  type="text"
                   required
-                  className="form-select input-custom"
+                  className="form-control input-custom"
                   value={formData.estado}
                   onChange={(e) =>
                     setFormData({ ...formData, estado: e.target.value })
                   }
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="QuintanaRoo">Quintana Roo</option>
-                  <option value="Jalisco">Jalisco</option>
-                  <option value="NuevoLeon">Nuevo León</option>
-                  <option value="EstadoDeMexico">Estado de México</option>
-                </select>
+                />
               </div>
+
 
               <div className="col-6 mb-3">
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   País *
                 </label>
-                <select
+                <input
+                  type="text"
                   required
-                  className="form-select input-custom"
+                  className="form-control input-custom"
                   value={formData.pais}
                   onChange={(e) =>
                     setFormData({ ...formData, pais: e.target.value })
                   }
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="Mexico">México</option>
-                  <option value="EEUU">EEUU</option>
-                  <option value="Canada">Canadá</option>
-                </select>
+                />
               </div>
             </div>
           </div>
@@ -370,6 +495,11 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
 
         </div>
       </div>
+      <style>{`
+        .pac-container {
+          z-index: 1060 !important;
+        }
+      `}</style>
     </div>
   );
 }

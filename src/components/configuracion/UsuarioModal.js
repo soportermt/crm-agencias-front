@@ -40,7 +40,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
         nombreCompleto: user.idUsuario?.profiles?.fullname || user.nombre || "",
         usuario: user.idUsuario?.username || (user.email ? `@${user.email.split('@')[0]}` : ""),
         email: user.idUsuario?.email || user.email || "",
-        fechaNacimiento: user.fecha_nacimiento || "",
+        fechaNacimiento: (user.fecha_nacimiento || "").split("T")[0].split(" ")[0],
         contrasena: "",
         confirmarContrasena: "",
         rol: user.id_rol || 1,
