@@ -24,39 +24,39 @@ const notesMock = [
 
 export const clientsService = {
   async getClients({ page = 1, perPage = 10, search = "", filter = "Todos" } = {}) {
-    const { data } = await api.get("/clientes/clientesCrmApi", {
+    const { data } = await api.get("/clientes/clientesCrmApi.html", {
       params: { page, perPage, search, filter },
     });
     return data;
   },
 
   async getClientById(id) {
-    const { data } = await api.get(`/clientes/clienteCrmDetailApi/${id}`);
+    const { data } = await api.get(`/clientes/clienteCrmDetailApi/${id}.html`);
     return data;
   },
 
   async createClient(clientData) {
-    const { data } = await api.post("/clientes/clientesCrmCreate", clientData);
+    const { data } = await api.post("/clientes/clientesCrmCreate.html", clientData);
     return data;
   },
 
   async updateClient(id, clientData) {
-    const { data } = await api.post(`/clientes/clientesCrmUpdate/${id}`, clientData);
+    const { data } = await api.post(`/clientes/clientesCrmUpdate/${id}.html`, clientData);
     return data;
   },
 
   async deleteClient(id) {
-    const { data } = await api.delete(`/clientes/clientesCrmDelete/${id}`);
+    const { data } = await api.delete(`/clientes/clientesCrmDelete/${id}.html`);
     return data;
   },
 
   async searchCustomers() {
-    const { data } = await api.get("/clientes/clientesCrmApi");
+    const { data } = await api.get("/clientes/clientesCrmApi.html");
     return data;
   },
 
   async getMetrics() {
-    const { data } = await api.get("/clientes/clientesCrmMetrics");
+    const { data } = await api.get("/clientes/clientesCrmMetrics.html");
     return data;
   },
 
@@ -65,7 +65,7 @@ export const clientsService = {
   },
 
   async getClientPurchases(id) {
-    const { data } = await api.get(`/clientes/clientePurchases/${id}`);
+    const { data } = await api.get(`/clientes/clientePurchases/${id}.html`);
     return data;
   },
 
