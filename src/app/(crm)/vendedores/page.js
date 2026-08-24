@@ -63,6 +63,9 @@ export default function VendedoresPage() {
       <VendedoresModal
         show={showModal}
         onClose={() => setShowModal(false)}
+        onClientCreated={(nuevoVendedor) => {
+          setVendedores((prev) => [nuevoVendedor, ...prev]);
+        }}
       />
     </div>
   );
