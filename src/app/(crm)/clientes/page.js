@@ -149,7 +149,7 @@ export default function ClientesPage() {
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Cargando...</span>
             </div>
-            <p className="text-muted mt-2 font-poppins small">Cargando clientes desde el backend...</p>
+            <p className="text-muted mt-2 font-poppins small">Cargando...</p>
           </div>
         ) : error ? (
           <div className="alert alert-warning my-3 text-center" role="alert">

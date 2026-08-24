@@ -74,6 +74,18 @@ export const clientsService = {
   },
 
   async getClientNotes(id) {
-    return notesMock;
+    const { data } = await api.get(`/clientes/clienteNotas/${id}`);
+    return data;
+  },
+
+  async createClientNote(id, noteData) {
+    const payload = typeof noteData === "string" ? { text: noteData } : noteData;
+    const { data } = await api.post(`/clientes/clienteNotasCreate/${id}`, payload);
+    return data;
+  },
+
+  async deleteClientNote(noteId) {
+    const { data } = await api.delete(`/clientes/clienteNotasDelete/${noteId}`);
+    return data;
   }
 };
