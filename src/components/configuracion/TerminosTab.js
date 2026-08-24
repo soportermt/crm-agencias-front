@@ -18,10 +18,14 @@ export default function TerminosTab() {
 
       try {
         const data = await configService.term();
-        setTerm(data);
+        if (data && data.success === false) {
+          setError(data.message || "Error al cargar los términos.");
+        } else {
+          setTerm(data);
+        }
       } catch (err) {
         console.error("Error al cargar datos de term:", err);
-        setError(err);
+        setError(err.response?.data?.message || "Error de conexión o permisos insuficientes.");
       } finally {
         setIsLoading(false);
       }
@@ -43,18 +47,32 @@ export default function TerminosTab() {
       const formData = new FormData();
       formData.append("terminos_general", term.terminos_general ?? "");
 
-      await configService.updateTerms(formData);
-      setSaveStatus("success");
+      const res = await configService.updateTerms(formData);
+      if (res && res.success === false) {
+        setSaveStatus("error");
+        setError(res.message || "Error al guardar, intenta de nuevo.");
+      } else {
+        setSaveStatus("success");
+      }
     } catch (err) {
       console.error("Error al guardar términos:", err);
       setSaveStatus("error");
+      setError(err.response?.data?.message || "Error de conexión o permisos insuficientes.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (isLoading || !term) {
-    return <div className="d-flex flex-column h-100 font-inter w-100">Cargando...</div>;
+  if (isLoading) {
+    return <div className="d-flex flex-column h-100 font-inter w-100 p-4">Cargando...</div>;
+  }
+
+  if (error && !term) {
+    return <div className="d-flex flex-column h-100 font-inter w-100 p-4 text-danger">{typeof error === 'string' ? error : error.message || "Ocurrió un error."}</div>;
+  }
+
+  if (!term) {
+    return <div className="d-flex flex-column h-100 font-inter w-100 p-4">No se encontraron términos.</div>;
   }
 
   return (
@@ -104,7 +122,7 @@ export default function TerminosTab() {
             <span className="text-success" style={{ fontSize: "13px" }}>Guardado correctamente</span>
           )}
           {saveStatus === "error" && (
-            <span className="text-danger" style={{ fontSize: "13px" }}>Error al guardar, intenta de nuevo</span>
+            <span className="text-danger" style={{ fontSize: "13px" }}>{typeof error === 'string' ? error : "Error al guardar, intenta de nuevo"}</span>
           )}
           <button
             className="btn btn-primary d-flex align-items-center justify-content-center shadow-premium"
