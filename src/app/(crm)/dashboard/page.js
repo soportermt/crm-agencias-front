@@ -7,6 +7,7 @@ import ExportButton from "@/components/common/ExportButton";
 import { reservationsMock, dailySalesMock, pendingTasksMock } from "@/mocks/dashboardMock";
 import { usuariosService } from "@/services/usuarios.service";
 import { dashboardService } from "@/services/dashboard.service";
+import InfoTableVendedor from "@/components/vendedores/InfoTableVendedor";
 
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
 
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const pendingTasks = pendingTasksMock;
   const [user, setUser] = useState(null);
   const [data, setData] = useState(null);
+  const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,8 +46,18 @@ export default function DashboardPage() {
       }
     };
 
+    async function loadVentas() {
+      try {
+        const data = await dashboardService.getMonthSales();
+        setSales(data);
+      } catch (error) {
+        console.error("Error fetching ventas:", error);
+      }
+    }
+
     fetchData();
     fetchUser();
+    loadVentas();
   }, []);
 
 
@@ -67,7 +79,7 @@ export default function DashboardPage() {
       currency: "MXN",
     }).format(value);
   };
-  
+
   return (
     <div className="container-fluid p-0">
       <div className="mb-4">
@@ -235,50 +247,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "12px" }}>
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-          <div>
-            <h2 className="font-inter mb-0 text-dark" style={{ fontSize: "16px" }}>
-              <span className="fw-semibold" style={{ color: "#0f1901" }}>Próximas </span>
-              <span className="fw-normal" style={{ color: "#0f1901" }}>reservas del mes</span>
-            </h2>
-          </div>
-
-          <div className="d-flex align-items-center gap-2">
-            <ExportButton onExport={() => console.log("Exportando reservas del dashboard...")} />
-
-            <a
-              href="#"
-              className="text-decoration-none fw-medium d-flex align-items-center gap-1 px-3 py-2 transition-smooth hover-underline"
-              style={{ color: "#0c5cc6", fontSize: "14px" }}
-              onClick={(e) => e.preventDefault()}
-            >
-              <span>Ir a la sección</span>
-              <i className="bi bi-arrow-up-right"></i>
-            </a>
-          </div>
-        </div>
-
-        <DataTable
-          columns={[
-            { key: "id", label: "ID", sortable: true },
-            { key: "folio", label: "Folio", sortable: true },
-            { key: "cliente", label: "Cliente", sortable: true },
-            { key: "hotel", label: "Hotel", sortable: true },
-            { key: "habitacion", label: "Tipo de habitación", sortable: true },
-            { key: "fecha", label: "Fecha de venta", sortable: true },
-            { key: "destino", label: "Destino", sortable: true },
-            { key: "descripcion", label: "Descripción", sortable: true },
-            { key: "total", label: "Total", sortable: true },
-            { key: "moneda", label: "Moneda", sortable: true },
-          ]}
-          data={reservations}
-          pagination={true}
-          currentPage={1}
-          totalPages={2}
-          totalItems={reservations.length}
-          emptyMessage="No hay próximas reservas."
-        />
+      <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "12px" }}>
+        <InfoTableVendedor data={sales} dashboard/>
       </div>
     </div>
   );

@@ -148,7 +148,7 @@ function exportToCSV(data) {
     URL.revokeObjectURL(url);
 }
 
-export default function InfoTableVendedor({ data }) {
+export default function InfoTableVendedor({ data, dashboard }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -208,55 +208,57 @@ export default function InfoTableVendedor({ data }) {
     return (
         <div>
             <div className='p-3 d-flex align-items-center justify-content-between'>
-                <p className='m-0' style={{ fontWeight: 500 }}>Listado de ventas</p>
+                <p className='m-0' style={{ fontWeight: 500 }}>{!dashboard ? 'Listado de ventas' : 'Servicios del mes'}</p>
                 <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
             </div>
-            <div className='row pb-3 px-3'>
-                <div className='col-6 d-flex gap-2'>
-                    <select
-                        name="estado"
-                        className="form-select form-select-sm"
-                        style={{ width: "fit-content", minWidth: "160px" }}
-                        value={statusFilter}
-                        onChange={(e) => {
-                            setStatusFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                    >
-                        <option value="">Todos los estados</option>
-                        {availableStatuses.map((st) => (
-                            <option key={st} value={st}>
-                                {st.charAt(0).toUpperCase() + st.slice(1)}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        name="destino"
-                        className="form-select form-select-sm"
-                        style={{ width: "fit-content", minWidth: "170px" }}
-                        value={destinationFilter}
-                        onChange={(e) => {
-                            setDestinationFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                    >
-                        <option value="">Todos los destinos</option>
-                        {availableDestinations.map((d) => (
-                            <option key={d} value={d}>
-                                {d}
-                            </option>
-                        ))}
-                    </select>
+            {!dashboard && (
+                <div className='row pb-3 px-3'>
+                    <div className='col-6 d-flex gap-2'>
+                        <select
+                            name="estado"
+                            className="form-select form-select-sm"
+                            style={{ width: "fit-content", minWidth: "160px" }}
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="">Todos los estados</option>
+                            {availableStatuses.map((st) => (
+                                <option key={st} value={st}>
+                                    {st.charAt(0).toUpperCase() + st.slice(1)}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            name="destino"
+                            className="form-select form-select-sm"
+                            style={{ width: "fit-content", minWidth: "170px" }}
+                            value={destinationFilter}
+                            onChange={(e) => {
+                                setDestinationFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="">Todos los destinos</option>
+                            {availableDestinations.map((d) => (
+                                <option key={d} value={d}>
+                                    {d}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className='col-6 d-flex justify-content-end'>
+                        <SearchBar
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            placeholder="Buscar por cliente, folio, hotel"
+                            width="300px"
+                        />
+                    </div>
                 </div>
-                <div className='col-6 d-flex justify-content-end'>
-                    <SearchBar
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder="Buscar por cliente, folio, hotel"
-                        width="300px"
-                    />
-                </div>
-            </div>
+            )}
             <DataTable
                 columns={columns}
                 data={paginatedData}

@@ -7,4 +7,10 @@ export const dashboardService = {
         });
         return data;
     },
+    async getMonthSales() {
+        const { data } = await api.get("/dashboard/getMonthSales", {
+            withCredentials: true,
+        });
+        return data;
+    },
 }

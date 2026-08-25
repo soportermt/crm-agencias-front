@@ -18,7 +18,7 @@ export default function BookingForm({ mode }) {
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }}>Información general</h5>
       <div className="row g-3">
-        <div className="col-12 col-md-6 col-lg-4">
+        <div className="col-12 col-md-6 col-lg-3">
           <VendedoresSelect
            value={booking.idVendedor}
             onChange={(vendedor) => {
