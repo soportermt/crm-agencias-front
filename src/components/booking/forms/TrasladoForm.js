@@ -174,7 +174,7 @@ export default function TrasladoForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Salida origen *</label>
+                    <label className="form-label">Pickup de salida *</label>
                     <input
                         type="time"
                         className="form-control"
@@ -185,7 +185,7 @@ export default function TrasladoForm() {
                 {isRedondo && (
                     <>
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Salida destino *</label>
+                            <label className="form-label">Horario de salida *</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -195,7 +195,7 @@ export default function TrasladoForm() {
                         </div>
 
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Recogida hotel *</label>
+                            <label className="form-label">Pickup de hotel *</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -205,7 +205,7 @@ export default function TrasladoForm() {
                         </div>
 
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Llegada origen *</label>
+                            <label className="form-label">Horario de llegada *</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -215,7 +215,7 @@ export default function TrasladoForm() {
                         </div>
 
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Llegada destino *</label>
+                            <label className="form-label">Pickup de llegada *</label>
                             <input
                                 type="time"
                                 className="form-control"
