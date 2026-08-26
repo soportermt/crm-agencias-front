@@ -2,10 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import StatCard from "@/components/common/StatCard";
-import { usuariosService } from "@/services/usuarios.service";
 import { dashboardService } from "@/services/dashboard.service";
 import InfoTableVendedor from "@/components/vendedores/InfoTableVendedor";
-import { vendedoresService } from "@/services/vendedores.service";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
@@ -41,12 +39,9 @@ function getServiceDetail(sale) {
   }
 }
 
-export default function DashboardAdmin() {
-  const [user, setUser] = useState(null);
+export default function DashboardAdmin({ user, sales, vendedores }) {
   const [data, setData] = useState(null);
-  const [sales, setSales] = useState([]);
   const [salesDay, setSalesDay] = useState([]);
-  const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,37 +57,6 @@ export default function DashboardAdmin() {
       }
     };
 
-    const fetchUser = async () => {
-      try {
-        const data = await usuariosService.getCurrentUser();
-        if (Array.isArray(data) && data.length > 0) {
-          setUser(data[0]);
-        } else if (data && !Array.isArray(data)) {
-          setUser(data);
-        }
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
-    };
-
-    async function loadVentas() {
-      try {
-        const data = await dashboardService.getMonthSales();
-        setSales(data);
-      } catch (error) {
-        console.error("Error fetching ventas:", error);
-      }
-    }
-
-    async function loadVendedores() {
-      try {
-        const vendedores = await vendedoresService.get();
-        setVendedores(vendedores);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
     async function loadVentasDia() {
       try {
         const data = await dashboardService.getDaySales();
@@ -103,9 +67,6 @@ export default function DashboardAdmin() {
     }
 
     fetchData();
-    fetchUser();
-    loadVentas();
-    loadVendedores();
     loadVentasDia();
   }, []);
 
@@ -219,7 +180,7 @@ export default function DashboardAdmin() {
           <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <p className="mb-0" style={{ fontWeight: 500 }}>
-                Ventas del día
+                Ventas del día <span style={{fontSize: 12, color: "rgba(0, 0, 0, 0.4)"}}>({salesDay.length} en total)</span> 
               </p>
               <Link
                 href="/reservaciones"

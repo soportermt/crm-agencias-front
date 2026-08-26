@@ -149,9 +149,9 @@ function exportToCSV(data) {
     URL.revokeObjectURL(url);
 }
 
-export default function InfoTableVendedor({ data, dashboard, vendedores }) {
+export default function InfoTableVendedor({ data, dashboard, vendedores, dashboardAgente }) {
     const [currentPage, setCurrentPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
+    const isLoading = data === undefined;
     const [searchValue, setSearchValue] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [destinationFilter, setDestinationFilter] = useState("");
@@ -208,8 +208,14 @@ export default function InfoTableVendedor({ data, dashboard, vendedores }) {
 
     return (
         <div>
-            <div className='p-3 d-flex align-items-center justify-content-between'>
-                <p className='m-0' style={{ fontWeight: 500 }}>{!dashboard ? 'Listado de ventas' : 'Servicios del mes'}</p>
+            <div className='p-2 d-flex align-items-center justify-content-between'>
+                <p className='m-0' style={{ fontWeight: 500 }}>
+                    {!dashboard
+                        ? 'Listado de ventas'
+                        : dashboardAgente
+                            ? 'Ventas creadas este mes'
+                            : 'Servicios del mes'}
+                </p>
                 {/* <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} /> */}
                 <div className="d-flex align-items-center gap-2">
                     {dashboard && vendedores?.length > 0 && (
@@ -235,7 +241,7 @@ export default function InfoTableVendedor({ data, dashboard, vendedores }) {
                 </div>
             </div>
             {!dashboard && (
-                <div className='row pb-3 px-3'>
+                <div className='row pb-2 px-3'>
                     <div className='col-6 d-flex gap-2'>
                         <select
                             name="estado"

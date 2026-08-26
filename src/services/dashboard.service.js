@@ -7,9 +7,13 @@ export const dashboardService = {
         });
         return data;
     },
-    async getMonthSales(idVendedor) {
+    async getMonthSales(idVendedor, idUsuario) {
+        const params = {};
+        if (idVendedor) params.id_vendedor = idVendedor;
+        if (idUsuario) params.id_usuario = idUsuario;
+    
         const { data } = await api.get("/dashboard/getMonthSales", {
-            params: idVendedor ? { id_vendedor: idVendedor } : {},
+            params,
             withCredentials: true,
         });
         return data;
