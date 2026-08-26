@@ -146,6 +146,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
               value={formatCurrency(data?.total_a_cobrar)}
               trend="up"
               hasShadow={true}
+              dashboard
             />
           </div>
           <div className="col-12 col-sm-6 col-md-3">
@@ -154,6 +155,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
               value={formatCurrency(data?.total_a_pagar)}
               trend="down"
               hasShadow={true}
+              dashboard
             />
           </div>
           <div className="col-12 col-sm-6 col-md-3">
@@ -162,6 +164,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
               value={formatCurrency(data?.total_generado)}
               trend="up"
               hasShadow={true}
+              dashboard
             />
           </div>
           <div className="col-12 col-sm-6 col-md-3">
@@ -170,6 +173,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
               value={data?.clientes_registrados?.toLocaleString("es-MX") || "0"}
               trend="user"
               hasShadow={true}
+              dashboard
             />
           </div>
         </div>

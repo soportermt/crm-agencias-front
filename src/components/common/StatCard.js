@@ -14,13 +14,14 @@ export default function StatCard({
   titleColor,
   titleFontFamily = "font-inter",
   hasShadow = false,
+  dashboard
 }) {
   const isUp = trend === "up";
   const isDown = trend === "down";
   const isUser = trend === "user";
 
   const finalLinkText = linkText || (size === "md" ? "Ver detalles" : null);
-  const showFooter = !!subtext || !!finalLinkText;
+  const showFooter = !dashboard && (!!subtext || !!finalLinkText);
 
   return (
     <div
