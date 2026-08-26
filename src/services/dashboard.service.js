@@ -14,4 +14,10 @@ export const dashboardService = {
         });
         return data;
     },
+    async getDaySales() {
+        const { data } = await api.get("/dashboard/getDaySales", {
+            withCredentials: true,
+        });
+        return data;
+    },
 }

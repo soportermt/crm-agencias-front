@@ -9,8 +9,39 @@ import { usuariosService } from "@/services/usuarios.service";
 import { dashboardService } from "@/services/dashboard.service";
 import InfoTableVendedor from "@/components/vendedores/InfoTableVendedor";
 import { vendedoresService } from "@/services/vendedores.service";
+import Link from "next/link";
 
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
+function parseDesglose(desgloseStr) {
+  try {
+    return typeof desgloseStr === "string" ? JSON.parse(desgloseStr) : desgloseStr;
+  } catch {
+    return {};
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr || dateStr === "0000-00-00") return "-";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("es-MX", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+function getServiceDetail(sale) {
+  const d = parseDesglose(sale.desglose);
+
+  switch (Number(sale.id_tipo_servicio)) {
+    case 2: // traslado
+      return `${d.origen || "-"} → ${d.destino || "-"}${d.redondo ? " (redondo)" : ""}`;
+    case 1: // hospedaje
+      const noHab = d.habitaciones?.length || d.no_hab || 0;
+      return `${noHab} habitación${noHab === 1 ? "" : "es"} · ${d.ocupacion || ""}`;
+    default: // tours, actividades, etc.
+      return d.ocupacion || sale.descripcion;
+  }
+}
 
 export default function DashboardPage() {
   const reservations = reservationsMock;
@@ -19,6 +50,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const [data, setData] = useState(null);
   const [sales, setSales] = useState([]);
+  const [salesDay, setSalesDay] = useState([]);
   const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,13 +95,23 @@ export default function DashboardPage() {
         setVendedores(vendedores);
       } catch (err) {
         console.error(err);
-      } 
+      }
+    }
+
+    async function loadVentasDia() {
+      try {
+        const data = await dashboardService.getDaySales();
+        setSalesDay(data);
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     fetchData();
     fetchUser();
     loadVentas();
     loadVendedores();
+    loadVentasDia();
   }, []);
 
 
@@ -161,106 +203,149 @@ export default function DashboardPage() {
       )}
 
       <div className="row g-3 mb-4">
-        <div className="col-12 col-md-7">
-          <div className="bg-white p-4 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
+        <div className="col-12 col-md-6">
+          <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="fw-normal font-inter mb-0" style={{ fontSize: "16px", color: "#0f1901" }}>
+              <p className="mb-0" style={{ fontWeight: 500 }}>
                 Ventas del día
-              </h2>
-              <a
-                href="#"
+              </p>
+              <Link
+                href="/reservaciones"
+                target="_blank"
                 className="text-decoration-none fw-medium d-flex align-items-center gap-1 transition-smooth hover-underline"
                 style={{ color: "#0c5cc6", fontSize: "14px" }}
-                onClick={(e) => e.preventDefault()}
               >
                 <span>Ir a la sección</span>
                 <i className="bi bi-arrow-up-right"></i>
-              </a>
+              </Link>
             </div>
 
-            <div className="d-flex flex-column" style={{ gap: "6px" }}>
-              {dailySales.map((sale, index) => (
-                <div
-                  key={index}
-                  className="transition-smooth"
-                  style={{ backgroundColor: "rgba(71, 71, 71, 0.05)", padding: "10px 16px", borderRadius: "12px" }}
-                >
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div style={{ fontFamily: "var(--font-inter)" }}>
-                      <h4 className="fw-semibold mb-0.5" style={{ fontSize: "13px", color: "#1e293b" }}>
-                        {sale.hotel}
-                      </h4>
-                      <p className="mb-1 fw-medium" style={{ fontSize: "12px", color: "#1e293b" }}>
-                        {sale.detail}
-                      </p>
-                      <p className="mb-0 font-inter" style={{ fontSize: "12px", color: "rgba(64, 64, 64, 0.8)" }}>
-                        Fecha del servicio: <span className="fw-semibold">{sale.dates}</span>
-                      </p>
+            <div
+              className="d-flex flex-column pe-1"
+              style={{
+                gap: "6px",
+                maxHeight: "150px",
+                overflowY: "auto",
+              }}
+            >
+              {loading ? (
+                [1, 2, 3].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="placeholder-glow"
+                    style={{
+                      backgroundColor: "rgb(231, 241, 254, 0.6)",
+                      padding: "10px 16px",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div style={{ width: "70%" }}>
+                        <span
+                          className="placeholder col-8 mb-1"
+                          style={{ height: "13px", borderRadius: "4px", display: "block" }}
+                        />
+                        <span
+                          className="placeholder col-6 mb-1"
+                          style={{ height: "12px", borderRadius: "4px", display: "block" }}
+                        />
+                        <span
+                          className="placeholder col-10"
+                          style={{ height: "11px", borderRadius: "4px", display: "block" }}
+                        />
+                      </div>
+                      <span
+                        className="placeholder col-3"
+                        style={{ height: "14px", borderRadius: "4px" }}
+                      />
                     </div>
-                    <span
-                      className="font-inter fw-semibold"
-                      style={{ fontSize: "12px", color: "#227cf2" }}
-                    >
-                      {sale.type}
-                    </span>
                   </div>
+                ))
+              ) : salesDay.length === 0 ? (
+                <div
+                  className="d-flex flex-column align-items-center justify-content-center text-center"
+                  style={{ padding: "32px 16px", gap: "8px" }}
+                >
+                  <i
+                    className="bi bi-calendar-x"
+                    style={{ fontSize: "24px", color: "rgba(64, 64, 64, 0.35)" }}
+                  ></i>
+                  <p
+                    className="mb-0 font-inter fw-medium"
+                    style={{ fontSize: "13px", color: "#1e293b" }}
+                  >
+                    Sin ventas registradas hoy
+                  </p>
+                  <p
+                    className="mb-0 font-inter"
+                    style={{ fontSize: "12px", color: "rgba(64, 64, 64, 0.6)" }}
+                  >
+                    Aquí aparecerán los servicios en cuanto se generen ventas del día
+                  </p>
                 </div>
-              ))}
+              ) : (
+                salesDay.map((sale, index) => (
+                  <div
+                    key={index}
+                    className="transition-smooth"
+                    style={{
+                      backgroundColor: "rgba(231, 241, 254, 0.6)",
+                      padding: "10px 16px",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div style={{ fontFamily: "var(--font-inter)" }}>
+                        <h4
+                          className="fw-semibold mb-0.5"
+                          style={{ fontSize: "13px", color: "rgb(12, 92, 198)" }}
+                        >
+                          {sale.descripcion || sale.folio}
+                        </h4>
+                        <p
+                          className="mb-1 fw-medium"
+                          style={{ fontSize: "12px", color: "#1e293b" }}
+                        >
+                          {getServiceDetail(sale)}
+                        </p>
+                        <p
+                          className="mb-0 font-inter"
+                          style={{ fontSize: "12px", color: "rgba(64, 64, 64, 0.8)" }}
+                        >
+                          Fecha del servicio:{" "}
+                          <span className="fw-semibold">
+                            {sale.fin_servicio &&
+                              sale.fin_servicio !== sale.inicio_servicio &&
+                              sale.fin_servicio !== "0000-00-00" &&
+                              sale.fin_servicio !== "0000-00-00 00:00:00"
+                              ? `${formatDate(sale.inicio_servicio)} a ${formatDate(sale.fin_servicio)}`
+                              : formatDate(sale.inicio_servicio)}
+                          </span>
+                        </p>
+                      </div>
+                      <span
+                        className="font-inter fw-semibold"
+                        style={{ fontSize: "12px", color: "#227cf2" }}
+                      >
+                        {sale.tipo_servicio}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-md-5">
+        <div className="col-12 col-md-6">
           <div className="bg-white p-4 border shadow-premium h-100 d-flex flex-column" style={{ borderRadius: "12px" }}>
-            <div className="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-              <h2 className="font-inter mb-0" style={{ fontSize: "16px", color: "#0f1901" }}>
-                <span className="fw-semibold">Pendientes</span>
-                <span className="fw-normal"> del día</span>
-              </h2>
-              <a
-                href="#"
-                className="text-decoration-none fw-medium transition-smooth hover-underline"
-                style={{ color: "#0c5cc6", fontSize: "14px" }}
-                onClick={(e) => e.preventDefault()}
-              >
-                Ver más
-              </a>
-            </div>
 
-            <div className="d-flex flex-column justify-content-between flex-grow-1">
-              {pendingTasks.map((task, index) => (
-                <div key={index} className="d-flex align-items-center" style={{ gap: "8px", padding: "4px 8px" }}>
-                  <div
-                    className="d-flex align-items-center justify-content-center"
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      minWidth: "36px",
-                      backgroundColor: "#f4faeb",
-                      color: "#000000",
-                      borderRadius: "8px",
-                      fontSize: "16px",
-                    }}
-                  >
-                    <i className="bi bi-exclamation-triangle"></i>
-                  </div>
-                  <div className="flex-grow-1" style={{ fontFamily: "var(--font-inter)" }}>
-                    <h4 className="fw-normal text-dark mb-0" style={{ fontSize: "14px", lineHeight: "1.2" }}>
-                      Atraso de pago #{task.id}
-                    </h4>
-                    <p className="mb-0" style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.4)", lineHeight: "1.2" }}>
-                      {task.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
       <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "12px" }}>
-        <InfoTableVendedor data={sales} dashboard vendedores={vendedores}/>
+        <InfoTableVendedor data={sales} dashboard vendedores={vendedores} />
       </div>
     </div>
   );
