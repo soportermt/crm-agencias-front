@@ -8,6 +8,7 @@ import { reservationsMock, dailySalesMock, pendingTasksMock } from "@/mocks/dash
 import { usuariosService } from "@/services/usuarios.service";
 import { dashboardService } from "@/services/dashboard.service";
 import InfoTableVendedor from "@/components/vendedores/InfoTableVendedor";
+import { vendedoresService } from "@/services/vendedores.service";
 
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
 
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const [data, setData] = useState(null);
   const [sales, setSales] = useState([]);
+  const [vendedores, setVendedores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,9 +57,19 @@ export default function DashboardPage() {
       }
     }
 
+    async function loadVendedores() {
+      try {
+        const vendedores = await vendedoresService.get();
+        setVendedores(vendedores);
+      } catch (err) {
+        console.error(err);
+      } 
+    }
+
     fetchData();
     fetchUser();
     loadVentas();
+    loadVendedores();
   }, []);
 
 
@@ -248,7 +260,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "12px" }}>
-        <InfoTableVendedor data={sales} dashboard/>
+        <InfoTableVendedor data={sales} dashboard vendedores={vendedores}/>
       </div>
     </div>
   );

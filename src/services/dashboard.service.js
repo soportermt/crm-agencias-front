@@ -7,8 +7,9 @@ export const dashboardService = {
         });
         return data;
     },
-    async getMonthSales() {
+    async getMonthSales(idVendedor) {
         const { data } = await api.get("/dashboard/getMonthSales", {
+            params: idVendedor ? { id_vendedor: idVendedor } : {},
             withCredentials: true,
         });
         return data;

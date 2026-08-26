@@ -104,6 +104,7 @@ function mapVentaToRow(venta) {
         total,
         estatus: venta.estatus,
         fecha: formatDate(venta.fecha),
+        id_vendedor: venta.id_vendedor,
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
         _venta: venta
     };
@@ -148,13 +149,14 @@ function exportToCSV(data) {
     URL.revokeObjectURL(url);
 }
 
-export default function InfoTableVendedor({ data, dashboard }) {
+export default function InfoTableVendedor({ data, dashboard, vendedores }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchValue, setSearchValue] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [destinationFilter, setDestinationFilter] = useState("");
+    const [vendedorFilter, setVendedorFilter] = useState("");
 
     const rows = useMemo(() => {
         if (!Array.isArray(data)) return [];
@@ -209,7 +211,29 @@ export default function InfoTableVendedor({ data, dashboard }) {
         <div>
             <div className='p-3 d-flex align-items-center justify-content-between'>
                 <p className='m-0' style={{ fontWeight: 500 }}>{!dashboard ? 'Listado de ventas' : 'Servicios del mes'}</p>
-                <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
+                {/* <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} /> */}
+                <div className="d-flex align-items-center gap-2">
+                    {dashboard && vendedores?.length > 0 && (
+                        <select
+                            name="vendedor"
+                            className="form-select form-select-sm"
+                            style={{ width: "fit-content", minWidth: "160px" }}
+                            value={vendedorFilter}
+                            onChange={(e) => {
+                                setVendedorFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="">Todos los vendedores</option>
+                            {vendedores.map((v) => (
+                                <option key={v.id} value={v.id}>
+                                    {v.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
+                </div>
             </div>
             {!dashboard && (
                 <div className='row pb-3 px-3'>
