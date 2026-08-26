@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import StatCard from "@/components/common/StatCard";
-import DataTable from "@/components/common/DataTable";
-import ExportButton from "@/components/common/ExportButton";
-import { reservationsMock, dailySalesMock, pendingTasksMock } from "@/mocks/dashboardMock";
 import { usuariosService } from "@/services/usuarios.service";
 import { dashboardService } from "@/services/dashboard.service";
 import InfoTableVendedor from "@/components/vendedores/InfoTableVendedor";
 import { vendedoresService } from "@/services/vendedores.service";
 import Link from "next/link";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
 function parseDesglose(desgloseStr) {
@@ -44,9 +42,6 @@ function getServiceDetail(sale) {
 }
 
 export default function DashboardPage() {
-  const reservations = reservationsMock;
-  const dailySales = dailySalesMock;
-  const pendingTasks = pendingTasksMock;
   const [user, setUser] = useState(null);
   const [data, setData] = useState(null);
   const [sales, setSales] = useState([]);
@@ -133,6 +128,23 @@ export default function DashboardPage() {
       currency: "MXN",
     }).format(value);
   };
+
+  const chartData = React.useMemo(() => {
+    if (!sales.length) return [];
+    const totals = {};
+    sales.forEach((venta) => {
+      const fecha = venta.fecha?.split(" ")[0];
+      if (!fecha) return;
+      const monto = (venta.ventasServicioses || []).reduce(
+        (sum, s) => sum + (Number(s.tarifa_publica) || 0),
+        0
+      );
+      totals[fecha] = (totals[fecha] || 0) + monto;
+    });
+    return Object.keys(totals)
+      .sort()
+      .map((fecha) => ({ fecha: formatDate(fecha), total: totals[fecha] }));
+  }, [sales]);
 
   return (
     <div className="container-fluid p-0">
@@ -338,8 +350,31 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-12 col-md-6">
-          <div className="bg-white p-4 border shadow-premium h-100 d-flex flex-column" style={{ borderRadius: "12px" }}>
+          <div
+            className="bg-white p-3 border shadow-premium h-100 d-flex flex-column"
+            style={{ borderRadius: "12px" }}
+          >
+            <p className="mb-3" style={{ fontWeight: 500 }}>Ventas del mes</p>
 
+            <div className="d-flex align-items-center justify-content-center">
+              {loading ? (
+                <div className="placeholder-glow w-100 h-100">
+                  <span className="placeholder w-100 h-100" style={{ borderRadius: "8px" }} />
+                </div>
+              ) : chartData.length === 0 ? (
+                <div className="text-secondary small">Sin ventas registradas este mes</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={150}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="fecha" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Line type="monotone" dataKey="total" stroke="#0c5cc6" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </div>
       </div>

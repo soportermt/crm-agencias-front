@@ -152,7 +152,6 @@ function exportToCSV(data) {
 export default function InfoTableVendedor({ data, dashboard, vendedores }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchValue, setSearchValue] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [destinationFilter, setDestinationFilter] = useState("");
