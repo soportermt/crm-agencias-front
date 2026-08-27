@@ -14,13 +14,14 @@ export default function StatCard({
   titleColor,
   titleFontFamily = "font-inter",
   hasShadow = false,
+  dashboard
 }) {
   const isUp = trend === "up";
   const isDown = trend === "down";
   const isUser = trend === "user";
 
   const finalLinkText = linkText || (size === "md" ? "Ver detalles" : null);
-  const showFooter = !!subtext || !!finalLinkText;
+  const showFooter = !dashboard && (!!subtext || !!finalLinkText);
 
   return (
     <div
@@ -31,7 +32,7 @@ export default function StatCard({
         boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
         minHeight: size === "sm" ? "86px" : "104px",
-        padding: "12px 14px",
+        padding: "8px 14px",
         overflow: "hidden",
       }}
     >
