@@ -8,6 +8,7 @@ import { dashboardService } from '@/services/dashboard.service';
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
 export default function DashboardAgente({ user, sales }) {
     const [data, setData] = useState(null);
+    const [dataUser, setDataUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -26,6 +27,21 @@ export default function DashboardAgente({ user, sales }) {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (!user?.id_usuario) return;
+
+        async function loadInfoUser() {
+            try {
+                const dataUser = await dashboardService.getSalesStatsByUser(user.id_usuario);
+                setDataUser(dataUser);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        loadInfoUser();
+    }, [user]);
+
     const rawDate = new Intl.DateTimeFormat("es-MX", {
         weekday: "long",
         day: "numeric",
@@ -35,6 +51,18 @@ export default function DashboardAgente({ user, sales }) {
 
     const fecha = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
     const userName = user?.idUsuario?.profiles?.fullname || user?.nombre || "Usuario";
+
+    const formatCurrency = (value) => {
+        if (value == null || isNaN(value)) return "$0.00";
+        return new Intl.NumberFormat("es-MX", {
+          style: "currency",
+          currency: "MXN",
+        }).format(value);
+      };
+
+    if (loading) {
+        return <div>Cargando...</div>;
+    }
 
     return (
         <div className="container-fluid p-0">
@@ -71,8 +99,8 @@ export default function DashboardAgente({ user, sales }) {
                 <div className="row g-3 mb-4">
                     <div className="col-12 col-sm-6 col-md-3">
                         <StatCard
-                            title="Total a Cobrar"
-                            value="0"
+                            title="Total de ventas en el mes"
+                            value={formatCurrency(dataUser?.total_ventas_mes)}
                             trend="up"
                             hasShadow={true}
                             dashboard
@@ -80,17 +108,8 @@ export default function DashboardAgente({ user, sales }) {
                     </div>
                     <div className="col-12 col-sm-6 col-md-3">
                         <StatCard
-                            title="Total a Pagar"
-                            value="0"
-                            trend="down"
-                            hasShadow={true}
-                            dashboard
-                        />
-                    </div>
-                    <div className="col-12 col-sm-6 col-md-3">
-                        <StatCard
-                            title="Total Generado en Ventas"
-                            value="0"
+                            title="Total de ventas en el año"
+                            value={formatCurrency(dataUser?.total_ventas_anio)}
                             trend="up"
                             hasShadow={true}
                             dashboard
@@ -98,8 +117,17 @@ export default function DashboardAgente({ user, sales }) {
                     </div>
                     <div className="col-12 col-sm-6 col-md-3">
                         <StatCard
-                            title="Clientes Registrados"
-                            value="0"
+                            title="Total de pagos pendientes"
+                            value={formatCurrency(dataUser?.total_pagos_pendientes)}
+                            trend="up"
+                            hasShadow={true}
+                            dashboard
+                        />
+                    </div>
+                    <div className="col-12 col-sm-6 col-md-3">
+                        <StatCard
+                            title="Comisión generada"
+                            value={formatCurrency(dataUser?.comision_generada)}
                             trend="user"
                             hasShadow={true}
                             dashboard

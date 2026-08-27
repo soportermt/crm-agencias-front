@@ -32,7 +32,7 @@ export default function StatCard({
         boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
         minHeight: size === "sm" ? "86px" : "104px",
-        padding: "12px 14px",
+        padding: "8px 14px",
         overflow: "hidden",
       }}
     >
