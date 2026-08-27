@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import InfoTableVendedor from '../vendedores/InfoTableVendedor';
 import StatCard from './StatCard';
 import { dashboardService } from '@/services/dashboard.service';
+import { CobradoPendientePieChart, VentasBarChart } from './VentasCharts';
 
 const SKELETON_KEYS = ["cobrar", "pagar", "generado", "clientes"];
 export default function DashboardAgente({ user, sales }) {
@@ -55,10 +56,10 @@ export default function DashboardAgente({ user, sales }) {
     const formatCurrency = (value) => {
         if (value == null || isNaN(value)) return "$0.00";
         return new Intl.NumberFormat("es-MX", {
-          style: "currency",
-          currency: "MXN",
+            style: "currency",
+            currency: "MXN",
         }).format(value);
-      };
+    };
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -126,7 +127,7 @@ export default function DashboardAgente({ user, sales }) {
                     </div>
                     <div className="col-12 col-sm-6 col-md-3">
                         <StatCard
-                            title="Comisión generada"
+                            title="Comisión generada (fee)"
                             value={formatCurrency(dataUser?.comision_generada)}
                             trend="user"
                             hasShadow={true}
@@ -138,12 +139,10 @@ export default function DashboardAgente({ user, sales }) {
 
             <div className="row g-3 mb-4">
                 <div className="col-12 col-md-6">
-                    <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
-                    </div>
+                    <VentasBarChart dataUser={dataUser} />
                 </div>
                 <div className="col-12 col-md-6">
-                    <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
-                    </div>
+                    <CobradoPendientePieChart dataUser={dataUser} />
                 </div>
             </div>
 
