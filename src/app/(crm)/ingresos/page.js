@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import StatCard from "@/components/common/StatCard";
-import IncomeChart from "@/components/ingresos/IncomeChart";
 import IngresosTable from "@/components/ingresos/IngresosTable";
 import {
-  ingresosChartMock,
-  ingresosMetricsMock,
   ingresosTableMock,
   pendientesTableMock,
 } from "@/mocks/ingresosMock";
+import Chart from "@/components/ingresos/Chart";
+import { ingresosService } from "@/services/ingresos.service";
 
 export default function IngresosPage() {
   const [activeTab, setActiveTab] = useState("pendientes");
@@ -19,6 +17,8 @@ export default function IngresosPage() {
     startDate: "2026-05-01",
     endDate: "2026-12-31",
   });
+
+  const [data, setData] = useState([]);
 
   const ITEMS_PER_PAGE = 5;
 
@@ -64,6 +64,19 @@ export default function IngresosPage() {
   );
 
   useEffect(() => {
+    async function loadChartData() {
+      try {
+        const data = await ingresosService.getReporteIngresosAnio();
+        setData(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadChartData();
+  }, []);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, searchValue]);
 
@@ -81,59 +94,7 @@ export default function IngresosPage() {
             Control de ingresos
           </h1>
 
-          <div className="d-flex gap-4" style={{ flexWrap: "wrap" }}>
-            <div style={{ flex: "1 1 0", minWidth: "300px" }}>
-              <IncomeChart
-                data={ingresosChartMock}
-                onExport={() => console.log("Exportar PDF")}
-              />
-            </div>
-
-            <div style={{ flex: "1 1 0", minWidth: "300px" }}>
-              <div className="row g-4 h-100">
-                <div className="col-6">
-                  <StatCard
-                    title={
-                      <>
-                        Total ingresos <span className="fw-semibold">mayo</span>
-                      </>
-                    }
-                    value={ingresosMetricsMock.totalIngresos.value}
-                    subtext={ingresosMetricsMock.totalIngresos.subtext}
-                    valueColor="#227cf2"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title="Pendientes de pago"
-                    value={ingresosMetricsMock.pendientesPago.value}
-                    subtext={ingresosMetricsMock.pendientesPago.subtext}
-                    valueColor="#b9861f"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title="Vencidos"
-                    value={ingresosMetricsMock.vencidos.value}
-                    linkText="Ver detalles"
-                    valueColor="#af233a"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title={
-                      <>
-                        Pagados <span className="fw-semibold">este mes</span>
-                      </>
-                    }
-                    value={ingresosMetricsMock.pagadosEsteMes.value}
-                    subtext={ingresosMetricsMock.pagadosEsteMes.subtext}
-                    valueColor="#0e803c"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <Chart chart={data}/>
 
           <IngresosTable
             activeTab={activeTab}

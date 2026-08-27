@@ -1,17 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
+import { DocumentArrowDownIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 
 export default function IncomeChart({
-  title = "Reporte de ingresos del año",
   data = [],
-  onExport,
   barColor = "#619e05",
   barBgColor = "rgba(97,158,5,0.15)",
 }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const maxValue = Math.max(...data.map((d) => d.value));
+  const maxValue = Math.max(...data.map((d) => d.value), 1);
+  const currentYear = new Date().getFullYear();
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("es-MX", {
@@ -19,6 +18,33 @@ export default function IncomeChart({
       currency: "MXN",
       minimumFractionDigits: 0,
     }).format(value);
+
+  const handleExportCSV = () => {
+    if (!data || data.length === 0) {
+      alert("No hay datos disponibles para exportar.");
+      return;
+    }
+
+    const headers = ["Mes", "Ingreso"];
+
+    const rows = data.map((item) => [
+      `"${item.month}"`,
+      item.value.toFixed(2),
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `reporte_ingresos_${currentYear}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div
@@ -34,22 +60,26 @@ export default function IncomeChart({
           <span className="fw-semibold">ingresos</span>
           <span className="fw-normal"> del año</span>
         </p>
-        <button
-          onClick={onExport}
-          className="btn d-flex align-items-center gap-2 border-0"
-          style={{
-            backgroundColor: "#227cf2",
-            color: "#f2f2f2",
-            borderRadius: "12px",
-            padding: "8px 12px",
-            fontSize: "11px",
-            fontWeight: 700,
-            lineHeight: "18px",
-          }}
-        >
-          <DocumentArrowDownIcon style={{ width: "16px", height: "16px" }} />
-          <span>Exportar PDF</span>
-        </button>
+
+        <div className="d-flex gap-2">
+
+          <button
+            onClick={handleExportCSV}
+            className="btn d-flex align-items-center gap-2 border-0"
+            style={{
+              backgroundColor: "#227cf2",
+              color: "#f2f2f2",
+              borderRadius: "12px",
+              padding: "8px 12px",
+              fontSize: "11px",
+              fontWeight: 700,
+              lineHeight: "18px",
+            }}
+          >
+            <DocumentArrowDownIcon style={{ width: "16px", height: "16px" }} />
+            <span>Exportar</span>
+          </button>
+        </div>
       </div>
 
       <div
@@ -89,7 +119,7 @@ export default function IncomeChart({
                     className="font-jakarta fw-medium mb-0"
                     style={{ fontSize: "10px", color: "#71717a", lineHeight: "20px" }}
                   >
-                    {item.month} 2025
+                    {item.month} {item.year || currentYear}
                   </p>
                   <p
                     className="font-jakarta fw-bold mb-0"
