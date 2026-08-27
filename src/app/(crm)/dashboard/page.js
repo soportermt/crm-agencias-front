@@ -54,10 +54,10 @@ export default function Dashboard() {
     }, []);
 
     const rol = user?.rol?.toLowerCase();
-    
+
     useEffect(() => {
         if (rol !== "agente" || !user?.id_usuario) return;
-    
+
         async function loadVendedoresSuyos() {
             try {
                 const data = await dashboardService.getMonthSales(undefined, user.id_usuario);
@@ -66,12 +66,16 @@ export default function Dashboard() {
                 console.error(err);
             }
         }
-    
+
         loadVendedoresSuyos();
     }, [user, rol]);
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return (<div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Cargando...</span>
+            </div>
+        </div>)
     }
 
     return (

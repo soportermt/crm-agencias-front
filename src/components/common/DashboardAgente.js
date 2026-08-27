@@ -61,10 +61,6 @@ export default function DashboardAgente({ user, sales }) {
         }).format(value);
     };
 
-    if (loading) {
-        return <div>Cargando...</div>;
-    }
-
     return (
         <div className="container-fluid p-0">
             <div className="mb-4">
