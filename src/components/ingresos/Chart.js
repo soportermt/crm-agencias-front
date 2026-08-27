@@ -3,7 +3,15 @@ import IncomeChart from './IncomeChart'
 import StatCard from '../common/StatCard'
 import { ingresosMetricsMock } from '@/mocks/ingresosMock'
 
-export default function Chart({chart}) {
+export default function Chart({ chart, resumen }) {
+    const formatCurrency = (value) => {
+        if (value == null || isNaN(value)) return "$0.00";
+        return new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+        }).format(value);
+    };
+
     return (
         <div className="d-flex gap-4" style={{ flexWrap: "wrap" }}>
             <div style={{ flex: "1 1 0", minWidth: "300px" }}>
@@ -19,28 +27,36 @@ export default function Chart({chart}) {
                         <StatCard
                             title={
                                 <>
-                                    Total ingresos <span className="fw-semibold">mayo</span>
+                                    Total ingresos en <span className="fw-semibold">{resumen?.mes}</span>
                                 </>
                             }
-                            value={ingresosMetricsMock.totalIngresos.value}
-                            subtext={ingresosMetricsMock.totalIngresos.subtext}
+                            value={formatCurrency(resumen?.total_ingresos)}
                             valueColor="#227cf2"
+                            dashboard
                         />
                     </div>
                     <div className="col-6">
                         <StatCard
                             title="Pendientes de pago"
-                            value={ingresosMetricsMock.pendientesPago.value}
-                            subtext={ingresosMetricsMock.pendientesPago.subtext}
+                            subtext={
+                                <>
+                                    {resumen?.pendientes_pago} pagos pendientes
+                                </>
+                            }
+                            value={formatCurrency(resumen?.total_pendientes_pago)}
                             valueColor="#b9861f"
                         />
                     </div>
                     <div className="col-6">
                         <StatCard
                             title="Vencidos"
-                            value={ingresosMetricsMock.vencidos.value}
-                            linkText="Ver detalles"
+                            value={formatCurrency(resumen?.total_vencidos)}
                             valueColor="#af233a"
+                            subtext={
+                                <>
+                                    {resumen?.vencidos} pagos vencidos
+                                </>
+                            }
                         />
                     </div>
                     <div className="col-6">
@@ -50,9 +66,13 @@ export default function Chart({chart}) {
                                     Pagados <span className="fw-semibold">este mes</span>
                                 </>
                             }
-                            value={ingresosMetricsMock.pagadosEsteMes.value}
-                            subtext={ingresosMetricsMock.pagadosEsteMes.subtext}
+                            value={formatCurrency(resumen?.total_pagados_mes)}
                             valueColor="#0e803c"
+                            subtext={
+                                <>
+                                    {resumen?.pagados_mes} pagados este mes
+                                </>
+                            }
                         />
                     </div>
                 </div>

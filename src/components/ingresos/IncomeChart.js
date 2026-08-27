@@ -48,7 +48,7 @@ export default function IncomeChart({
 
   return (
     <div
-      className="bg-white border p-4 h-100 d-flex flex-column"
+      className="bg-white border p-2 h-100 d-flex flex-column"
       style={{ borderRadius: "12px" }}
     >
       <div className="d-flex justify-content-between align-items-center mb-3">

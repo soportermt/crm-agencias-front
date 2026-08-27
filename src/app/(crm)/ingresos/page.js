@@ -19,6 +19,7 @@ export default function IngresosPage() {
   });
 
   const [data, setData] = useState([]);
+  const [resumen, setResumen] = useState([]);
 
   const ITEMS_PER_PAGE = 5;
 
@@ -66,8 +67,15 @@ export default function IngresosPage() {
   useEffect(() => {
     async function loadChartData() {
       try {
-        const data = await ingresosService.getReporteIngresosAnio();
-        setData(data);
+        const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+        const currentUser = storedUser ? JSON.parse(storedUser) : null;
+        const idUsuario = currentUser?.id_usuario || currentUser?.id;
+        const [dataAnio, dataResumen] = await Promise.all([
+          ingresosService.getReporteIngresosAnio(),
+          idUsuario ? ingresosService.getResumenVentas(idUsuario) : Promise.resolve([]),
+        ]);
+        setData(dataAnio || []);
+        setResumen(dataResumen || []);
       } catch (err) {
         console.error(err);
       }
@@ -94,7 +102,7 @@ export default function IngresosPage() {
             Control de ingresos
           </h1>
 
-          <Chart chart={data}/>
+          <Chart chart={data} resumen={resumen}/>
 
           <IngresosTable
             activeTab={activeTab}
