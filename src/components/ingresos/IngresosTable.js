@@ -88,28 +88,28 @@ function exportToCSV(data) {
   const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Comisión", "Moneda", "Estatus"];
 
   const rows = data.map((row) => [
-      row.folio,
-      row.cliente,
-      row.descripcion,
-      row.tipo_servicio,
-      row.fecha_limite,
-      row.tarifa_publica,
-      row.fee,
-      row.moneda,
-      getEstatusByFechaLimite(row.fecha_limite),
+    row.folio,
+    row.cliente,
+    row.descripcion,
+    row.tipo_servicio,
+    row.fecha_limite,
+    row.tarifa_publica,
+    row.fee,
+    row.moneda,
+    getEstatusByFechaLimite(row.fecha_limite),
   ]);
 
   const escapeCsvValue = (value) => {
-      const str = String(value ?? "");
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-          return `"${str.replace(/"/g, '""')}"`;
-      }
-      return str;
+    const str = String(value ?? "");
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
   };
 
   const csvContent = [headers, ...rows]
-      .map((r) => r.map(escapeCsvValue).join(","))
-      .join("\n");
+    .map((r) => r.map(escapeCsvValue).join(","))
+    .join("\n");
 
   const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -136,7 +136,7 @@ export default function IngresosTable({
   endDate,
   onDateRangeChange,
 }) {
-
+  const isPendientes = activeTab === "pendientes";
   const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return "$0.00";
     return new Intl.NumberFormat("es-MX", {
@@ -220,24 +220,25 @@ export default function IngresosTable({
   return (
     <div>
       <div className="d-flex align-items-center gap-2 mb-3">
-        {["pendientes", "lista"].map((tab) => {
-          const isActive = activeTab === tab;
-          const label = tab === "pendientes" ? "Pendientes" : "Lista de pagos";
+        {[
+          { key: "pendientes", label: "Pendientes" },
+          { key: "lista", label: "Lista de pagos" },
+        ].map((tab) => {
+          const isActive = activeTab === tab.key;
           return (
             <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
+              key={tab.key}
+              onClick={() => onTabChange(tab.key)}
               className={`btn border-0 transition-smooth ${isActive ? "bg-brand-blue-light text-brand-blue" : ""}`}
               style={{
                 padding: "12px 24px",
                 borderRadius: "24px",
                 fontSize: "14px",
                 color: isActive ? undefined : "rgba(0,0,0,0.4)",
-                fontWeight: isActive ? 500 : 500,
-                overflow: "hidden",
+                fontWeight: 500,
               }}
             >
-              {label}
+              {tab.label}
             </button>
           );
         })}
@@ -265,42 +266,47 @@ export default function IngresosTable({
             <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
           </div>
 
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <div className="d-flex align-items-center gap-2">
-              <DatePicker
-                selectsRange={true}
-                startDate={startDate}
-                endDate={endDate}
-                onChange={handleDateChange}
-                isClearable={true}
-                placeholderText="Filtrar por fecha límite"
-                locale="es"
-                dateFormat="dd/MM/yyyy"
-                className="form-control form-control-sm"
-                autoComplete="off"
+        </div>
+        {isPendientes ?
+          <div>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="d-flex align-items-center gap-2">
+                <DatePicker
+                  selectsRange={true}
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={handleDateChange}
+                  isClearable={true}
+                  placeholderText="Filtrar por fecha límite"
+                  locale="es"
+                  dateFormat="dd/MM/yyyy"
+                  className="form-control form-control-sm"
+                  autoComplete="off"
+                />
+              </div>
+              <SearchBar
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Buscar por folio, cliente, descripcion o servicio..."
+                width="350px"
               />
             </div>
-            <SearchBar
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar por folio, cliente, descripcion o servicio..."
-              width="350px"
+            <DataTable
+              columns={COLUMNS}
+              data={data}
+              renderCell={renderCell}
+              pagination={true}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              onPageChange={onPageChange}
+              emptyMessage="No se encontraron ventas"
+              minWidth="1500px"
             />
           </div>
-        </div>
-
-        <DataTable
-          columns={COLUMNS}
-          data={data}
-          renderCell={renderCell}
-          pagination={true}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          onPageChange={onPageChange}
-          emptyMessage="No se encontraron ventas"
-          minWidth="1500px"
-        />
+          :
+          <div className="d-flex justify-content-center">En espera de caja</div>
+        }
       </div>
     </div>
   );
