@@ -28,5 +28,10 @@ export const ingresosService = {
             withCredentials: true,
         });
         return data;
-    }
+    },
+    async getVencidosCount() {
+        const { data } = await api.get("/ingresos/getVencidosCount");
+        return data.vencido ?? 0;
+    },
+
 }
