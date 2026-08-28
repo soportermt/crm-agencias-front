@@ -82,6 +82,46 @@ function getEstatusByFechaLimite(fechaLimiteStr) {
   }
 }
 
+function exportToCSV(data) {
+  if (!data.length) return;
+
+  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Comisión", "Moneda", "Estatus"];
+
+  const rows = data.map((row) => [
+      row.folio,
+      row.cliente,
+      row.descripcion,
+      row.tipo_servicio,
+      row.fecha_limite,
+      row.tarifa_publica,
+      row.fee,
+      row.moneda,
+      getEstatusByFechaLimite(row.fecha_limite),
+  ]);
+
+  const escapeCsvValue = (value) => {
+      const str = String(value ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+  };
+
+  const csvContent = [headers, ...rows]
+      .map((r) => r.map(escapeCsvValue).join(","))
+      .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `gestion_pagos_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export default function IngresosTable({
   activeTab,
   onTabChange,
@@ -92,7 +132,6 @@ export default function IngresosTable({
   totalPages,
   totalItems,
   onPageChange,
-  onExport,
   startDate,
   endDate,
   onDateRangeChange,
@@ -223,7 +262,7 @@ export default function IngresosTable({
                 Consulta la información de tus pagos (filtra por límite de pago).
               </p>
             </div>
-            <ExportButton onExport={onExport} />
+            <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-3">
