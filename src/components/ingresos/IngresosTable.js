@@ -10,16 +10,18 @@ import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
 
 const COLUMNS = [
-  { key: "id", label: "ID", width: "80px" },
+  // { key: "id", label: "ID", width: "80px" },
   { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
   { key: "cliente", label: "Cliente", width: "225px" },
-  { key: "metodoPago", label: "Método pago", width: "155px" },
-  { key: "tipoPago", label: "Tipo pago", width: "155px" },
+  { key: "descripcion", label: "Descripción", width: "155px" },
+  { key: "servicio", label: "Servicio", width: "155px" },
   { key: "limitePago", label: "Límite pago", width: "155px" },
-  { key: "total", label: "Total", width: "155px" },
+  { key: "total_publico", label: "Total Publico", width: "100px" },
+  // { key: "total_neto", label: "Total Neto", width: "100px" },
+  { key: "fee", label: "Comisión", width: "100px" },
   { key: "moneda", label: "Moneda", width: "130px" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
-  { key: "acciones", label: "Acciones", width: "174px", align: "center" },
+  // { key: "acciones", label: "Acciones", width: "174px", align: "center" },
 ];
 
 export default function IngresosTable({

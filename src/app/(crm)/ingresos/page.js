@@ -71,7 +71,7 @@ export default function IngresosPage() {
         const currentUser = storedUser ? JSON.parse(storedUser) : null;
         const idUsuario = currentUser?.id_usuario || currentUser?.id;
         const [dataAnio, dataResumen] = await Promise.all([
-          ingresosService.getReporteIngresosAnio(),
+          idUsuario ? ingresosService.getReporteIngresosAnio(idUsuario) : Promise.resolve([]),
           idUsuario ? ingresosService.getResumenVentas(idUsuario) : Promise.resolve([]),
         ]);
         setData(dataAnio || []);
