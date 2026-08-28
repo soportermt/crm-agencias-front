@@ -18,5 +18,11 @@ export const ingresosService = {
             withCredentials: true,
         });
         return data;
+    },
+    async getVentas() {
+        const { data } = await api.get("/ingresos/getVentas", {
+            withCredentials: true,
+        });
+        return data;
     }
 }

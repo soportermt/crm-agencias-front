@@ -10,19 +10,74 @@ import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
 
 const COLUMNS = [
-  // { key: "id", label: "ID", width: "80px" },
-  { key: "codigoConfirmacion", label: "Código de confirmación", width: "225px" },
+  { key: "folio", label: "Folio", width: "180px" },
   { key: "cliente", label: "Cliente", width: "225px" },
   { key: "descripcion", label: "Descripción", width: "155px" },
-  { key: "servicio", label: "Servicio", width: "155px" },
-  { key: "limitePago", label: "Límite pago", width: "155px" },
-  { key: "total_publico", label: "Total Publico", width: "100px" },
-  // { key: "total_neto", label: "Total Neto", width: "100px" },
+  { key: "tipo_servicio", label: "Servicio", width: "155px" },
+  { key: "fecha_limite", label: "Límite pago", width: "155px" },
+  { key: "tarifa_publica", label: "Total Publico", width: "100px" },
   { key: "fee", label: "Comisión", width: "100px" },
   { key: "moneda", label: "Moneda", width: "130px" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
-  // { key: "acciones", label: "Acciones", width: "174px", align: "center" },
 ];
+
+function parseLocalDate(dateString) {
+  if (!dateString || dateString === "0000-00-00") return null;
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDateRange(inicio, fin) {
+  const fechaInicio = parseLocalDate(inicio);
+
+  if (!fechaInicio) return "-";
+
+  const opts = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+
+  const dInicio = fechaInicio.toLocaleDateString("es-MX", opts);
+
+  if (
+    !fin ||
+    fin === "0000-00-00" ||
+    fin === "0000-00-00 00:00:00" ||
+    fin === inicio
+  ) {
+    return dInicio;
+  }
+
+  const fechaFin = parseLocalDate(fin);
+
+  if (!fechaFin) return dInicio;
+
+  const dFin = fechaFin.toLocaleDateString("es-MX", opts);
+
+  return `${dInicio} a ${dFin}`;
+}
+
+function getEstatusByFechaLimite(fechaLimiteStr) {
+  const fechaLimite = parseLocalDate(fechaLimiteStr);
+  if (!fechaLimite) return "Pendiente";
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fechaLimite.setHours(0, 0, 0, 0);
+
+  const diffTime = fechaLimite.getTime() - hoy.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return "Vencido";
+  } else if (diffDays <= 7) {
+    return "Próximo a vencer";
+  } else {
+    return "Pendiente";
+  }
+}
 
 export default function IngresosTable({
   activeTab,
@@ -40,24 +95,61 @@ export default function IngresosTable({
   onDateRangeChange,
 }) {
 
+  const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return "$0.00";
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(value);
+  };
+
   const renderCell = (key, row) => {
+    const estatusCalculado = getEstatusByFechaLimite(row.fecha_limite);
+
     switch (key) {
-      case "codigoConfirmacion":
+      case "folio":
         return (
           <span className="font-inter fw-semibold text-brand-blue">
-            {row.codigoConfirmacion}
+            {row.folio}
           </span>
         );
 
-      case "limitePago":
+      case "fecha_limite":
+        return (
+          <span
+            className="font-inter"
+            style={{
+              color: estatusCalculado === "Vencido" ? "#af233a" : "#0f1901",
+              fontWeight: estatusCalculado === "Vencido" ? 600 : 400,
+            }}
+          >
+            {formatDateRange(row.fecha_limite)}
+          </span>
+        );
+
+      case "tarifa_publica":
+        return (
+          <span className="font-inter fw-semibold">
+            {formatCurrency(row.tarifa_publica)}
+          </span>
+        );
+
+      case "fee":
+        return (
+          <span className="font-inter fw-semibold">
+            {formatCurrency(row.fee)}
+          </span>
+        );
+
+      case "fecha_limite":
         return (
           <span style={{ color: row.estatus === "Vencido" ? "#af233a" : "#0f1901" }}>
-            {row.limitePago}
+            {row.fecha_limite}
           </span>
         );
 
       case "estatus":
-        return <StatusBadge status={row.estatus} />;
+        return <StatusBadge status={estatusCalculado} />;
 
       case "acciones":
         return (

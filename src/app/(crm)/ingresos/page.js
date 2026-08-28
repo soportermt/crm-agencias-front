@@ -2,10 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import IngresosTable from "@/components/ingresos/IngresosTable";
-import {
-  ingresosTableMock,
-  pendientesTableMock,
-} from "@/mocks/ingresosMock";
 import Chart from "@/components/ingresos/Chart";
 import { ingresosService } from "@/services/ingresos.service";
 
@@ -18,13 +14,12 @@ export default function IngresosPage() {
     endDate: "2026-12-31",
   });
 
+  const [user, setUser] = useState(null);
   const [data, setData] = useState([]);
   const [resumen, setResumen] = useState([]);
+  const [ventas, setVentas] = useState([]);
 
-  const ITEMS_PER_PAGE = 5;
-
-  const tableData =
-    activeTab === "pendientes" ? pendientesTableMock : ingresosTableMock;
+  const ITEMS_PER_PAGE = 25;
 
   const parseSpanishDate = (dateStr) => {
     if (!dateStr) return null;
@@ -43,19 +38,53 @@ export default function IngresosPage() {
     return new Date(year, month, day);
   };
 
-  const filteredData = tableData.filter((row) => {
+  
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (err) {
+      console.error("Error al parsear el usuario:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const idUsuario = user?.id_usuario || user?.id;
+    if (!idUsuario) return;
+  
+    async function loadChartData() {
+      try {
+        const [dataAnio, dataResumen, dataVentas] = await Promise.all([
+          ingresosService.getReporteIngresosAnio(idUsuario),
+          ingresosService.getResumenVentas(idUsuario),
+          ingresosService.getVentas()
+        ]);
+  
+        setData(dataAnio || []);
+        setResumen(dataResumen || []);
+        setVentas(dataVentas || []);
+      } catch (err) {
+        console.error("Error al cargar datos del dashboard:", err);
+      }
+    }
+  
+    loadChartData();
+  }, [user]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchValue]);
+
+  const filteredData = ventas.filter((row) => {
     const matchesSearch =
       row.cliente.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.codigoConfirmacion.toLowerCase().includes(searchValue.toLowerCase());
+      row.folio.toLowerCase().includes(searchValue.toLowerCase()) ||
+      row.descripcion.toLowerCase().includes(searchValue.toLowerCase()) ||
+      row.tipo_servicio.toLowerCase().includes(searchValue.toLowerCase()); 
 
-    const rowDate = parseSpanishDate(row.limitePago);
-    const start = new Date(dateRange.startDate);
-    const end = new Date(dateRange.endDate);
-    end.setHours(23, 59, 59, 999);
-
-    const matchesDate = !rowDate || (rowDate >= start && rowDate <= end);
-
-    return matchesSearch && matchesDate;
+    return matchesSearch;
   });
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -64,29 +93,6 @@ export default function IngresosPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  useEffect(() => {
-    async function loadChartData() {
-      try {
-        const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-        const currentUser = storedUser ? JSON.parse(storedUser) : null;
-        const idUsuario = currentUser?.id_usuario || currentUser?.id;
-        const [dataAnio, dataResumen] = await Promise.all([
-          idUsuario ? ingresosService.getReporteIngresosAnio(idUsuario) : Promise.resolve([]),
-          idUsuario ? ingresosService.getResumenVentas(idUsuario) : Promise.resolve([]),
-        ]);
-        setData(dataAnio || []);
-        setResumen(dataResumen || []);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    loadChartData();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, searchValue]);
 
   return (
     <div className="container-fluid p-0">
