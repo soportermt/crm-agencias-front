@@ -58,7 +58,7 @@ export default function Header({ onToggleMobileSidebar }) {
       </div>
 
       <div className="d-flex align-items-center gap-3">
-        <div className="position-relative d-none d-md-block" style={{ width: "250px" }}>
+        {/* <div className="position-relative d-none d-md-block" style={{ width: "250px" }}>
           <input
             type="text"
             placeholder="Buscar..."
@@ -73,9 +73,11 @@ export default function Header({ onToggleMobileSidebar }) {
 
         <button className="btn btn-light rounded-circle p-2 border-0 d-flex align-items-center justify-content-center text-secondary transition-smooth">
           <i className="bi bi-sun-fill" style={{ fontSize: "1rem" }}></i>
-        </button>
+        </button> */}
 
-        <div className="d-flex align-items-center gap-2 border-start ps-3">
+{/* border-start */}
+
+        <div className="d-flex align-items-center gap-2  ps-3">
           <div className="text-end d-none d-sm-block">
             <p className="mb-0 fw-semibold text-dark small">{userName}</p>
             <p className="mb-0 text-muted" style={{ fontSize: "10px" }}>{userRole}</p>

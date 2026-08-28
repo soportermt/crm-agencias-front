@@ -1,71 +1,123 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import StatCard from "@/components/common/StatCard";
-import IncomeChart from "@/components/ingresos/IncomeChart";
+import React, { useState, useEffect, useCallback } from "react";
 import IngresosTable from "@/components/ingresos/IngresosTable";
-import {
-  ingresosChartMock,
-  ingresosMetricsMock,
-  ingresosTableMock,
-  pendientesTableMock,
-} from "@/mocks/ingresosMock";
+import Chart from "@/components/ingresos/Chart";
+import { ingresosService } from "@/services/ingresos.service";
+
+
+function formatToYMD(date) {
+  if (!date) return null;
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return null;
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getInitialMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  return {
+    startDate: new Date(year, month, 1),     
+    endDate: new Date(year, month + 1, 0),  
+  };
+}
 
 export default function IngresosPage() {
   const [activeTab, setActiveTab] = useState("pendientes");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2026-05-01",
-    endDate: "2026-12-31",
+  const [dateRange, setDateRange] = useState(getInitialMonthRange);
+
+  const [user, setUser] = useState(null);
+  const [data, setData] = useState([]);
+  const [resumen, setResumen] = useState([]);
+  const [ventas, setVentas] = useState([]);
+  const [loadingVentas, setLoadingVentas] = useState(false);
+
+  const ITEMS_PER_PAGE = 25;
+  
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (err) {
+      console.error("Error al parsear el usuario:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const idUsuario = user?.id_usuario || user?.id;
+    if (!idUsuario) return;
+
+    async function loadChartData() {
+      try {
+        const [dataAnio, dataResumen] = await Promise.all([
+          ingresosService.getReporteIngresosAnio(idUsuario),
+          ingresosService.getResumenVentas(idUsuario),
+        ]);
+
+        setData(dataAnio || []);
+        setResumen(dataResumen || []);
+      } catch (err) {
+        console.error("Error al cargar datos del dashboard:", err);
+      }
+    }
+
+    loadChartData();
+  }, [user]);
+
+  const fetchVentas = useCallback(async () => {
+    const idUsuario = user?.id_usuario || user?.id;
+    if (!idUsuario) return;
+
+    if (dateRange.startDate && !dateRange.endDate) return;
+
+    try {
+      setLoadingVentas(true);
+      const strStart = formatToYMD(dateRange.startDate);
+      const strEnd = formatToYMD(dateRange.endDate);
+
+      const dataVentas = await ingresosService.getVentas(strStart, strEnd);
+      setVentas(dataVentas || []);
+    } catch (err) {
+      console.error("Error al cargar ventas con filtro:", err);
+    } finally {
+      setLoadingVentas(false);
+    }
+  }, [user, dateRange]);
+
+  useEffect(() => {
+    fetchVentas();
+  }, [fetchVentas]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchValue, dateRange]);
+
+  const filteredData = ventas.filter((row) => {
+    const term = searchValue.toLowerCase();
+    return (
+      row.cliente?.toLowerCase().includes(term) ||
+      row.folio?.toLowerCase().includes(term) ||
+      row.descripcion?.toLowerCase().includes(term) ||
+      row.tipo_servicio?.toLowerCase().includes(term)
+    );
   });
 
-  const ITEMS_PER_PAGE = 5;
-
-  const tableData =
-    activeTab === "pendientes" ? pendientesTableMock : ingresosTableMock;
-
-  const parseSpanishDate = (dateStr) => {
-    if (!dateStr) return null;
-    const months = {
-      "ene.": 0, "feb.": 1, "mar.": 2, "abr.": 3, "may.": 4, "jun.": 5,
-      "jul.": 6, "ago.": 7, "sep.": 8, "oct.": 9, "nov.": 10, "dic.": 11,
-      "ene": 0, "feb": 1, "mar": 2, "abr": 3, "may": 4, "jun": 5,
-      "jul": 6, "ago": 7, "sep": 8, "oct": 9, "nov": 10, "dic": 11
-    };
-    const cleanStr = dateStr.replace(/de\s+/g, "").trim().toLowerCase();
-    const parts = cleanStr.split(/\s+/);
-    if (parts.length < 3) return null;
-    const day = parseInt(parts[0], 10);
-    const month = months[parts[1]] ?? 0;
-    const year = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-  };
-
-  const filteredData = tableData.filter((row) => {
-    const matchesSearch =
-      row.cliente.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.codigoConfirmacion.toLowerCase().includes(searchValue.toLowerCase());
-
-    const rowDate = parseSpanishDate(row.limitePago);
-    const start = new Date(dateRange.startDate);
-    const end = new Date(dateRange.endDate);
-    end.setHours(23, 59, 59, 999);
-
-    const matchesDate = !rowDate || (rowDate >= start && rowDate <= end);
-
-    return matchesSearch && matchesDate;
-  });
-
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
   const paginatedData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, searchValue]);
 
   return (
     <div className="container-fluid p-0">
@@ -81,59 +133,7 @@ export default function IngresosPage() {
             Control de ingresos
           </h1>
 
-          <div className="d-flex gap-4" style={{ flexWrap: "wrap" }}>
-            <div style={{ flex: "1 1 0", minWidth: "300px" }}>
-              <IncomeChart
-                data={ingresosChartMock}
-                onExport={() => console.log("Exportar PDF")}
-              />
-            </div>
-
-            <div style={{ flex: "1 1 0", minWidth: "300px" }}>
-              <div className="row g-4 h-100">
-                <div className="col-6">
-                  <StatCard
-                    title={
-                      <>
-                        Total ingresos <span className="fw-semibold">mayo</span>
-                      </>
-                    }
-                    value={ingresosMetricsMock.totalIngresos.value}
-                    subtext={ingresosMetricsMock.totalIngresos.subtext}
-                    valueColor="#227cf2"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title="Pendientes de pago"
-                    value={ingresosMetricsMock.pendientesPago.value}
-                    subtext={ingresosMetricsMock.pendientesPago.subtext}
-                    valueColor="#b9861f"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title="Vencidos"
-                    value={ingresosMetricsMock.vencidos.value}
-                    linkText="Ver detalles"
-                    valueColor="#af233a"
-                  />
-                </div>
-                <div className="col-6">
-                  <StatCard
-                    title={
-                      <>
-                        Pagados <span className="fw-semibold">este mes</span>
-                      </>
-                    }
-                    value={ingresosMetricsMock.pagadosEsteMes.value}
-                    subtext={ingresosMetricsMock.pagadosEsteMes.subtext}
-                    valueColor="#0e803c"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <Chart chart={data} resumen={resumen}/>
 
           <IngresosTable
             activeTab={activeTab}
