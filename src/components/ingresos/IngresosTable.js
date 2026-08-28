@@ -6,8 +6,11 @@ import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import StatusBadge from "@/components/common/StatusBadge";
-import DateRangeSelector from "@/components/common/DateRangeSelector";
-import FilterButton from "@/components/common/FilterButton";
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from "date-fns/locale";
+
+registerLocale("es", es);
 
 const COLUMNS = [
   { key: "folio", label: "Folio", width: "180px" },
@@ -101,6 +104,14 @@ export default function IngresosTable({
       style: "currency",
       currency: "MXN",
     }).format(value);
+  };
+  const handleDateChange = (dates) => {
+    if (!dates) {
+      onDateRangeChange({ startDate: null, endDate: null });
+      return;
+    }
+    const [start, end] = dates;
+    onDateRangeChange({ startDate: start, endDate: end });
   };
 
   const renderCell = (key, row) => {
@@ -209,7 +220,7 @@ export default function IngresosTable({
                 className="font-inter mb-0"
                 style={{ fontSize: "13px", color: "#a1a1aa" }}
               >
-                Consulta la información de tus pagos.
+                Consulta la información de tus pagos (filtra por límite de pago).
               </p>
             </div>
             <ExportButton onExport={onExport} />
@@ -217,28 +228,24 @@ export default function IngresosTable({
 
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div className="d-flex align-items-center gap-2">
-              <DateRangeSelector
+              <DatePicker
+                selectsRange={true}
                 startDate={startDate}
                 endDate={endDate}
-                onChange={onDateRangeChange}
-                showIcon={false}
+                onChange={handleDateChange}
+                isClearable={true}
+                placeholderText="Filtrar por fecha límite"
+                locale="es"
+                dateFormat="dd/MM/yyyy"
+                className="form-control form-control-sm"
+                autoComplete="off"
               />
-              <FilterButton>
-                <span>
-                  Sucursal{" "}
-                  <span className="fw-semibold">Viajemos Juntos ATM</span>
-                </span>
-                <i
-                  className="bi bi-chevron-down"
-                  style={{ fontSize: "12px" }}
-                ></i>
-              </FilterButton>
             </div>
             <SearchBar
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar"
-              width="300px"
+              placeholder="Buscar por folio, cliente, descripcion o servicio..."
+              width="350px"
             />
           </div>
         </div>
@@ -252,7 +259,7 @@ export default function IngresosTable({
           totalPages={totalPages}
           totalItems={totalItems}
           onPageChange={onPageChange}
-          emptyMessage="No se encontraron pagos."
+          emptyMessage="No se encontraron ventas"
           minWidth="1500px"
         />
       </div>

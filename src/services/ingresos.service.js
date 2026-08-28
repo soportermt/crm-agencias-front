@@ -19,8 +19,12 @@ export const ingresosService = {
         });
         return data;
     },
-    async getVentas() {
+    async getVentas(fechaInicio = null, fechaFin = null) {
         const { data } = await api.get("/ingresos/getVentas", {
+            params: {
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin,
+            },
             withCredentials: true,
         });
         return data;

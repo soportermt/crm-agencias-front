@@ -1,43 +1,46 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import IngresosTable from "@/components/ingresos/IngresosTable";
 import Chart from "@/components/ingresos/Chart";
 import { ingresosService } from "@/services/ingresos.service";
+
+
+function formatToYMD(date) {
+  if (!date) return null;
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return null;
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getInitialMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  return {
+    startDate: new Date(year, month, 1),     
+    endDate: new Date(year, month + 1, 0),  
+  };
+}
 
 export default function IngresosPage() {
   const [activeTab, setActiveTab] = useState("pendientes");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2026-05-01",
-    endDate: "2026-12-31",
-  });
+  const [dateRange, setDateRange] = useState(getInitialMonthRange);
 
   const [user, setUser] = useState(null);
   const [data, setData] = useState([]);
   const [resumen, setResumen] = useState([]);
   const [ventas, setVentas] = useState([]);
+  const [loadingVentas, setLoadingVentas] = useState(false);
 
   const ITEMS_PER_PAGE = 25;
-
-  const parseSpanishDate = (dateStr) => {
-    if (!dateStr) return null;
-    const months = {
-      "ene.": 0, "feb.": 1, "mar.": 2, "abr.": 3, "may.": 4, "jun.": 5,
-      "jul.": 6, "ago.": 7, "sep.": 8, "oct.": 9, "nov.": 10, "dic.": 11,
-      "ene": 0, "feb": 1, "mar": 2, "abr": 3, "may": 4, "jun": 5,
-      "jul": 6, "ago": 7, "sep": 8, "oct": 9, "nov": 10, "dic": 11
-    };
-    const cleanStr = dateStr.replace(/de\s+/g, "").trim().toLowerCase();
-    const parts = cleanStr.split(/\s+/);
-    if (parts.length < 3) return null;
-    const day = parseInt(parts[0], 10);
-    const month = months[parts[1]] ?? 0;
-    const year = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-  };
-
   
   useEffect(() => {
     try {
@@ -53,41 +56,63 @@ export default function IngresosPage() {
   useEffect(() => {
     const idUsuario = user?.id_usuario || user?.id;
     if (!idUsuario) return;
-  
+
     async function loadChartData() {
       try {
-        const [dataAnio, dataResumen, dataVentas] = await Promise.all([
+        const [dataAnio, dataResumen] = await Promise.all([
           ingresosService.getReporteIngresosAnio(idUsuario),
           ingresosService.getResumenVentas(idUsuario),
-          ingresosService.getVentas()
         ]);
-  
+
         setData(dataAnio || []);
         setResumen(dataResumen || []);
-        setVentas(dataVentas || []);
       } catch (err) {
         console.error("Error al cargar datos del dashboard:", err);
       }
     }
-  
+
     loadChartData();
   }, [user]);
 
+  const fetchVentas = useCallback(async () => {
+    const idUsuario = user?.id_usuario || user?.id;
+    if (!idUsuario) return;
+
+    if (dateRange.startDate && !dateRange.endDate) return;
+
+    try {
+      setLoadingVentas(true);
+      const strStart = formatToYMD(dateRange.startDate);
+      const strEnd = formatToYMD(dateRange.endDate);
+
+      const dataVentas = await ingresosService.getVentas(strStart, strEnd);
+      setVentas(dataVentas || []);
+    } catch (err) {
+      console.error("Error al cargar ventas con filtro:", err);
+    } finally {
+      setLoadingVentas(false);
+    }
+  }, [user, dateRange]);
+
+  useEffect(() => {
+    fetchVentas();
+  }, [fetchVentas]);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, searchValue]);
+  }, [activeTab, searchValue, dateRange]);
 
   const filteredData = ventas.filter((row) => {
-    const matchesSearch =
-      row.cliente.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.folio.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.descripcion.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.tipo_servicio.toLowerCase().includes(searchValue.toLowerCase()); 
-
-    return matchesSearch;
+    const term = searchValue.toLowerCase();
+    return (
+      row.cliente?.toLowerCase().includes(term) ||
+      row.folio?.toLowerCase().includes(term) ||
+      row.descripcion?.toLowerCase().includes(term) ||
+      row.tipo_servicio?.toLowerCase().includes(term)
+    );
   });
 
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
   const paginatedData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
