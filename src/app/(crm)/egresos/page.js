@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import StatCard from "@/components/common/StatCard";
 import AlertBanner from "@/components/common/AlertBanner";
 import EgresosTable from "@/components/egresos/EgresosTable";
 import {
-  egresosMetricsMock,
   egresosPendientesMock,
   egresosOperadoresMock,
   egresosVuelosHotelesMock,
@@ -15,27 +14,38 @@ import {
 } from "@/mocks/egresosMock";
 import { egresosService } from "@/services/egresos.service";
 
-const TAB_DATA = {
-  pendientes: egresosPendientesMock,
-  operadores: egresosOperadoresMock,
-  vuelosHoteles: egresosVuelosHotelesMock,
-  historial: egresosHistorialMock,
-};
+function formatToYMD(date) {
+  if (!date) return null;
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return null;
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+function getInitialMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  return {
+    startDate: new Date(year, month, 1),
+    endDate: new Date(year, month + 1, 0),
+  };
+}
 
 export default function EgresosPage() {
   const [activeTab, setActiveTab] = useState("pendientes");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2025-05-01",
-    endDate: "2025-12-31",
-  });
+  const [dateRange, setDateRange] = useState(getInitialMonthRange);
 
   const [resumen, setResumen] = useState([]);
+  const [ventas, setVentas] = useState([]);
+  const [loadingVentas, setLoadingVentas] = useState(false);
 
   const ITEMS_PER_PAGE = 5;
-
-  const tableData = TAB_DATA[activeTab] || egresosPendientesMock;
 
   useEffect(() => {
     async function loadChartData() {
@@ -49,6 +59,27 @@ export default function EgresosPage() {
 
     loadChartData();
   }, []);
+
+  const fetchVentas = useCallback(async () => {
+    if (dateRange.startDate && !dateRange.endDate) return;
+
+    try {
+      setLoadingVentas(true);
+      const strStart = formatToYMD(dateRange.startDate);
+      const strEnd = formatToYMD(dateRange.endDate);
+
+      const dataVentas = await egresosService.getVentas(strStart, strEnd);
+      setVentas(dataVentas || []);
+    } catch (err) {
+      console.error("Error al cargar ventas con filtro:", err);
+    } finally {
+      setLoadingVentas(false);
+    }
+  }, [dateRange]);
+
+  useEffect(() => {
+    fetchVentas();
+  }, [fetchVentas]);
 
   const parseSpanishDate = (dateStr) => {
     if (!dateStr) return null;
@@ -69,23 +100,17 @@ export default function EgresosPage() {
     return new Date(year, month, day);
   };
 
-  const filteredData = tableData.filter((row) => {
-    const matchesSearch =
-      row.proveedor.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.reserva.toLowerCase().includes(searchValue.toLowerCase()) ||
-      row.servicio.toLowerCase().includes(searchValue.toLowerCase());
-
-    const rowDate = parseSpanishDate(row.fechaLimite);
-    const start = new Date(dateRange.startDate);
-    const end = new Date(dateRange.endDate);
-    end.setHours(23, 59, 59, 999);
-
-    const matchesDate = !rowDate || (rowDate >= start && rowDate <= end);
-
-    return matchesSearch && matchesDate;
+  const filteredData = ventas.filter((row) => {
+    const term = searchValue.toLowerCase();
+    return (
+      row.proveedor?.toLowerCase().includes(term) ||
+      row.folio?.toLowerCase().includes(term) ||
+      row.descripcion?.toLowerCase().includes(term) ||
+      row.tipo_servicio?.toLowerCase().includes(term)
+    );
   });
 
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
   const paginatedData = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE

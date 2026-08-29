@@ -6,9 +6,13 @@ import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import PillBadge from "@/components/common/PillBadge";
-import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
 import OperadoresSummary from "./OperadoresSummary";
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from "date-fns/locale";
+
+registerLocale("es", es);
 
 const CATEGORY_STYLES = {
   Hotel: { backgroundColor: "#e7f1fe", color: "#0f1901" },
@@ -54,17 +58,16 @@ export default function EgresosTable({
   const tabs = [
     { key: "pendientes", label: "Pendientes" },
     { key: "operadores", label: "Pagos a operadores" },
-    { key: "vuelosHoteles", label: "Vuelos y hoteles" },
-    { key: "historial", label: "Historial", icon: "bi-arrow-counterclockwise" },
+    { key: "vuelosHoteles", label: "Hoteles" },
   ];
 
   const tableTitle = activeTab === "pendientes"
     ? "Egresos pendientes y vencidos"
     : activeTab === "operadores"
-    ? "Pagos a operadores"
-    : activeTab === "vuelosHoteles"
-    ? "Vuelos y hoteles"
-    : "Historial de egresos";
+      ? "Pagos a operadores"
+      : activeTab === "vuelosHoteles"
+        ? "Vuelos y hoteles"
+        : "Historial de egresos";
 
   const getColumns = () => {
     switch (activeTab) {
@@ -79,31 +82,39 @@ export default function EgresosTable({
           { key: "estado", label: "Estados", width: "130px" },
           { key: "acciones", label: "Acciones", width: "130px" },
         ];
-      case "historial":
-        return [
-          { key: "folio", label: "Folio", width: "140px" },
-          { key: "reserva", label: "Reserva", width: "140px" },
-          { key: "proveedor", label: "Proveedor", width: "225px" },
-          { key: "categoria", label: "Categoría", width: "155px" },
-          { key: "servicio", label: "Servicio", width: "225px" },
-          { key: "monto", label: "Monto", width: "130px" },
-          { key: "fechaLimite", label: "Fecha límite", width: "130px" },
-          { key: "registradoPor", label: "Registrado por", width: "130px" },
-          { key: "estado", label: "Estados", width: "130px" },
-        ];
       default:
         return [
-          { key: "reserva", label: "Reserva", width: "140px" },
+          { key: "folio", label: "Reserva", width: "140px" },
           { key: "proveedor", label: "Proveedor", width: "225px" },
-          { key: "categoria", label: "Categoría", width: "155px" },
-          { key: "servicio", label: "Servicio", width: "225px" },
-          { key: "monto", label: "Monto", width: "130px" },
-          { key: "fechaLimite", label: "Fecha límite", width: "130px" },
+          { key: "tipo_servicio", label: "Categoría", width: "155px" },
+          { key: "descripcion", label: "Servicio", width: "225px" },
+          { key: "tarifa_publica", label: "Tarifa publica", width: "130px" },
+          { key: "comision", label: "Comision", width: "130px" },
+          { key: "costo", label: "Trifa neta", width: "130px" },
+          { key: "moneda", label: "Moneda", width: "130px" },
+          { key: "fecha_limite", label: "Fecha límite", width: "130px" },
           { key: "diasRestantes", label: "Días restantes", width: "130px" },
-          { key: "estado", label: "Estados", width: "130px" },
-          { key: "acciones", label: "Acciones", width: "130px" },
+          { key: "estado", label: "Estado", width: "130px" },
+          // { key: "acciones", label: "Acciones", width: "130px" },
         ];
     }
+  };
+
+  const handleDateChange = (dates) => {
+    if (!dates) {
+      onDateRangeChange({ startDate: null, endDate: null });
+      return;
+    }
+    const [start, end] = dates;
+    onDateRangeChange({ startDate: start, endDate: end });
+  };
+
+  const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return "$0.00";
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(value);
   };
 
   const columns = getColumns();
@@ -136,18 +147,28 @@ export default function EgresosTable({
         return <PillBadge label={row.categoria} backgroundColor={catStyle.backgroundColor} color={catStyle.color} />;
       }
 
-      case "fechaLimite": {
-        const isOverdue = row.estado === "Vencido";
+      case "tarifa_publica": {
         return (
-          <span style={{ color: isOverdue ? "#af233a" : row.estado === "Por vencer" ? "#b9861f" : "#0f1901" }}>
-            {row.fechaLimite}
+          <span className="font-inter">
+            {formatCurrency(row.tarifa_publica)}
           </span>
         );
       }
 
-      case "diasRestantes": {
-        const diasStyle = getDiasStyle(row.diasRestantes);
-        return <PillBadge label={row.diasRestantes} backgroundColor={diasStyle.backgroundColor} color={diasStyle.color} />;
+      case "comision": {
+        return (
+          <span className="font-inter">
+            {formatCurrency(row.comision)}
+          </span>
+        );
+      }
+
+      case "costo": {
+        return (
+          <span className="font-inter fw-semibold">
+            {formatCurrency(row.costo)}
+          </span>
+        );
       }
 
       case "estado": {
@@ -271,20 +292,26 @@ export default function EgresosTable({
               <>
                 <div className="d-flex align-items-center gap-2">
                   <ExportButton onExport={onExport} />
-                  <FilterButton>Todas las categorías</FilterButton>
-                  <FilterButton>Todos los estados</FilterButton>
-                  <DateRangeSelector
+                  {/* <FilterButton>Todas las categorías</FilterButton>
+                  <FilterButton>Todos los estados</FilterButton> */}
+                  <DatePicker
+                    selectsRange={true}
                     startDate={startDate}
                     endDate={endDate}
-                    onChange={onDateRangeChange}
-                    showIcon={false}
+                    onChange={handleDateChange}
+                    isClearable={true}
+                    placeholderText="Filtrar por fecha límite"
+                    locale="es"
+                    dateFormat="dd/MM/yyyy"
+                    className="form-control form-control-sm"
+                    autoComplete="off"
                   />
                 </div>
                 <SearchBar
                   value={searchValue}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Buscar"
-                  width="300px"
+                  placeholder="Buscar por reserva, proveedor, categoria o servicio..."
+                  width="350px"
                 />
               </>
             )}
