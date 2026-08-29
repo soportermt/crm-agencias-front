@@ -13,6 +13,7 @@ import {
   egresosPorOperadorMock,
   egresosEstadoCuentasMock,
 } from "@/mocks/egresosMock";
+import { egresosService } from "@/services/egresos.service";
 
 const TAB_DATA = {
   pendientes: egresosPendientesMock,
@@ -30,9 +31,24 @@ export default function EgresosPage() {
     endDate: "2025-12-31",
   });
 
+  const [resumen, setResumen] = useState([]);
+
   const ITEMS_PER_PAGE = 5;
 
   const tableData = TAB_DATA[activeTab] || egresosPendientesMock;
+
+  useEffect(() => {
+    async function loadChartData() {
+      try {
+        const dataResumen = await egresosService.getResumenVentas();
+        setResumen(dataResumen);
+      } catch (err) {
+        console.error("Error al cargar datos del dashboard:", err);
+      }
+    }
+
+    loadChartData();
+  }, []);
 
   const parseSpanishDate = (dateStr) => {
     if (!dateStr) return null;
@@ -79,6 +95,14 @@ export default function EgresosPage() {
     setCurrentPage(1);
   }, [activeTab, searchValue]);
 
+  const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return "$0.00";
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(value);
+  };
+
   return (
     <div className="container-fluid p-0">
       <div
@@ -101,33 +125,45 @@ export default function EgresosPage() {
           <div className="row g-4">
             <div className="col-12 col-sm-6 col-xl-3">
               <StatCard
-                title="Total egresos mayo"
-                value={egresosMetricsMock.totalEgresos.value}
-                subtext={egresosMetricsMock.totalEgresos.subtext}
+                title={
+                  <>
+                    Total egresos en <span className="fw-semibold">{resumen?.mes}</span>
+                  </>
+                }
+                value={formatCurrency(resumen?.total_egresos)}
+                dashboard
                 valueColor="#227cf2"
               />
             </div>
             <div className="col-12 col-sm-6 col-xl-3">
               <StatCard
                 title="Pendientes de pago"
-                value={egresosMetricsMock.pendientesPago.value}
-                subtext={egresosMetricsMock.pendientesPago.subtext}
+                value={formatCurrency(resumen?.total_pendientes_pago)}
+                dashboard
                 valueColor="#b9861f"
               />
             </div>
             <div className="col-12 col-sm-6 col-xl-3">
               <StatCard
                 title="Vencidos"
-                value={egresosMetricsMock.vencidos.value}
-                linkText="Ver detalles"
+                value={formatCurrency(resumen?.total_vencidos)}
+                subtext={
+                  <>
+                    {resumen?.vencidos} ventas vencidos
+                  </>
+                }
                 valueColor="#af233a"
               />
             </div>
             <div className="col-12 col-sm-6 col-xl-3">
               <StatCard
                 title="Pagados este mes"
-                value={egresosMetricsMock.pagadosEsteMes.value}
-                subtext={egresosMetricsMock.pagadosEsteMes.subtext}
+                value={formatCurrency(resumen?.total_pagados_mes)}
+                subtext={
+                  <>
+                    {resumen?.pagados_mes} ventas este mes
+                  </>
+                }
                 valueColor="#0e803c"
               />
             </div>

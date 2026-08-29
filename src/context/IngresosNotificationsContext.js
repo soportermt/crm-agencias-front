@@ -16,11 +16,11 @@ export function IngresosNotificationsProvider({ children }) {
     }
   }, []);
 
-  useEffect(() => {
-    refetchCount();
-    const interval = setInterval(refetchCount, 60000);
-    return () => clearInterval(interval);
-  }, [refetchCount]);
+  // useEffect(() => {
+  //   refetchCount();
+  //   const interval = setInterval(refetchCount, 60000);
+  //   return () => clearInterval(interval);
+  // }, [refetchCount]);
 
   return (
     <IngresosNotificationsContext.Provider value={{ vencidosCount, refetchCount }}>
