@@ -13,8 +13,8 @@ export default function ClientProfileChat({ clientId }) {
       try {
         setLoading(true);
         if (clientId) {
-          const data = await conectividadService.getClientChats(clientId);
-          setMessages(data);
+          const responseData = await conectividadService.getClientChats(clientId);
+          setMessages(responseData.data || []);
         }
       } catch (error) {
         console.error("Error al cargar chats:", error);
@@ -36,13 +36,21 @@ export default function ClientProfileChat({ clientId }) {
       </h3>
 
       <div className="d-flex flex-column gap-3 font-inter">
-        {messages.map((msg) => {
+        {messages.map((msg, index) => {
           const isClient = msg.sender === "client";
+          const showDateSeparator = index === 0 || msg.date !== messages[index - 1].date;
           return (
-            <div
-              key={msg.id}
-              className={`d-flex align-items-end gap-2 ${isClient ? "justify-content-start" : "justify-content-end"}`}
-            >
+            <React.Fragment key={msg.id}>
+              {showDateSeparator && msg.date && (
+                <div className="text-center my-2">
+                  <span className="badge text-muted fw-normal px-3 py-1 rounded-pill" style={{ backgroundColor: "#f1f5f9", fontSize: "11px" }}>
+                    {msg.date}
+                  </span>
+                </div>
+              )}
+              <div
+                className={`d-flex align-items-end gap-2 ${isClient ? "justify-content-start" : "justify-content-end"}`}
+              >
               {isClient && (
                 <div
                   className="rounded-circle overflow-hidden position-relative flex-shrink-0"
@@ -83,7 +91,7 @@ export default function ClientProfileChat({ clientId }) {
                   }}
                 >
                   {msg.time}
-                  <i className="bi bi-check-all" style={{ fontSize: "14px" }}></i>
+                  {!isClient && <i className="bi bi-check-all" style={{ fontSize: "14px" }}></i>}
                 </span>
               </div>
 
@@ -98,10 +106,11 @@ export default function ClientProfileChat({ clientId }) {
                     fontSize: "12px",
                   }}
                 >
-                  SL
+                  {msg.sender ? msg.sender.charAt(0).toUpperCase() : "A"}
                 </div>
               )}
             </div>
+            </React.Fragment>
           );
         })}
       </div>

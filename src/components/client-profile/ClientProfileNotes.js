@@ -84,7 +84,7 @@ export default function ClientProfileNotes({ clientId }) {
   };
 
   return (
-    <div className="bg-white p-4 d-flex flex-column h-100" style={{ borderRadius: "12px", boxShadow: "0 8px 16px 0 rgba(12, 12, 13, 0.1)" }}>
+    <div className="bg-white p-4 d-flex flex-column" style={{ borderRadius: "12px", boxShadow: "0 8px 16px 0 rgba(12, 12, 13, 0.1)" }}>
       <h3 className="font-poppins h6 fw-semibold mb-4" style={{ color: "var(--dark-green)" }}>
         Notas
       </h3>

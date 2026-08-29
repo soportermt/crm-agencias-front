@@ -87,5 +87,10 @@ export const clientsService = {
   async deleteClientNote(noteId) {
     const { data } = await api.delete(`/clientes/clienteNotasDelete/${noteId}`);
     return data;
+  },
+
+  async getRecentChatContacts() {
+    const { data } = await api.get(`/clientes/contactosChat.html`);
+    return data;
   }
 };
