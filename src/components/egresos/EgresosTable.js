@@ -38,6 +38,86 @@ function getEstadoStyle(estado) {
   return { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
 }
 
+function parseLocalDate(dateString) {
+  if (!dateString || dateString === "0000-00-00") return null;
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDateRange(inicio, fin) {
+  const fechaInicio = parseLocalDate(inicio);
+
+  if (!fechaInicio) return "-";
+
+  const opts = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+
+  const dInicio = fechaInicio.toLocaleDateString("es-MX", opts);
+
+  if (
+    !fin ||
+    fin === "0000-00-00" ||
+    fin === "0000-00-00 00:00:00" ||
+    fin === inicio
+  ) {
+    return dInicio;
+  }
+
+  const fechaFin = parseLocalDate(fin);
+
+  if (!fechaFin) return dInicio;
+
+  const dFin = fechaFin.toLocaleDateString("es-MX", opts);
+
+  return `${dInicio} a ${dFin}`;
+}
+
+function exportToCSV(data) {
+  if (!data.length) return;
+
+  const headers = ["Reserva", "Proveedor", "Categoría", "Servicio", "Tarifa publica", "Comisión", "Tarifa neta", "Moneda", "Fecha límite", "Días restantes", "Estado"];
+
+  const rows = data.map((row) => [
+    row.folio,
+    row.proveedor,
+    row.tipo_servicio,
+    row.descripcion,
+    row.tarifa_publica,
+    row.comision,
+    row.costo,
+    row.moneda,
+    row.fecha_limite,
+    row.diasRestantes,
+    row.estado,
+  ]);
+
+  const escapeCsvValue = (value) => {
+    const str = String(value ?? "");
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvContent = [headers, ...rows]
+    .map((r) => r.map(escapeCsvValue).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `egresos_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export default function EgresosTable({
   activeTab,
   onTabChange,
@@ -94,7 +174,7 @@ export default function EgresosTable({
           { key: "descripcion", label: "Servicio", width: "225px" },
           { key: "tarifa_publica", label: "Tarifa publica", width: "130px" },
           { key: "comision", label: "Comision", width: "130px" },
-          { key: "costo", label: "Trifa neta", width: "130px" },
+          { key: "costo", label: "Tarifa neta", width: "130px" },
           { key: "moneda", label: "Moneda", width: "130px" },
           { key: "fecha_limite", label: "Fecha límite", width: "130px" },
           { key: "diasRestantes", label: "Días restantes", width: "130px" },
@@ -171,6 +251,14 @@ export default function EgresosTable({
         return (
           <span className="font-inter fw-semibold">
             {formatCurrency(row.costo)}
+          </span>
+        );
+      }
+
+      case "fecha_limite": {
+        return (
+          <span className="font-inter fw-semibold">
+            {formatDateRange(row.fecha_limite)}
           </span>
         );
       }
@@ -295,7 +383,7 @@ export default function EgresosTable({
             ) : (
               <>
                 <div className="d-flex align-items-center gap-2">
-                  <ExportButton onExport={onExport} />
+                  <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
                   <select
                     name="categorias"
                     className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
