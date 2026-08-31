@@ -18,4 +18,10 @@ export const egresosService = {
         });
         return data;
     },
+    async getResumenOperadores() {
+        const { data } = await api.get("/egresos/getResumenOperadores", {
+            withCredentials: true,
+        });
+        return data;
+    },
 }

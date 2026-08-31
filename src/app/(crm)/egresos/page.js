@@ -44,6 +44,9 @@ export default function EgresosPage() {
   const [loadingVentas, setLoadingVentas] = useState(false);
   const [servicioFilter, setServicioFilter] = useState("");
 
+  const [porOperadorData, setPorOperadorData] = useState([]);
+  const [estadoCuentasData, setEstadoCuentasData] = useState([]);
+
   const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
@@ -82,25 +85,6 @@ export default function EgresosPage() {
     fetchVentas();
   }, [fetchVentas]);
 
-  const parseSpanishDate = (dateStr) => {
-    if (!dateStr) return null;
-    const months = {
-      "ene.": 0, "feb.": 1, "mar.": 2, "abr.": 3, "may.": 4, "jun.": 5,
-      "jul.": 6, "ago.": 7, "sep.": 8, "oct.": 9, "nov.": 10, "dic.": 11,
-      "ene": 0, "feb": 1, "mar": 2, "abr": 3, "may": 4, "jun": 5,
-      "jul": 6, "ago": 7, "sep": 8, "oct": 9, "nov": 10, "dic": 11,
-      "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5,
-      "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11
-    };
-    const cleanStr = dateStr.replace(/de\s+/g, "").trim().toLowerCase();
-    const parts = cleanStr.split(/\s+/);
-    if (parts.length < 3) return null;
-    const day = parseInt(parts[0], 10);
-    const month = months[parts[1]] ?? 0;
-    const year = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-  };
-
   const filteredData = ventas.filter((row) => {
     const term = searchValue.toLowerCase();
     return (
@@ -116,6 +100,21 @@ export default function EgresosPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  useEffect(() => {
+    if (activeTab !== "proveedores") return;
+
+    async function loadResumenOperadores() {
+      try {
+        const { porOperador, estadoCuentas } = await egresosService.getResumenOperadores();
+        setPorOperadorData(porOperador || []);
+        setEstadoCuentasData(estadoCuentas || []);
+      } catch (err) {
+        console.error("Error al cargar resumen de operadores:", err);
+      }
+    }
+    loadResumenOperadores();
+  }, [activeTab]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -142,7 +141,7 @@ export default function EgresosPage() {
           >
             Control de egresos
           </h1>
-{/* 
+          {/* 
           <AlertBanner
             message="3 pagos vencen en los próximos 5 días"
             description="— Reserva #0042 (hotel), #0051 (vuelo), #0067 (operador). Revisa la pestaña Pendientes."

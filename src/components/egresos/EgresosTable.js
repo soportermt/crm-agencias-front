@@ -6,7 +6,6 @@ import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
 import ExportButton from "@/components/common/ExportButton";
 import PillBadge from "@/components/common/PillBadge";
-import FilterButton from "@/components/common/FilterButton";
 import OperadoresSummary from "./OperadoresSummary";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -146,7 +145,6 @@ export default function EgresosTable({
   totalPages,
   totalItems,
   onPageChange,
-  onExport,
   startDate,
   endDate,
   onDateRangeChange,
@@ -159,14 +157,14 @@ export default function EgresosTable({
 
   const tabs = [
     { key: "pendientes", label: "Pendientes" },
-    { key: "operadores", label: "Pagos a operadores" },
+    { key: "proveedores", label: "Proveedores" },
     { key: "vuelosHoteles", label: "Hoteles" },
   ];
 
   const tableTitle = activeTab === "pendientes"
     ? "Egresos pendientes y vencidos"
-    : activeTab === "operadores"
-      ? "Pagos a operadores"
+    : activeTab === "proveedores"
+      ? "Proveedores"
       : activeTab === "vuelosHoteles"
         ? "Vuelos y hoteles"
         : "Historial de egresos";
@@ -286,7 +284,7 @@ export default function EgresosTable({
         const style = DIAS_STYLES[estado] || { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
         return <PillBadge label={diasLabel} backgroundColor={style.backgroundColor} color={style.color} />;
       }
-      
+
       case "estado": {
         const { estado } = getDiasEstadoInfo(row.fecha_limite);
         const style = DIAS_STYLES[estado] || { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
@@ -325,16 +323,13 @@ export default function EgresosTable({
       />
     );
 
-    if (activeTab === "operadores") {
+    if (activeTab === "proveedores") {
       return (
         <div className="d-flex flex-column gap-4 px-3 pb-3">
           <OperadoresSummary
             porOperadorData={porOperadorData}
             estadoCuentasData={estadoCuentasData}
           />
-          <div style={{ minWidth: 0, overflowX: "auto" }}>
-            {tableComponent}
-          </div>
         </div>
       );
     }
@@ -385,26 +380,16 @@ export default function EgresosTable({
                 className="font-inter"
                 style={{ fontSize: "13px", color: "#a1a1aa" }}
               >
-                Ordenado por fecha límite
+                {activeTab !== "proveedores" && (
+                  "Ordenado por fecha límite"
+                )}
               </span>
             </div>
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-3">
-            {activeTab === "historial" ? (
-              <>
-                <div className="d-flex align-items-center gap-2">
-                  <ExportButton onExport={onExport} />
-                  <FilterButton>Mayo 2026</FilterButton>
-                  <FilterButton>Todas las categorías</FilterButton>
-                </div>
-                <SearchBar
-                  value={searchValue}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Buscar por reserva, proveedor"
-                  width="300px"
-                />
-              </>
+            {activeTab === "proveedores" ? (
+              <></>
             ) : (
               <>
                 <div className="d-flex align-items-center gap-2">
@@ -459,7 +444,7 @@ export default function EgresosTable({
         </div>
 
         {renderTableContent()}
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

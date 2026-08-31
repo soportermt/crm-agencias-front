@@ -5,7 +5,7 @@ export default function OperadoresSummary({ porOperadorData = [], estadoCuentasD
     <div className="d-flex gap-4 w-100 flex-wrap flex-md-nowrap">
       <div className="bg-white p-3 border rounded-3 flex-fill" style={{ borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
         <p className="font-inter fw-semibold mb-3 text-dark" style={{ fontSize: "16px" }}>
-          Por operador
+          Por proveedor
         </p>
         <div className="d-flex flex-column gap-3">
           {porOperadorData.map((item, idx) => (
