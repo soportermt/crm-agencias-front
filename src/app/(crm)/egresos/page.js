@@ -4,10 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import StatCard from "@/components/common/StatCard";
 import AlertBanner from "@/components/common/AlertBanner";
 import EgresosTable from "@/components/egresos/EgresosTable";
-import {
-  egresosPorOperadorMock,
-  egresosEstadoCuentasMock,
-} from "@/mocks/egresosMock";
 import { egresosService } from "@/services/egresos.service";
 import { catalogosService } from "@/services/catalogos.service";
 
@@ -208,8 +204,8 @@ export default function EgresosPage() {
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
             onDateRangeChange={setDateRange}
-            porOperadorData={egresosPorOperadorMock}
-            estadoCuentasData={egresosEstadoCuentasMock}
+            porOperadorData={porOperadorData}
+            estadoCuentasData={estadoCuentasData}
             servicios={servicios}
             servicioFilter={servicioFilter}
             onServicioFilterChange={setServicioFilter}

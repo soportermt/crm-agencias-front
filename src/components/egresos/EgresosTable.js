@@ -158,13 +158,13 @@ export default function EgresosTable({
   const tabs = [
     { key: "pendientes", label: "Pendientes" },
     { key: "proveedores", label: "Proveedores" },
-    { key: "vuelosHoteles", label: "Hoteles" },
+    // { key: "vuelosHoteles", label: "Hoteles" },
   ];
 
   const tableTitle = activeTab === "pendientes"
     ? "Egresos pendientes y vencidos"
     : activeTab === "proveedores"
-      ? "Proveedores"
+      ? "Listado de proveedores para sus estados de cuenta"
       : activeTab === "vuelosHoteles"
         ? "Vuelos y hoteles"
         : "Historial de egresos";
@@ -367,7 +367,7 @@ export default function EgresosTable({
       </div>
 
       <div className="bg-white" style={{ borderRadius: "12px" }}>
-        <div className="px-3 pt-3">
+        <div className="px-3 pt-1">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <div className="d-flex align-items-center gap-3">
               <h3
