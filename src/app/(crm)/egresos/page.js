@@ -142,11 +142,11 @@ export default function EgresosPage() {
           >
             Control de egresos
           </h1>
-
+{/* 
           <AlertBanner
             message="3 pagos vencen en los próximos 5 días"
             description="— Reserva #0042 (hotel), #0051 (vuelo), #0067 (operador). Revisa la pestaña Pendientes."
-          />
+          /> */}
 
           <div className="row g-4">
             <div className="col-12 col-sm-6 col-xl-3">

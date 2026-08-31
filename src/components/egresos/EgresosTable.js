@@ -15,9 +15,16 @@ import { es } from "date-fns/locale";
 registerLocale("es", es);
 
 const CATEGORY_STYLES = {
-  Hotel: { backgroundColor: "#e7f1fe", color: "#0f1901" },
-  Vuelo: { backgroundColor: "#f4faeb", color: "#0f1901" },
-  Operador: { backgroundColor: "rgba(230,174,44,0.1)", color: "#0f1901" },
+  Hospedaje: { backgroundColor: "#e7f1fe", color: "#0f1901" },
+  Traslado: { backgroundColor: "#f4faeb", color: "#0f1901" },
+  // Grupo:                   { backgroundColor: "rgba(230,174,44,0.1)", color: "#0f1901" },
+  // Boda:                    { backgroundColor: "rgba(175,35,58,0.1)", color: "#af233a" },
+  Circuitos: { backgroundColor: "rgba(64, 64, 64, 0.08)", color: "#0f1901" },
+  // Vuelos:                  { backgroundColor: "#e7f1fe", color: "#227cf2" },
+  // "Renta de autos":        { backgroundColor: "rgba(185,134,31,0.15)", color: "#b9861f" },
+  // "Actividades Turísticas": { backgroundColor: "#ecfdf3", color: "#037847" },
+  // "Renta de Transporte":   { backgroundColor: "rgba(230,174,44,0.15)", color: "#b9861f" },
+  // Otros:                   { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" },
 };
 
 const DIAS_STYLES = {
@@ -26,17 +33,6 @@ const DIAS_STYLES = {
   Pendiente: { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" },
   Pagado: { backgroundColor: "#ecfdf3", color: "#037847" },
 };
-
-function getDiasStyle(value) {
-  if (DIAS_STYLES[value]) return DIAS_STYLES[value];
-  if (value.includes("día")) return { backgroundColor: "rgba(185,134,31,0.15)", color: "#b9861f" };
-  return { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
-}
-
-function getEstadoStyle(estado) {
-  if (DIAS_STYLES[estado]) return DIAS_STYLES[estado];
-  return { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
-}
 
 function parseLocalDate(dateString) {
   if (!dateString || dateString === "0000-00-00") return null;
@@ -74,6 +70,28 @@ function formatDateRange(inicio, fin) {
   const dFin = fechaFin.toLocaleDateString("es-MX", opts);
 
   return `${dInicio} a ${dFin}`;
+}
+
+function getDiasEstadoInfo(fechaLimite) {
+  const fecha = parseLocalDate(fechaLimite);
+  if (!fecha) return { estado: "Pendiente", diasLabel: "-" };
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fecha.setHours(0, 0, 0, 0);
+
+  const diffDias = Math.round((fecha - hoy) / (1000 * 60 * 60 * 24));
+
+  if (diffDias < 0) {
+    return { estado: "Vencido", diasLabel: "Vencido" };
+  }
+  if (diffDias <= 15) {
+    return {
+      estado: "Por vencer",
+      diasLabel: diffDias === 0 ? "Hoy" : `${diffDias} día${diffDias === 1 ? "" : "s"}`,
+    };
+  }
+  return { estado: "Pendiente", diasLabel: `${diffDias} días` };
 }
 
 function exportToCSV(data) {
@@ -226,9 +244,9 @@ export default function EgresosTable({
           </span>
         );
 
-      case "categoria": {
-        const catStyle = CATEGORY_STYLES[row.categoria] || { backgroundColor: "#e7f1fe", color: "#0f1901" };
-        return <PillBadge label={row.categoria} backgroundColor={catStyle.backgroundColor} color={catStyle.color} />;
+      case "tipo_servicio": {
+        const catStyle = CATEGORY_STYLES[row.tipo_servicio] || { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
+        return <PillBadge label={row.tipo_servicio} backgroundColor={catStyle.backgroundColor} color={catStyle.color} />;
       }
 
       case "tarifa_publica": {
@@ -263,9 +281,16 @@ export default function EgresosTable({
         );
       }
 
+      case "diasRestantes": {
+        const { estado, diasLabel } = getDiasEstadoInfo(row.fecha_limite);
+        const style = DIAS_STYLES[estado] || { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
+        return <PillBadge label={diasLabel} backgroundColor={style.backgroundColor} color={style.color} />;
+      }
+      
       case "estado": {
-        const estadoStyle = getEstadoStyle(row.estado);
-        return <PillBadge label={row.estado} backgroundColor={estadoStyle.backgroundColor} color={estadoStyle.color} />;
+        const { estado } = getDiasEstadoInfo(row.fecha_limite);
+        const style = DIAS_STYLES[estado] || { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" };
+        return <PillBadge label={estado} backgroundColor={style.backgroundColor} color={style.color} />;
       }
 
       case "acciones":
