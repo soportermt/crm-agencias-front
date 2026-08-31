@@ -28,6 +28,12 @@ export const catalogosService = {
 
         return data;
     },
+    async servicios() {
+        const { data } = await api.get("/tipoServicios/serviciosapi", {
+        });
+
+        return data;
+    },
     // async roles() {
     //     const { data } = await api.get("/reservas/getProviders.html", {
     //     });

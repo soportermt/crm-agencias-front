@@ -7,6 +7,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import RightBar from "@/components/layout/RightBar";
 import Header from "@/components/layout/Header";
 import ClientModal from "@/components/clients/ClientModal";
+import { IngresosNotificationsProvider } from "@/context/IngresosNotificationsContext";
 
 export default function CRMLayout({ children }) {
   const [showClientModal, setShowClientModal] = useState(false);
@@ -71,36 +72,38 @@ export default function CRMLayout({ children }) {
   };
 
   return (
-    <div 
-      className="d-flex min-vh-100 font-inter bg-light overflow-x-hidden position-relative"
-      style={layoutStyle}
-    >
-      <Sidebar
-        onRegisterClientClick={() => setShowClientModal(true)}
-        mobileOpen={mobileSidebarOpen}
-        onCloseMobile={() => setMobileSidebarOpen(false)}
-        isPinned={leftSidebarPinned}
-        onTogglePin={handleToggleLeftSidebar}
-      />
+    <IngresosNotificationsProvider>
+      <div
+        className="d-flex min-vh-100 font-inter bg-light overflow-x-hidden position-relative"
+        style={layoutStyle}
+      >
+        <Sidebar
+          onRegisterClientClick={() => setShowClientModal(true)}
+          mobileOpen={mobileSidebarOpen}
+          onCloseMobile={() => setMobileSidebarOpen(false)}
+          isPinned={leftSidebarPinned}
+          onTogglePin={handleToggleLeftSidebar}
+        />
 
-      <div className="flex-grow-1 d-flex flex-column vh-100 crm-content-wrapper overflow-hidden" style={{ minWidth: 0 }}>
-        <Header onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
+        <div className="flex-grow-1 d-flex flex-column vh-100 crm-content-wrapper overflow-hidden" style={{ minWidth: 0 }}>
+          <Header onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
 
-        <main className="p-4 flex-grow-1 overflow-y-auto" style={{ backgroundColor: "var(--bg-light)" }}>
-          {children}
-        </main>
+          <main className="p-4 flex-grow-1 overflow-y-auto" style={{ backgroundColor: "var(--bg-light)" }}>
+            {children}
+          </main>
+        </div>
+
+        <RightBar
+          onRegisterClientClick={() => setShowClientModal(true)}
+          isPinned={rightSidebarPinned}
+          onTogglePin={handleToggleRightSidebar}
+        />
+
+        <ClientModal
+          show={showClientModal}
+          onClose={() => setShowClientModal(false)}
+        />
       </div>
-
-      <RightBar 
-        onRegisterClientClick={() => setShowClientModal(true)}
-        isPinned={rightSidebarPinned}
-        onTogglePin={handleToggleRightSidebar}
-      />
-
-      <ClientModal
-        show={showClientModal}
-        onClose={() => setShowClientModal(false)}
-      />
-    </div>
+    </IngresosNotificationsProvider>
   );
 }

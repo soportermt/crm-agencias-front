@@ -11,9 +11,6 @@ import {
   IdentificationIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  BriefcaseIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
   ChartPieIcon,
@@ -21,6 +18,7 @@ import {
   ArrowLeftOnRectangleIcon,
   PlusIcon
 } from "@heroicons/react/24/outline";
+import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
@@ -79,6 +77,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
       </p>
     );
   };
+
+  const { vencidosCount } = useIngresosNotifications();
 
   return (
     <>
@@ -159,7 +159,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               "/ingresos",
               "Control de ingresos",
               ArrowTrendingUpIcon,
-              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>13</span>
+
             )}
           </div>
 
@@ -169,7 +169,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               "/egresos",
               "Control de egresos",
               ArrowTrendingDownIcon,
-              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>15</span>
+              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>{vencidosCount}</span>
             )}
           </div>
 

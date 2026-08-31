@@ -3,9 +3,9 @@ import React from "react";
 export default function OperadoresSummary({ porOperadorData = [], estadoCuentasData = [] }) {
   return (
     <div className="d-flex gap-4 w-100 flex-wrap flex-md-nowrap">
-      <div className="bg-white p-3 border rounded-3 flex-fill" style={{ borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
+      <div className="bg-white p-2 border rounded-3 flex-fill" style={{ borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
         <p className="font-inter fw-semibold mb-3 text-dark" style={{ fontSize: "16px" }}>
-          Por operador
+          Por proveedor
         </p>
         <div className="d-flex flex-column gap-3">
           {porOperadorData.map((item, idx) => (
@@ -22,13 +22,13 @@ export default function OperadoresSummary({ porOperadorData = [], estadoCuentasD
         </div>
       </div>
 
-      <div className="bg-white p-3 border rounded-3 flex-fill" style={{ borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
+      <div className="bg-white p-2 border rounded-3 flex-fill" style={{ borderColor: "rgba(161, 161, 170, 0.35)", minWidth: "280px" }}>
         <p className="font-inter fw-semibold mb-3 text-dark" style={{ fontSize: "16px" }}>
           Estado de cuentas
         </p>
         <div className="d-flex flex-column gap-2 font-inter" style={{ fontSize: "13px" }}>
           <div className="d-flex justify-content-between text-muted fw-medium pb-2 border-bottom">
-            <span>Operador</span>
+            <span>Proveedor</span>
             <div className="d-flex gap-4 ms-auto">
               <span style={{ width: "90px", textAlign: "right" }}>Pagado</span>
               <span style={{ width: "90px", textAlign: "right" }}>Pendiente</span>
