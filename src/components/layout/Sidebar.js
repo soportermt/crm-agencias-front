@@ -159,7 +159,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               "/ingresos",
               "Control de ingresos",
               ArrowTrendingUpIcon,
-              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>{vencidosCount}</span>
+
             )}
           </div>
 
@@ -169,7 +169,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               "/egresos",
               "Control de egresos",
               ArrowTrendingDownIcon,
-              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>15</span>
+              <span className="badge rounded-pill bg-danger px-2 py-1 fw-bold" style={{ fontSize: "11px" }}>{vencidosCount}</span>
             )}
           </div>
 
