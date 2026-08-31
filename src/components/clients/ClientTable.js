@@ -8,7 +8,6 @@ import StatusBadge from "@/components/common/StatusBadge";
 const COLUMNS = [
   { key: "id", label: "ID", sortable: true, width: "80px" },
   { key: "name", label: "Nombre Completo", sortable: true },
-  { key: "username", label: "Usuario", sortable: true },
   { key: "city", label: "Ciudad", sortable: true },
   { key: "state", label: "Estado", sortable: true },
   { key: "status", label: "Estatus", sortable: true, align: "center", width: "140px" },

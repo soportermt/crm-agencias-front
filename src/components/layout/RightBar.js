@@ -8,6 +8,8 @@ import {
   ChartBarIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useEffect } from "react";
+import { clientsService } from "@/services/clients.service";
 
 export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -21,14 +23,36 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
     { title: "Próximo pago pendiente", time: "Hoy, a las 11:59 am", bgIcon: "#e6f1fd", iconColor: "#000000", icon: ChartBarIcon },
   ];
 
-  const contacts = [
-    { name: "Vanessa Fuentes", initials: "VF", avatar: "/avatars/avatar-female-06.png" },
-    { name: "Orlando Paz", initials: "OP", avatar: "/avatars/avatar-male-01.png" },
-    { name: "Lorena Figueroa", initials: "LF", avatar: "/avatars/avatar-female-01.png" },
-    { name: "Jonathan Neri", initials: "JN", avatar: "/avatars/avatar-male-04.png" },
-    { name: "María Cervantes", initials: "MC", avatar: "/avatars/avatar-female-04.png" },
-    { name: "Daniela López", initials: "DL", avatar: "/avatars/avatar-female-05.png" },
-  ];
+  const [chatContacts, setChatContacts] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchContacts = async () => {
+      try {
+        const data = await clientsService.getRecentChatContacts();
+        if (isMounted && Array.isArray(data)) {
+          const formatted = data.map((c, i) => ({
+            id: c.id_cliente,
+            name: c.nombre,
+            preview: c.last_message_preview,
+            avatar: `/avatars/avatar-${i % 2 === 0 ? 'male' : 'female'}-0${(i % 5) + 1}.png`
+          }));
+          setChatContacts(formatted);
+        }
+      } catch (error) {
+        console.error("Error fetching chat contacts:", error);
+      }
+    };
+
+    fetchContacts();
+    const intervalId = setInterval(fetchContacts, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <aside
@@ -158,25 +182,35 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           <hr className="my-2" style={{ opacity: 0.1 }} />
         )}
         <div className="d-flex flex-column gap-2">
-          {contacts.map((contact, idx) => (
-            <div
-              key={idx}
-              className={`d-flex align-items-center rounded-3 hover-light transition-smooth ${!isExpanded ? "justify-content-center p-1" : "gap-3 p-2"
-                }`}
-              title={!isExpanded ? contact.name : undefined}
+          {chatContacts.map((contact, idx) => (
+            <Link 
+              href={`/clientes/${contact.id}`} 
+              key={idx} 
+              className="text-decoration-none"
             >
-              <img
-                src={contact.avatar}
-                alt={contact.name}
-                className="rounded-circle flex-shrink-0 animate-fade-in"
-                style={{ width: "24px", height: "24px", minWidth: "24px", objectFit: "cover" }}
-              />
-              {isExpanded && (
-                <div className="flex-grow-1 min-w-0">
-                  <p className="mb-0 fw-normal text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{contact.name}</p>
-                </div>
-              )}
-            </div>
+              <div
+                className={`d-flex align-items-center rounded-3 hover-light transition-smooth ${!isExpanded ? "justify-content-center p-1" : "gap-3 p-2"
+                  }`}
+                title={!isExpanded ? contact.name : undefined}
+                style={{ cursor: "pointer" }}
+              >
+                <img
+                  src={contact.avatar}
+                  alt={contact.name}
+                  className="rounded-circle flex-shrink-0 animate-fade-in"
+                  style={{ width: "24px", height: "24px", minWidth: "24px", objectFit: "cover" }}
+                  onError={(e) => { e.target.src = "/avatars/avatar-male-01.png"; }}
+                />
+                {isExpanded && (
+                  <div className="flex-grow-1" style={{ minWidth: 0, overflow: "hidden" }}>
+                    <p className="mb-0 fw-normal text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{contact.name}</p>
+                    {contact.preview && (
+                      <p className="mb-0 text-muted text-truncate font-inter" style={{ fontSize: "11px" }}>{contact.preview}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Link>
           ))}
         </div>
       </div>
