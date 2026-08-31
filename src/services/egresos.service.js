@@ -7,11 +7,12 @@ export const egresosService = {
         });
         return data;
     },
-    async getVentas(fechaInicio = null, fechaFin = null) {
+    async getVentas(fechaInicio = null, fechaFin = null, idServicio) {
         const { data } = await api.get("/egresos/getVentas", {
             params: {
                 fecha_inicio: fechaInicio,
                 fecha_fin: fechaFin,
+                id_servicio: idServicio
             },
             withCredentials: true,
         });

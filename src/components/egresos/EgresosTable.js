@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
@@ -54,7 +54,11 @@ export default function EgresosTable({
   onDateRangeChange,
   porOperadorData = [],
   estadoCuentasData = [],
+  servicios = [],
+  servicioFilter,
+  onServicioFilterChange,
 }) {
+
   const tabs = [
     { key: "pendientes", label: "Pendientes" },
     { key: "operadores", label: "Pagos a operadores" },
@@ -292,8 +296,31 @@ export default function EgresosTable({
               <>
                 <div className="d-flex align-items-center gap-2">
                   <ExportButton onExport={onExport} />
-                  {/* <FilterButton>Todas las categorías</FilterButton>
-                  <FilterButton>Todos los estados</FilterButton> */}
+                  <select
+                    name="categorias"
+                    className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                    style={{
+                      height: "38px",
+                      borderRadius: "8px",
+                      borderColor: "#d0d5dd",
+                      backgroundColor: "#fff",
+                      fontSize: "13px",
+                      color: "#0f1901",
+                      fontWeight: 400,
+                      appearance: "none",
+                      textAlign: "start",
+                      width: "fit-content",
+                    }}
+                    value={servicioFilter}
+                    onChange={(e) => onServicioFilterChange(e.target.value)}
+                  >
+                    <option value="">Todas las categorias</option>
+                    {servicios.map((s) => (
+                      <option key={s.id_servicio} value={s.id_servicio}>
+                        {s.tipo_servicio}
+                      </option>
+                    ))}
+                  </select>
                   <DatePicker
                     selectsRange={true}
                     startDate={startDate}

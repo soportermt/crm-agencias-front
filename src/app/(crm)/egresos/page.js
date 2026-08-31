@@ -5,14 +5,11 @@ import StatCard from "@/components/common/StatCard";
 import AlertBanner from "@/components/common/AlertBanner";
 import EgresosTable from "@/components/egresos/EgresosTable";
 import {
-  egresosPendientesMock,
-  egresosOperadoresMock,
-  egresosVuelosHotelesMock,
-  egresosHistorialMock,
   egresosPorOperadorMock,
   egresosEstadoCuentasMock,
 } from "@/mocks/egresosMock";
 import { egresosService } from "@/services/egresos.service";
+import { catalogosService } from "@/services/catalogos.service";
 
 function formatToYMD(date) {
   if (!date) return null;
@@ -43,7 +40,9 @@ export default function EgresosPage() {
 
   const [resumen, setResumen] = useState([]);
   const [ventas, setVentas] = useState([]);
+  const [servicios, setServicios] = useState([]);
   const [loadingVentas, setLoadingVentas] = useState(false);
+  const [servicioFilter, setServicioFilter] = useState("");
 
   const ITEMS_PER_PAGE = 5;
 
@@ -51,7 +50,9 @@ export default function EgresosPage() {
     async function loadChartData() {
       try {
         const dataResumen = await egresosService.getResumenVentas();
+        const servicios = await catalogosService.servicios();
         setResumen(dataResumen);
+        setServicios(servicios || []);
       } catch (err) {
         console.error("Error al cargar datos del dashboard:", err);
       }
@@ -68,14 +69,14 @@ export default function EgresosPage() {
       const strStart = formatToYMD(dateRange.startDate);
       const strEnd = formatToYMD(dateRange.endDate);
 
-      const dataVentas = await egresosService.getVentas(strStart, strEnd);
+      const dataVentas = await egresosService.getVentas(strStart, strEnd, servicioFilter);
       setVentas(dataVentas || []);
     } catch (err) {
       console.error("Error al cargar ventas con filtro:", err);
     } finally {
       setLoadingVentas(false);
     }
-  }, [dateRange]);
+  }, [dateRange, servicioFilter]);
 
   useEffect(() => {
     fetchVentas();
@@ -118,7 +119,7 @@ export default function EgresosPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, searchValue]);
+  }, [activeTab, searchValue, servicioFilter]);
 
   const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return "$0.00";
@@ -210,6 +211,9 @@ export default function EgresosPage() {
             onDateRangeChange={setDateRange}
             porOperadorData={egresosPorOperadorMock}
             estadoCuentasData={egresosEstadoCuentasMock}
+            servicios={servicios}
+            servicioFilter={servicioFilter}
+            onServicioFilterChange={setServicioFilter}
           />
         </div>
       </div>
