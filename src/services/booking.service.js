@@ -67,4 +67,15 @@ export const bookingService = {
         });
         return data;
     },
+
+    async calendario(mes, anio) {
+        const { data } = await api.get("/reservas/calendario", {
+            params: {
+                mes: mes,
+                anio: anio,
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
 };

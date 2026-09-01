@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     addMonths,
     eachDayOfInterval,
@@ -10,36 +10,35 @@ import {
     isSameDay,
     isSameMonth,
     isToday,
-    parseISO,
     startOfMonth,
     startOfWeek,
     subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-
-const MOCK_EVENTS = {
-    '2026-09-09': [{ id: 1, label: 'Hotel Dreams - Folio #0042', type: 'hotel' }],
-    '2026-09-16': [
-        { id: 2, label: 'Vuelo AM 302 - Folio #0051', type: 'vuelo' },
-        { id: 3, label: 'Transfer Aeropuerto - Folio #0067', type: 'operador' },
-    ],
-    '2026-09-23': [{ id: 4, label: 'Tour Huatulco Bays - Folio #0089', type: 'tour' }],
-};
+import { bookingService } from '@/services/booking.service';
 
 const TYPE_COLORS = {
-    hotel: '#2563eb',
-    vuelo: '#7c3aed',
-    operador: '#ea580c',
-    tour: '#059669',
+    'Hospedaje': '#2563eb',
+    'Traslado': '#ea580c',
+    'Circuitos': '#059669',
+    'Vuelo': '#7c3aed',
 };
 
-const VIEWS = ['Día', 'Semana', 'Mes'];
+function mapTipoServicioToBadge(tipoServicio) {
+    const tipo = (tipoServicio || '').toLowerCase();
+    if (tipo.includes('hotel') || tipo.includes('hosped')) return 'hotel';
+    if (tipo.includes('vuelo') || tipo.includes('aereo')) return 'vuelo';
+    if (tipo.includes('tour') || tipo.includes('excursion')) return 'tour';
+    return 'operador';
+}
 
-export default function Calendario({ events = MOCK_EVENTS, onDayClick, alertMessage }) {
+export default function Calendario({ onDayClick, alertMessage }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [view, setView] = useState('Mes');
     const [selectedDay, setSelectedDay] = useState(null);
+
+    const [events, setEvents] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const days = useMemo(() => {
         const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 });
@@ -48,6 +47,33 @@ export default function Calendario({ events = MOCK_EVENTS, onDayClick, alertMess
     }, [currentMonth]);
 
     const weekdayLabels = ['Dom.', 'Lun.', 'Mar.', 'Mié.', 'Jue.', 'Vie.', 'Sáb.'];
+
+    useEffect(() => {
+        let cancelado = false;
+
+        async function loadData() {
+            setLoading(true);
+            setError(null);
+            try {
+                const mes = format(currentMonth, 'M');
+                const anio = format(currentMonth, 'yyyy');
+                const data = await bookingService.calendario(mes, anio);
+                if (!cancelado) {
+                    setEvents(data);
+                }
+            } catch (err) {
+                console.error('Error al cargar el calendario:', err);
+                if (!cancelado) setError('No se pudo cargar el calendario.');
+            } finally {
+                if (!cancelado) setLoading(false);
+            }
+        }
+
+        loadData();
+        return () => {
+            cancelado = true;
+        };
+    }, [currentMonth]);
 
     const getEventsForDay = (day) => {
         const key = format(day, 'yyyy-MM-dd');
@@ -62,6 +88,8 @@ export default function Calendario({ events = MOCK_EVENTS, onDayClick, alertMess
     return (
         <div style={styles.card}>
             <h2 style={styles.title}>Calendario</h2>
+
+            {error && <div style={styles.errorBanner}>{error}</div>}
 
             {alertMessage && (
                 <div style={styles.alert}>
@@ -79,96 +107,87 @@ export default function Calendario({ events = MOCK_EVENTS, onDayClick, alertMess
                         style={styles.navBtn}
                         onClick={() => setCurrentMonth((m) => subMonths(m, 1))}
                         aria-label="Mes anterior"
+                        disabled={loading}
                     >
                         ‹
                     </button>
                     <span style={styles.monthLabel}>
-                        {format(currentMonth, 'MMMM', { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
+                        {format(currentMonth, 'MMMM yyyy', { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
                     </span>
                     <button
                         style={styles.navBtn}
                         onClick={() => setCurrentMonth((m) => addMonths(m, 1))}
                         aria-label="Mes siguiente"
+                        disabled={loading}
                     >
                         ›
                     </button>
                 </div>
-
-                <div style={styles.viewSwitch}>
-                    {VIEWS.map((v) => (
-                        <button
-                            key={v}
-                            onClick={() => setView(v)}
-                            style={{
-                                ...styles.viewBtn,
-                                ...(view === v ? styles.viewBtnActive : {}),
-                            }}
-                        >
-                            {v}
-                        </button>
-                    ))}
-                </div>
             </div>
 
-            <div style={styles.grid}>
-                {weekdayLabels.map((label) => (
-                    <div key={label} style={styles.weekdayCell}>
-                        {label}
-                    </div>
-                ))}
+            <div style={{ position: 'relative' }}>
+                {loading && <div style={styles.loadingOverlay}>Cargando…</div>}
 
-                {days.map((day) => {
-                    const inMonth = isSameMonth(day, currentMonth);
-                    const dayEvents = getEventsForDay(day);
-                    const selected = selectedDay && isSameDay(day, selectedDay);
+                <div style={styles.grid}>
+                    {weekdayLabels.map((label) => (
+                        <div key={label} style={styles.weekdayCell}>
+                            {label}
+                        </div>
+                    ))}
 
-                    return (
-                        <button
-                            key={day.toISOString()}
-                            onClick={() => handleDayClick(day)}
-                            style={{
-                                ...styles.dayCell,
-                                ...(inMonth ? {} : styles.dayCellOutside),
-                                ...(isToday(day) && inMonth ? styles.dayCellToday : {}),
-                                ...(selected ? styles.dayCellSelected : {}),
-                            }}
-                        >
-                            <span
+                    {days.map((day) => {
+                        const inMonth = isSameMonth(day, currentMonth);
+                        const dayEvents = getEventsForDay(day);
+                        const selected = selectedDay && isSameDay(day, selectedDay);
+
+                        return (
+                            <button
+                                key={day.toISOString()}
+                                onClick={() => handleDayClick(day)}
                                 style={{
-                                    ...styles.dayNumber,
-                                    ...(inMonth ? {} : styles.dayNumberOutside),
+                                    ...styles.dayCell,
+                                    ...(inMonth ? {} : styles.dayCellOutside),
+                                    ...(isToday(day) && inMonth ? styles.dayCellToday : {}),
+                                    ...(selected ? styles.dayCellSelected : {}),
                                 }}
                             >
-                                {format(day, 'd')}
-                            </span>
+                                <span
+                                    style={{
+                                        ...styles.dayNumber,
+                                        ...(inMonth ? {} : styles.dayNumberOutside),
+                                    }}
+                                >
+                                    {format(day, 'd')}
+                                </span>
 
-                            <div style={styles.eventList}>
-                                {dayEvents.slice(0, 3).map((ev) => (
-                                    <div
-                                        key={ev.id}
-                                        title={ev.label}
-                                        style={{
-                                            ...styles.eventBadge,
-                                            background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
-                                            color: TYPE_COLORS[ev.type] || '#374151',
-                                        }}
-                                    >
-                                        <span
+                                <div style={styles.eventList}>
+                                    {dayEvents.slice(0, 3).map((ev) => (
+                                        <div
+                                            key={ev.id}
+                                            title={ev.label}
                                             style={{
-                                                ...styles.eventDot,
-                                                background: TYPE_COLORS[ev.type] || '#6b7280',
+                                                ...styles.eventBadge,
+                                                background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
+                                                color: TYPE_COLORS[ev.type] || '#374151',
                                             }}
-                                        />
-                                        {ev.label}
-                                    </div>
-                                ))}
-                                {dayEvents.length > 3 && (
-                                    <div style={styles.moreLabel}>+{dayEvents.length - 3} más</div>
-                                )}
-                            </div>
-                        </button>
-                    );
-                })}
+                                        >
+                                            <span
+                                                style={{
+                                                    ...styles.eventDot,
+                                                    background: TYPE_COLORS[ev.type] || '#6b7280',
+                                                }}
+                                            />
+                                            {ev.label}
+                                        </div>
+                                    ))}
+                                    {dayEvents.length > 3 && (
+                                        <div style={styles.moreLabel}>+{dayEvents.length - 3} más</div>
+                                    )}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
@@ -185,6 +204,15 @@ const styles = {
         fontFamily: 'inherit',
     },
     title: { margin: '0 0 16px', fontSize: 22, fontWeight: 600, color: '#111827' },
+    errorBanner: {
+        background: '#fee2e2',
+        border: '1px solid #fecaca',
+        color: '#991b1b',
+        borderRadius: 8,
+        padding: '8px 12px',
+        fontSize: 13,
+        marginBottom: 12,
+    },
     alert: {
         display: 'flex',
         gap: 10,
@@ -216,7 +244,7 @@ const styles = {
         padding: '2px 6px',
         borderRadius: 6,
     },
-    monthLabel: { fontSize: 16, fontWeight: 600, color: '#111827', minWidth: 90, textAlign: 'center' },
+    monthLabel: { fontSize: 16, fontWeight: 600, color: '#111827', minWidth: 130, textAlign: 'center' },
     viewSwitch: { display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 3, gap: 2 },
     viewBtn: {
         border: 'none',
@@ -228,6 +256,18 @@ const styles = {
         color: '#4b5563',
     },
     viewBtnActive: { background: '#1d4ed8', color: '#fff', fontWeight: 500 },
+    loadingOverlay: {
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(255,255,255,0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 13,
+        color: '#4b5563',
+        zIndex: 1,
+        borderRadius: 8,
+    },
     grid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(7, 1fr)',
