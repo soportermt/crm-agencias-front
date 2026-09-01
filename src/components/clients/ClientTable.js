@@ -17,6 +17,9 @@ const COLUMNS = [
 export default function ClientTable({ clients = [], currentPage, totalPages, totalItems, onPageChange, onEdit }) {
 
   const renderCell = (key, row) => {
+    if (key === "name") {
+      return <span className="fw-medium text-dark">{row.name}</span>;
+    }
     if (key === "status") {
       return <StatusBadge status={row.status} />;
     }

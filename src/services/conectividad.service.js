@@ -6,6 +6,7 @@ export const conectividadService = {
     return data;
   },
 
+
   async getClientEmails(id) {
     const { data } = await api.get(`/email/client/${id}`);
     return data;

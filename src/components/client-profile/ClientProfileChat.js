@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { conectividadService } from "@/services/conectividad.service";
 
 export default function ClientProfileChat({ clientId }) {
@@ -13,8 +14,8 @@ export default function ClientProfileChat({ clientId }) {
       try {
         setLoading(true);
         if (clientId) {
-          const responseData = await conectividadService.getClientChats(clientId);
-          setMessages(responseData.data || []);
+          const res = await conectividadService.getClientChats(clientId);
+          setMessages(Array.isArray(res) ? res : res?.data || []);
         }
       } catch (error) {
         console.error("Error al cargar chats:", error);
@@ -31,9 +32,19 @@ export default function ClientProfileChat({ clientId }) {
 
   return (
     <div>
-      <h3 className="font-poppins h6 fw-semibold mb-4" style={{ color: "var(--dark-green)" }}>
-        Conversaciones en WhatsApp
-      </h3>
+      <div className="d-flex align-items-center justify-content-between mb-4">
+        <h3 className="font-poppins h6 fw-semibold mb-0" style={{ color: "var(--dark-green)" }}>
+          Conversaciones en WhatsApp
+        </h3>
+        <Link
+          href={`/mensajeria?clientId=${clientId}`}
+          className="btn btn-bg-style d-flex align-items-center gap-2 fw-medium"
+          style={{ fontSize: "12.5px", padding: "6px 14px", borderRadius: "8px" }}
+        >
+          <i className="bi bi-whatsapp" style={{ fontSize: "14px", color: "#25D366" }}></i>
+          Abrir en Bandeja
+        </Link>
+      </div>
 
       <div className="d-flex flex-column gap-3 font-inter">
         {messages.map((msg, index) => {
@@ -53,27 +64,20 @@ export default function ClientProfileChat({ clientId }) {
               >
               {isClient && (
                 <div
-                  className="rounded-circle overflow-hidden position-relative flex-shrink-0"
-                  style={{ width: "32px", height: "32px" }}
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+                  style={{ width: "32px", height: "32px", backgroundColor: "#e7f1fe", color: "#0c5cc6", fontSize: "12px" }}
                 >
-                  <Image
-                    src="/avatar-placeholder.jpg"
-                    alt="Avatar"
-                    fill
-                    className="object-fit-cover"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      e.target.parentElement.style.backgroundColor = "#e1e1e1";
-                    }}
-                  />
+                  CL
                 </div>
               )}
 
               <div
                 className="d-flex align-items-end gap-2"
                 style={{
-                  backgroundColor: isClient ? "#f1f5f9" : "#5145cd",
+                  backgroundColor: isClient ? "#ffffff" : "#5145cd",
                   color: isClient ? "#0f1901" : "#ffffff",
+                  border: isClient ? "1px solid #e5e7eb" : "none",
+                  boxShadow: isClient ? "0 1px 1px rgba(15,25,1,0.04)" : "0 1px 1px rgba(15,25,1,0.05)",
                   padding: "10px 16px",
                   borderRadius: "16px",
                   borderBottomLeftRadius: isClient ? "4px" : "16px",

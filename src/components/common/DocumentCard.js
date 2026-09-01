@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function DocumentCard({ name, size, type, onDownload }) {
+export default function DocumentCard({ name, size, type, url, onDelete, onDownload }) {
   return (
     <div
       className="d-flex align-items-center justify-content-between px-3 py-2 w-100"
@@ -51,13 +51,17 @@ export default function DocumentCard({ name, size, type, onDownload }) {
         </div>
       </div>
 
-      {/* Descargar Link */}
-      <div>
+      {/* Acciones */}
+      <div className="d-flex align-items-center gap-3">
         <a
-          href="#"
+          href={url || "#"}
+          target={url ? "_blank" : "_self"}
+          rel="noopener noreferrer"
           onClick={(e) => {
-            e.preventDefault();
-            if (onDownload) onDownload();
+            if (!url && onDownload) {
+              e.preventDefault();
+              onDownload();
+            }
           }}
           className="fw-semibold text-decoration-none"
           style={{
@@ -67,8 +71,18 @@ export default function DocumentCard({ name, size, type, onDownload }) {
             cursor: "pointer",
           }}
         >
-          Descargar
+          Ver / Descargar
         </a>
+
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="btn btn-link p-0 text-danger text-decoration-none"
+            style={{ fontSize: "14px", fontWeight: "500" }}
+          >
+            Eliminar
+          </button>
+        )}
       </div>
     </div>
   );
