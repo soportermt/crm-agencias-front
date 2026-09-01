@@ -64,19 +64,10 @@ export default function ClientProfileChat({ clientId }) {
               >
               {isClient && (
                 <div
-                  className="rounded-circle overflow-hidden position-relative flex-shrink-0"
-                  style={{ width: "32px", height: "32px" }}
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+                  style={{ width: "32px", height: "32px", backgroundColor: "#e7f1fe", color: "#0c5cc6", fontSize: "12px" }}
                 >
-                  <Image
-                    src="/avatar-placeholder.jpg"
-                    alt="Avatar"
-                    fill
-                    className="object-fit-cover"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      e.target.parentElement.style.backgroundColor = "#e1e1e1";
-                    }}
-                  />
+                  CL
                 </div>
               )}
 

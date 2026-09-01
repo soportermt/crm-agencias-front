@@ -17,6 +17,25 @@ const COLUMNS = [
 export default function ClientTable({ clients = [], currentPage, totalPages, totalItems, onPageChange, onEdit }) {
 
   const renderCell = (key, row) => {
+    if (key === "name") {
+      const initials = row.name 
+        ? (row.name.split(" ").filter(p => p.trim()).length >= 2 
+            ? (row.name.split(" ").filter(p => p.trim())[0][0] + row.name.split(" ").filter(p => p.trim())[1][0]) 
+            : row.name.substring(0, 2)).toUpperCase()
+        : "CL";
+
+      return (
+        <div className="d-flex align-items-center gap-2">
+          <div
+            className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+            style={{ width: "32px", height: "32px", backgroundColor: "#e7f1fe", color: "#0c5cc6", fontSize: "12px" }}
+          >
+            {initials}
+          </div>
+          <span className="fw-medium text-dark">{row.name}</span>
+        </div>
+      );
+    }
     if (key === "status") {
       return <StatusBadge status={row.status} />;
     }
