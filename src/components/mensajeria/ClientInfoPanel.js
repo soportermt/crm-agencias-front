@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { formatPhone } from "./utils";
 
 export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onRefreshEmails, showEmails = true }) {
   if (!clientInfo) {
@@ -47,7 +48,7 @@ export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onR
           {clientInfo.celular && (
             <div className="d-flex align-items-center gap-2">
               <i className="bi bi-telephone flex-shrink-0" style={{ color: "#0c5cc6" }}></i>
-              <span style={{ color: "#404040" }}>{clientInfo.celular}</span>
+              <span style={{ color: "#404040" }}>{formatPhone(clientInfo.celular)}</span>
             </div>
           )}
           {clientInfo.ciudad && (

@@ -1,3 +1,11 @@
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+
+export function formatPhone(phone) {
+  if (!phone) return "";
+  const phoneNumber = parsePhoneNumberFromString(phone.startsWith('+') ? phone : `+${phone}`);
+  return phoneNumber ? phoneNumber.formatInternational() : phone;
+}
+
 export function getInitials(name) {
   if (!name) return "CL";
   const parts = String(name).trim().split(/\s+/);

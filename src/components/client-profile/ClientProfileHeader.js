@@ -5,8 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import StatusBadge from "@/components/common/StatusBadge";
 import StatCard from "@/components/common/StatCard";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export default function ClientProfileHeader({ client }) {
+  const formatPhone = (phone) => {
+    if (!phone) return "";
+    const phoneNumber = parsePhoneNumberFromString(phone.startsWith('+') ? phone : `+${phone}`);
+    return phoneNumber ? phoneNumber.formatInternational() : phone;
+  };
+
   if (!client) return null;
   
   return (
@@ -46,7 +53,7 @@ export default function ClientProfileHeader({ client }) {
               {client.celular && (
                 <div className="d-flex align-items-center gap-1">
                   <i className="bi bi-telephone"></i>
-                  <span>{client.celular}</span>
+                  <span>{formatPhone(client.celular || client.telefono)}</span>
                 </div>
               )}
               {client.correo && (
