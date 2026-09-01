@@ -16,6 +16,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { bookingService } from '@/services/booking.service';
+import Link from 'next/link';
 
 const TYPE_COLORS = {
     'Hospedaje': '#2563eb',
@@ -162,23 +163,24 @@ export default function Calendario({ onDayClick, alertMessage }) {
 
                                 <div style={styles.eventList}>
                                     {dayEvents.slice(0, 3).map((ev) => (
-                                        <div
-                                            key={ev.id}
-                                            title={ev.label}
-                                            style={{
-                                                ...styles.eventBadge,
-                                                background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
-                                                color: TYPE_COLORS[ev.type] || '#374151',
-                                            }}
-                                        >
-                                            <span
+                                        <Link key={ev.id} href={`/reservaciones/editar/${ev.id_venta}`} target="_blank" style={{textDecoration: "none"}}>
+                                            <div
+                                                title={ev.label}
                                                 style={{
-                                                    ...styles.eventDot,
-                                                    background: TYPE_COLORS[ev.type] || '#6b7280',
+                                                    ...styles.eventBadge,
+                                                    background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
+                                                    color: TYPE_COLORS[ev.type] || '#374151',
                                                 }}
-                                            />
-                                            {ev.label}
-                                        </div>
+                                            >
+                                                <span
+                                                    style={{
+                                                        ...styles.eventDot,
+                                                        background: TYPE_COLORS[ev.type] || '#6b7280',
+                                                    }}
+                                                />
+                                                {ev.label}
+                                            </div>
+                                        </Link>
                                     ))}
                                     {dayEvents.length > 3 && (
                                         <div style={styles.moreLabel}>+{dayEvents.length - 3} más</div>
