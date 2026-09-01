@@ -27,7 +27,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchContacts = async () => {
       try {
         const data = await clientsService.getRecentChatContacts();
@@ -126,17 +126,19 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
             </button>
           </Link>
 
-          <button
-            className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${!isExpanded ? "justify-content-center" : "gap-3"
-              }`}
-            style={{ backgroundColor: "transparent" }}
-            title={!isExpanded ? "Calendario" : undefined}
-          >
-            <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06", borderRadius: "8px" }}>
-              <CalendarDaysIcon style={{ width: "14px", height: "14px" }} />
-            </div>
-            {isExpanded && <span className="small text-dark fw-normal font-inter">Calendario</span>}
-          </button>
+          <Link href="/calendario" className="text-decoration-none">
+            <button
+              className={`btn btn-light w-100 text-start p-2 border-radius-12 d-flex align-items-center transition-smooth hover-light border-0 ${!isExpanded ? "justify-content-center" : "gap-3"
+                }`}
+              style={{ backgroundColor: "transparent" }}
+              title={!isExpanded ? "Calendario" : undefined}
+            >
+              <div className="text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "24px", height: "24px", backgroundColor: "#75bf06", borderRadius: "8px" }}>
+                <CalendarDaysIcon style={{ width: "14px", height: "14px" }} />
+              </div>
+              {isExpanded && <span className="small text-dark fw-normal font-inter">Calendario</span>}
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -183,9 +185,9 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
         )}
         <div className="d-flex flex-column gap-2">
           {chatContacts.map((contact, idx) => (
-            <Link 
-              href={`/clientes/${contact.id}`} 
-              key={idx} 
+            <Link
+              href={`/clientes/${contact.id}`}
+              key={idx}
               className="text-decoration-none"
             >
               <div
