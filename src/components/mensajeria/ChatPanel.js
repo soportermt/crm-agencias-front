@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { WA_STATUS } from "./utils";
+import { WA_STATUS, formatPhone } from "./utils";
 
 function formatMessageTime(timeStr, dateStr) {
   const dt = dateStr ? new Date(`${dateStr}T${timeStr || "00:00"}`) : new Date();
@@ -90,7 +90,7 @@ export default function ChatPanel({
   }
 
   const clientName = clientInfo?.nombreCompleto || clientInfo?.name || conversation.clientName || conversation.client_name || "Cliente";
-  const clientPhone = clientInfo?.celular || conversation.clientPhone || conversation.client_phone || "";
+  const clientPhone = formatPhone(clientInfo?.celular || conversation.clientPhone || conversation.client_phone || "");
   const statusMeta = WA_STATUS[conversation?.status] || WA_STATUS.open;
 
   return (

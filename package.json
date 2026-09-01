@@ -20,11 +20,13 @@
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "date-fns": "^4.4.0",
+    "libphonenumber-js": "^1.13.12",
     "next": "15.5.19",
     "qs": "^6.15.3",
     "react": "19.1.0",
     "react-datepicker": "^9.1.0",
     "react-dom": "19.1.0",
+    "react-phone-input-2": "^2.15.1",
     "react-select": "^5.10.2",
     "recharts": "^3.10.1",
     "socket.io-client": "^4.8.3"

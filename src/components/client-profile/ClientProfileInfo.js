@@ -1,8 +1,15 @@
 "use client";
 
 import React from "react";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export default function ClientProfileInfo({ client }) {
+  const formatPhone = (phone) => {
+    if (!phone) return "-";
+    const phoneNumber = parsePhoneNumberFromString(phone.startsWith('+') ? phone : `+${phone}`);
+    return phoneNumber ? phoneNumber.formatInternational() : phone;
+  };
+
   if (!client) return null;
 
   return (
@@ -34,7 +41,7 @@ export default function ClientProfileInfo({ client }) {
               Teléfono
             </div>
             <div className="col-7" style={{ color: "var(--dark-green)", fontWeight: 500, fontSize: "13px" }}>
-              {client.celular || "-"}
+              {formatPhone(client.celular || client.telefono)}
             </div>
           </div>
           <div className="row g-0">

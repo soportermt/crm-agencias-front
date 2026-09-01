@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { catalogosService } from "@/services/catalogos.service";
-import { WA_TEMPLATES } from "./utils";
+import { WA_TEMPLATES, formatPhone } from "./utils";
 
 export default function NewWhatsAppConversationModal({ show, onClose, onSendTemplate }) {
   const [contacts, setContacts] = useState([]);
@@ -134,7 +134,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
                                   {contact.name}
                                 </span>
                                 <span className="text-truncate d-block small" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
-                                  {contact.phone}
+                                  {formatPhone(contact.phone)}
                                 </span>
                               </div>
                               {isSelected && (

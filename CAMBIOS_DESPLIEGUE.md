@@ -22,6 +22,8 @@ export default nextConfig;
 
 > **Nota sobre `rewrites`:** Se eliminaron las reglas de `rewrites` en `next.config.mjs` debido a que Next.js no permite el uso de `rewrites` junto con `output: 'export'`. Las peticiones a APIs externas se manejan directamente mediante la URL completa configurada en las variables de entorno.
 
+> **Nota sobre `axios.js` y conectividad:** En `src/lib/axios.js` se configuró `connectivityApi` para apuntar directamente a `NEXT_PUBLIC_CONNECTIVITY_API_URL` sin intentar reescrituras locales de proxy.
+
 > **Nota sobre `package.json`:** Se actualizó el script de compilación a `"build": "next build"` (eliminando el flag experimental `--turbopack` en build) para garantizar la correcta recolección y exportación de páginas estáticas.
 
 ## 2. Reestructuración de Rutas Dinámicas y Manejo de `useSearchParams`
@@ -60,17 +62,15 @@ Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas
 
 ## 4. Corrección de Rutas de Imágenes y Recursos Estáticos
 
-Cuando se usa `output: 'export'` y `basePath: '/app'`, las rutas de recursos públicos directos en cadenas de texto y componentes de imagen requieren el prefijo del subdirectorio:
+Cuando se usa `output: 'export'` y `basePath: '/app'`:
 
-1. **Logo (`2bt2025.png`)**:
-   - Modificado en `src/components/layout/Header.js` y `src/app/login/page.js` a `src="/app/2bt2025.png"` para prevenir errores 404 en peticiones directas al dominio raíz.
+1. **Next.js Image (`next/image`)**:
+   - Los componentes de Next.js que usan `<Image src="/2bt2025.png" ... />` reciben automáticamente el prefijo `basePath` durante el renderizado estático.
 
-2. **Avatares y Contactos**:
-   - Modificado en `src/components/layout/RightBar.js` para usar `src="/app/avatars/avatar-..."`.
-
-3. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
-   - Modificado en `src/components/pdf/fonts.js` reemplazando `/fonts/` por `/app/fonts/` (ej. `/app/fonts/Inter-Regular.ttf`).
-   - Modificado en `src/components/pdf/BookingPdf.js` para iconos e imágenes estáticas (`/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `map.png`, `location.png`, `email.png`, `phone-call.png`).
+2. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
+   - Dado que React-PDF se ejecuta en el navegador/canvas fuera del pipeline de Next.js, se configuraron rutas absolutas con `/app/`:
+     - En `src/components/pdf/fonts.js`: `/app/fonts/Inter-...ttf`.
+     - En `src/components/pdf/BookingPdf.js`: `/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `map.png`, `location.png`, `email.png`, `phone-call.png`.
 
 ## 5. Control de Versiones (`.gitignore`)
 
@@ -94,7 +94,7 @@ Para subir al servidor, se debe comprimir **el contenido directo** de la carpeta
 
 #### En Windows (PowerShell):
 ```powershell
-Get-ChildItem -Path "out" -Force | Compress-Archive -DestinationPath "crm_estatico.zip" -Force
+Get-ChildItem -Path "out\*" -Force | Compress-Archive -DestinationPath "crm_estatico.zip" -Force
 ```
 
 #### En Linux / macOS / Bash:

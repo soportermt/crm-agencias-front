@@ -2,6 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { clientsService } from "@/services/clients.service";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import es from 'react-phone-input-2/lang/es.json';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export default function ClientModal({ show, onClose, onClientCreated, client }) {
   const [submitting, setSubmitting] = useState(false);
@@ -22,7 +26,7 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
     codigoPostal: "",
     ciudad: "",
     estado: "",
-    pais: "",
+    pais: "México",
     rfc: "",
   });
   const resetForm = () => {
@@ -36,7 +40,7 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
       codigoPostal: "",
       ciudad: "",
       estado: "",
-      pais: "",
+      pais: "México",
       rfc: "",
     });
   };
@@ -113,6 +117,8 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
             }
             if (types.includes('country')) {
               country = component.long_name;
+              const matchedCountry = COUNTRIES.find(c => c.name.localeCompare(country, undefined, { sensitivity: 'base' }) === 0);
+              if (matchedCountry) country = matchedCountry.name;
             }
             if (types.includes('postal_code')) {
               postalCode = component.long_name;
@@ -134,17 +140,22 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
   useEffect(() => {
     if (show) {
       if (client) {
+        let loadedCelular = client.celular || client.telefono || "";
+        if (loadedCelular && !loadedCelular.startsWith("+")) {
+          loadedCelular = `+52${loadedCelular}`;
+        }
+
         setFormData({
           nombreCompleto: client.nombreCompleto || client.name || "",
           correo: client.correo || "",
           fechaNacimiento: (client.fechaNacimiento || client.fecha_nacimiento || "").split("T")[0].split(" ")[0],
-          celular: client.celular || client.telefono || "",
+          celular: loadedCelular,
           sexo: client.sexo || "",
           estadoCivil: client.estadoCivil || client.estado_civil || "",
           codigoPostal: client.codigoPostal || client.codigo_postal || "",
           ciudad: client.ciudad || "",
           estado: client.estado || "",
-          pais: client.pais || "",
+          pais: client.pais || "México",
           rfc: client.rfc || "",
         });
       } else {
@@ -160,15 +171,28 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
       return;
     }
 
+    const fullPhoneNumber = formData.celular.startsWith('+') ? formData.celular : `+${formData.celular}`;
+    const phoneNumber = parsePhoneNumberFromString(fullPhoneNumber);
+    
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      setError("El número de celular ingresado no es válido para el país seleccionado.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
       
+      const submitData = {
+        ...formData,
+        celular: fullPhoneNumber
+      };
+      
       if (client) {
-        const updatedClient = await clientsService.updateClient(client.id, formData);
+        const updatedClient = await clientsService.updateClient(client.id, submitData);
         if (onClientCreated) onClientCreated(updatedClient);
       } else {
-        const newClient = await clientsService.createClient(formData);
+        const newClient = await clientsService.createClient(submitData);
         if (onClientCreated) onClientCreated(newClient);
       }
 
@@ -297,14 +321,20 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   Celular *
                 </label>
-                <input
-                  type="tel"
-                  required
-                  className="form-control input-custom"
+                <PhoneInput
+                  country={'mx'}
+                  enableSearch={true}
+                  searchPlaceholder="Buscar país..."
+                  searchNotFound="País no encontrado"
+                  localization={es}
+                  countryCodeEditable={false}
                   value={formData.celular}
-                  onChange={(e) =>
-                    setFormData({ ...formData, celular: e.target.value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, celular: value || "" })}
+                  inputClass="form-control input-custom"
+                  containerClass="w-100"
+                  inputStyle={{ paddingLeft: '48px', height: '43px', borderRadius: '12px', border: '1px solid var(--border-color)', width: '100%', fontSize: '14px', color: 'var(--dark-green)' }}
+                  buttonStyle={{ borderRadius: '12px 0 0 12px', backgroundColor: 'transparent', border: 'none', paddingLeft: '8px' }}
+                  dropdownStyle={{ zIndex: 1060, borderRadius: '12px' }}
                 />
               </div>
 
@@ -454,15 +484,22 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
                   País *
                 </label>
-                <input
-                  type="text"
+                <select
                   required
-                  className="form-control input-custom"
+                  className="form-select input-custom"
                   value={formData.pais}
-                  onChange={(e) =>
-                    setFormData({ ...formData, pais: e.target.value })
-                  }
-                />
+                  onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                >
+                  <option value="">Seleccionar</option>
+                  {Object.values(es).sort((a, b) => a.localeCompare(b)).map((countryName) => (
+                    <option key={countryName} value={countryName}>
+                      {countryName}
+                    </option>
+                  ))}
+                  {formData.pais && !Object.values(es).includes(formData.pais) && (
+                    <option value={formData.pais}>{formData.pais}</option>
+                  )}
+                </select>
               </div>
             </div>
           </div>
@@ -498,6 +535,82 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
       <style>{`
         .pac-container {
           z-index: 1060 !important;
+        }
+        .react-tel-input .form-control:focus {
+          border-color: var(--primary-light) !important;
+          box-shadow: 0 0 0 3px rgba(57, 138, 243, 0.15) !important;
+        }
+        .react-tel-input .flag-dropdown {
+          border: none !important;
+          background-color: transparent !important;
+        }
+        .react-tel-input .flag-dropdown:hover, .react-tel-input .flag-dropdown.open {
+          background-color: transparent !important;
+        }
+        .react-tel-input .selected-flag {
+          width: 48px !important;
+          padding: 0 0 0 12px !important;
+          border-radius: 12px 0 0 12px !important;
+        }
+        .react-tel-input .selected-flag:hover, .react-tel-input .selected-flag:focus {
+          background-color: transparent !important;
+        }
+        
+        /* Modernización del buscador y la lista de países */
+        .react-tel-input .country-list {
+          border-radius: 12px !important;
+          border: 1px solid var(--border-color) !important;
+          box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12) !important;
+          margin-top: 6px !important;
+          max-height: 320px !important; /* Lista más larga */
+        }
+        .react-tel-input .search-emoji {
+          display: none !important; /* Ocultar emoji/brújula nativo */
+        }
+        .react-tel-input .country-list .search {
+          padding: 12px !important;
+          background-color: var(--white) !important;
+          border-bottom: 1px solid var(--border-color) !important;
+          position: sticky;
+          top: 0;
+          z-index: 2;
+        }
+        .react-tel-input .country-list .search-box {
+          border: 1px solid var(--border-color) !important;
+          border-radius: 8px !important;
+          padding: 8px 12px !important;
+          font-family: var(--font-inter), sans-serif !important;
+          font-size: 14px !important;
+          color: var(--dark-green) !important;
+          width: 100% !important;
+          transition: all 0.2s ease !important;
+          background-color: var(--bg-light) !important;
+          margin: 0 !important;
+        }
+        .react-tel-input .country-list .search-box:focus {
+          border-color: var(--primary-light) !important;
+          box-shadow: 0 0 0 3px rgba(57, 138, 243, 0.15) !important;
+          outline: none !important;
+          background-color: var(--white) !important;
+        }
+        .react-tel-input .country-list .country {
+          padding: 10px 16px !important;
+          font-family: var(--font-inter), sans-serif !important;
+          font-size: 14px !important;
+          color: var(--dark-green) !important;
+          transition: background-color 0.15s ease !important;
+        }
+        .react-tel-input .country-list .country:hover,
+        .react-tel-input .country-list .country.highlight {
+          background-color: var(--brand-blue-light) !important;
+        }
+        .react-tel-input .country-list .dial-code {
+          color: var(--grey-text) !important;
+          font-size: 13px !important;
+          margin-left: 6px !important;
+        }
+        .react-tel-input .country-list .country-name {
+          font-weight: 500;
         }
       `}</style>
     </div>
