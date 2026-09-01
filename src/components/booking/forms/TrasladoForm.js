@@ -12,7 +12,11 @@ export default function TrasladoForm() {
     const { draft, updateDraftField } = useBookingForm();
     const { data, errors } = draft;
     const isRedondo = !!data.redondo;
-    const setIsRedondo = (checked) => updateDraftField("redondo", checked);
+    // const setIsRedondo = (checked) => updateDraftField("redondo", checked);
+    const setIsRedondo = (checked) => {
+        updateDraftField("redondo", checked);
+        updateDraftField("descripcion", checked ? "Traslado Redondo" : "Traslado Sencillo");
+    };
 
     const toggleEquipaje = (tipo) => {
         const nuevo = data.equipaje?.includes(tipo)
