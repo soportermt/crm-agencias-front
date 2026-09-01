@@ -412,7 +412,7 @@ function MensajeriaContent() {
 
   return (
     <div className="container-fluid p-0 font-inter">
-      <div className="d-flex align-items-center justify-content-between mb-3">
+      <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
         <div>
           <h1 className="h4 font-poppins fw-bold mb-1" style={{ color: "var(--dark-green)" }}>
             Bandeja
@@ -464,7 +464,7 @@ function MensajeriaContent() {
       <div className="mensajeria-layout">
         <div className="row g-3 h-100">
           {/* Columna izquierda */}
-          <div className="col-12 col-md-4 col-xl-3 h-100">
+          <div className={`col-12 col-md-4 col-xl-3 h-100 ${selectedConv || selectedContact ? 'd-none d-md-block' : ''}`}>
             {view === "whatsapp" ? (
               <ConversationList
                 conversations={visibleConversations}
@@ -490,7 +490,7 @@ function MensajeriaContent() {
           </div>
 
           {/* Panel central */}
-          <div className="col-12 col-md-8 col-xl-6 h-100">
+          <div className={`col-12 col-md-8 col-xl-6 h-100 ${(selectedConv || selectedContact) ? '' : 'd-none d-md-block'}`}>
             {view === "whatsapp" ? (
               <ChatPanel
                 conversation={selectedConv}
@@ -518,8 +518,8 @@ function MensajeriaContent() {
             )}
           </div>
 
-          {/* Columna derecha */}
-          <div className="col-12 col-xl-3 h-100 overflow-y-auto">
+          {/* Columna derecha (info cliente) - Oculta en móviles, visible desde xl */}
+          <div className="col-12 col-xl-3 h-100 overflow-y-auto d-none d-xl-block">
             <ClientInfoPanel
               clientInfo={clientInfo}
               emails={emails}

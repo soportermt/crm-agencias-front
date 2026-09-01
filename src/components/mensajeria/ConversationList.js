@@ -65,23 +65,25 @@ export default function ConversationList({
 
       {/* Filtro de estado (oculto durante la búsqueda) */}
       {!isSearching && (
-        <div className="d-flex align-items-center gap-2 px-3 py-2 border-bottom overflow-auto" style={{ borderColor: "#f0f0f0", whiteSpace: "nowrap" }}>
+        <div className="d-flex align-items-center justify-content-between px-2 py-2 border-bottom" style={{ borderColor: "#f0f0f0" }}>
           {statuses.map((st) => {
             const isActive = statusFilter === st.key;
             return (
               <button
                 key={st.key}
                 onClick={() => onStatusChange(st.key)}
-                className="btn border-0 fw-medium d-flex align-items-center gap-1 flex-shrink-0 transition-smooth"
+                className="btn border-0 fw-medium d-flex align-items-center justify-content-center gap-1 transition-smooth flex-grow-1 mx-1 px-1"
                 style={{
-                  padding: "5px 12px",
+                  paddingTop: "5px",
+                  paddingBottom: "5px",
                   borderRadius: "20px",
-                  fontSize: "12px",
+                  fontSize: "11.5px",
                   backgroundColor: isActive ? "#e7f1fe" : "transparent",
                   color: isActive ? "#0c5cc6" : "var(--grey-text)",
+                  whiteSpace: "nowrap"
                 }}
               >
-                <i className={`bi ${st.icon}`} style={{ fontSize: "13px" }}></i>
+                <i className={`bi ${st.icon}`} style={{ fontSize: "12px" }}></i>
                 {st.label}
               </button>
             );

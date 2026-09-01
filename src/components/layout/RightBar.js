@@ -182,7 +182,14 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           <hr className="my-2" style={{ opacity: 0.1 }} />
         )}
         <div className="d-flex flex-column gap-2">
-          {chatContacts.map((contact, idx) => (
+          {chatContacts.map((contact, idx) => {
+            const initials = contact.name 
+              ? (contact.name.split(" ").filter(p => p.trim()).length >= 2 
+                  ? (contact.name.split(" ").filter(p => p.trim())[0][0] + contact.name.split(" ").filter(p => p.trim())[1][0]) 
+                  : contact.name.substring(0, 2)).toUpperCase()
+              : "CL";
+
+            return (
             <Link 
               href={`/clientes/${contact.id}`} 
               key={idx} 
@@ -194,13 +201,19 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
                 title={!isExpanded ? contact.name : undefined}
                 style={{ cursor: "pointer" }}
               >
-                <img
-                  src={contact.avatar}
-                  alt={contact.name}
-                  className="rounded-circle flex-shrink-0 animate-fade-in"
-                  style={{ width: "24px", height: "24px", minWidth: "24px", objectFit: "cover" }}
-                  onError={(e) => { e.target.src = "/avatars/avatar-male-01.png"; }}
-                />
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    minWidth: "24px",
+                    backgroundColor: "#e7f1fe",
+                    color: "#0c5cc6",
+                    fontSize: "10px",
+                  }}
+                >
+                  {initials}
+                </div>
                 {isExpanded && (
                   <div className="flex-grow-1" style={{ minWidth: 0, overflow: "hidden" }}>
                     <p className="mb-0 fw-normal text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{contact.name}</p>
@@ -211,7 +224,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
                 )}
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </aside>
