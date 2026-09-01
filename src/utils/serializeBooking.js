@@ -151,7 +151,7 @@ function buildService(item) {
   } else if (tipoId === TIPO_SERVICIO_MAP.tour) {
     descripcion = item.data.descripcion;
   } else if (tipoId === TIPO_SERVICIO_MAP.traslado) {
-    descripcion = "";
+    descripcion = item.data.redondo ? "Traslado Redondo" : "Traslado Sencillo";
   } else {
     descripcion = "";
   }
