@@ -1,8 +1,8 @@
 # Registro de Cambios para Despliegue en Servidor Estático (Subdominio /app)
 
-Este documento detalla todas las modificaciones realizadas en el proyecto para asegurar su correcto funcionamiento al ser exportado como un sitio web estático y alojado bajo el subdominio o subdirectorio `/app`.
+Este documento detalla todas las modificaciones realizadas en el proyecto para asegurar su correcto funcionamiento al ser exportado como un sitio web estático (`output: 'export'`) y alojado bajo el subdominio o subdirectorio `/app`.
 
-## 1. Configuración de Next.js (`next.config.mjs`)
+## 1. Configuración de Next.js (`next.config.mjs`) y Scripts
 
 Para permitir la exportación estática y configurar la ruta base, se realizaron los siguientes ajustes en el archivo de configuración:
 
@@ -22,7 +22,9 @@ export default nextConfig;
 
 > **Nota sobre `rewrites`:** Se eliminaron las reglas de `rewrites` en `next.config.mjs` debido a que Next.js no permite el uso de `rewrites` junto con `output: 'export'`. Las peticiones a APIs externas se manejan directamente mediante la URL completa configurada en las variables de entorno.
 
-## 2. Reestructuración de Rutas Dinámicas
+> **Nota sobre `package.json`:** Se actualizó el script de compilación a `"build": "next build"` (eliminando el flag experimental `--turbopack` en build) para garantizar la correcta recolección y exportación de páginas estáticas.
+
+## 2. Reestructuración de Rutas Dinámicas y Manejo de `useSearchParams`
 
 Next.js requiere conocer todos los posibles valores de las rutas dinámicas (carpetas como `[id]`) durante el tiempo de construcción (`build time`) si se utiliza una exportación estática. Para un CRM donde los IDs de clientes, vendedores, pagos y reservaciones son dinámicos, esto no es viable con rutas en el sistema de archivos.
 
@@ -41,13 +43,16 @@ Por lo tanto, se migraron todas las rutas dinámicas al uso de **Parámetros de 
    - `src/app/(crm)/reservaciones/editar/page.js`
 2. **Eliminación de carpetas dinámicas:** Las carpetas antiguas `[id]` fueron eliminadas por completo para evitar errores de compilación (`generateStaticParams`).
 3. En lugar de usar `params.id`, los componentes utilizan el hook `useSearchParams()` de Next.js para leer el parámetro `id` (`const id = searchParams.get("id")`).
-4. Todo componente que hace uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica y un componente exportado por defecto que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación y permitir la generación estática.
+4. **Envoltura con `<Suspense>`:** Todo componente que hace uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica y un componente exportado por defecto que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación y permitir la generación estática.
+   - Aplica también a la página de **Mensajería** (`src/app/(crm)/mensajeria/page.js`), la cual utiliza `useSearchParams` para el parámetro `clientId`.
 
 ## 3. Actualización de Enlaces (`<Link>`)
 
 Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas dinámicas fueron actualizados:
 
 - En `ClientTable.js`: Se cambió ``href={`/clientes/${row.id}`}`` a ``href={`/clientes/detalle?id=${row.id}`}``.
+- En `ClientInfoPanel.js` y `ChatPanel.js`: Se cambió ``href={`/clientes/${clientInfo.id}`}`` a ``href={`/clientes/detalle?id=${clientInfo.id}`}``.
+- En `RightBar.js`: Se cambió ``href={`/clientes/${contact.id}`}`` a ``href={`/clientes/detalle?id=${contact.id}`}``.
 - En `IngresosTable.js` y `EgresosTable.js`: Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}``.
 - En `VendedoresTable.js`: Se cambió ``href={`/vendedores/${row.id}`}`` a ``href={`/vendedores/detalle?id=${row.id}`}``.
 - En `BookingsList.js` e `InfoTableVendedor.js`: Se cambió ``href={`reservaciones/editar/${row.id_venta}`}`` a ``href={`/reservaciones/editar?id=${row.id_venta}`}``.
@@ -55,14 +60,13 @@ Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas
 
 ## 4. Corrección de Rutas de Imágenes y Recursos Estáticos
 
-Cuando se usa `output: 'export'` y `basePath: '/app'`, las rutas de recursos públicos directos en cadenas de texto requieren el prefijo del subdirectorio:
+Cuando se usa `output: 'export'` y `basePath: '/app'`, las rutas de recursos públicos directos en cadenas de texto y componentes de imagen requieren el prefijo del subdirectorio:
 
 1. **Logo (`2bt2025.png`)**:
-   - Modificado en `src/components/layout/Header.js` y `src/app/login/page.js` a `src="/app/2bt2025.png"`.
+   - Modificado en `src/components/layout/Header.js` y `src/app/login/page.js` a `src="/app/2bt2025.png"` para prevenir errores 404 en peticiones directas al dominio raíz.
 
-2. **Avatares y Placeholders**:
-   - Modificado en `ClientProfileHeader.js` y `ClientProfileChat.js` para usar los avatares existentes bajo `src="/app/avatars/avatar-female-06.png"`.
-   - Modificado en `RightBar.js` para las imágenes de contactos a `src="/app/avatars/avatar-female-06.png"`, etc.
+2. **Avatares y Contactos**:
+   - Modificado en `src/components/layout/RightBar.js` para usar `src="/app/avatars/avatar-..."`.
 
 3. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
    - Modificado en `src/components/pdf/fonts.js` reemplazando `/fonts/` por `/app/fonts/` (ej. `/app/fonts/Inter-Regular.ttf`).

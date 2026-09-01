@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { clientsService } from "@/services/clients.service";
 import { notificationsService } from "@/services/notifications.service";
 import { useSocket } from "@/hooks/useSocket";
+import { formatRelativeTime } from "@/utils/date";
 
 export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -20,6 +21,14 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
   const [notifications, setNotifications] = useState([]);
   const [chatContacts, setChatContacts] = useState([]);
   const socket = useSocket();
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -184,7 +193,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
               key={idx}
               className={`d-flex align-items-start px-2 py-1 transition-smooth hover-light rounded-3 ${!isExpanded ? "justify-content-center" : "gap-3"
                 }`}
-              title={!isExpanded ? notif.title : undefined}
+              title={notif.title}
+              style={{ minWidth: 0, maxWidth: "100%", overflow: "hidden" }}
             >
               <div
                 className="d-flex align-items-center justify-content-center flex-shrink-0"
@@ -193,9 +203,13 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
                 <IconComponent style={{ width: "14px", height: "14px", color: notif.icon_color || notif.iconColor }} />
               </div>
               {isExpanded && (
-                <div className="flex-grow-1 min-w-0">
-                  <p className="mb-0 fw-medium text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{notif.title}</p>
-                  <p className="mb-0 text-muted font-inter" style={{ fontSize: "11px" }}>{notif.time || "Justo ahora"}</p>
+                <div className="flex-grow-1" style={{ minWidth: 0, overflow: "hidden" }}>
+                  <p className="mb-0 fw-medium text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>
+                    {notif.title}
+                  </p>
+                  <p className="mb-0 text-muted font-inter text-truncate" style={{ fontSize: "11px" }}>
+                    {formatRelativeTime(notif.created_at || notif.createdAt || notif.time || notif.fecha)}
+                  </p>
                 </div>
               )}
             </div>
