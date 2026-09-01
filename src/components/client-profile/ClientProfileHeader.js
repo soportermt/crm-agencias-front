@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import StatusBadge from "@/components/common/StatusBadge";
 import StatCard from "@/components/common/StatCard";
 
@@ -64,18 +65,28 @@ export default function ClientProfileHeader({ client }) {
           </div>
         </div>
 
-        <button
-          className="btn d-flex align-items-center gap-2 transition-smooth fw-medium p-0"
-          style={{
-            backgroundColor: "transparent",
-            border: "none",
-            color: "#0c5cc6",
-            fontSize: "13px",
-          }}
-        >
-          <i className="bi bi-pencil" style={{ fontSize: "14px" }}></i>
-          Editar datos
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          <Link
+            href={`/mensajeria?clientId=${client.id || client.id_cliente}`}
+            className="btn btn-bg-style d-flex align-items-center gap-2 fw-medium"
+            style={{ fontSize: "13px", padding: "8px 14px", borderRadius: "10px" }}
+          >
+            <i className="bi bi-whatsapp" style={{ fontSize: "14px", color: "#25D366" }}></i>
+            Abrir chat
+          </Link>
+          <button
+            className="btn d-flex align-items-center gap-2 transition-smooth fw-medium p-0 ms-2"
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              color: "#0c5cc6",
+              fontSize: "13px",
+            }}
+          >
+            <i className="bi bi-pencil" style={{ fontSize: "14px" }}></i>
+            Editar datos
+          </button>
+        </div>
       </div>
 
       <div className="row g-3">

@@ -13,7 +13,7 @@ export default function ClientProfileEmails({ clientId, clientEmail }) {
         setLoading(true);
         if (clientId) {
           const data = await conectividadService.getClientEmails(clientId);
-          setEmails(data);
+          setEmails(Array.isArray(data) ? data : data?.data || []);
         }
       } catch (error) {
         console.error("Error al cargar correos:", error);
