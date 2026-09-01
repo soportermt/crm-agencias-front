@@ -43,3 +43,7 @@ yarn.lock
 
 # commandcode
 .commandcode
+
+# temp and archives
+/tmp/
+*.zip

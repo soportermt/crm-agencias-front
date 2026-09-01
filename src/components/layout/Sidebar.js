@@ -16,7 +16,8 @@ import {
   ChartPieIcon,
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
-  PlusIcon
+  PlusIcon,
+  ChatBubbleLeftRightIcon
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
 
@@ -141,6 +142,11 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           <div className="mb-3">
             {renderCategoryHeader("Clientes")}
             {renderNavLink("/clientes", "Gestión de clientes", UsersIcon)}
+          </div>
+
+          <div className="mb-3">
+            {renderCategoryHeader("Mensajería")}
+            {renderNavLink("/mensajeria", "Bandeja", ChatBubbleLeftRightIcon)}
           </div>
 
           <div className="mb-3">

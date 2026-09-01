@@ -10,20 +10,57 @@ import {
 import Link from "next/link";
 import { useEffect } from "react";
 import { clientsService } from "@/services/clients.service";
+import { notificationsService } from "@/services/notifications.service";
+import { useSocket } from "@/hooks/useSocket";
+import { formatRelativeTime } from "@/utils/date";
 
 export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin }) {
   const [isHovered, setIsHovered] = useState(false);
-
   const isExpanded = isPinned || isHovered;
 
-  const notifications = [
-    { title: "Mensaje de Vanessa Fuentes", time: "Justo ahora", bgIcon: "#f4faeb", iconColor: "#000000", icon: UserIcon },
-    { title: "Nuevo usuario registrado", time: "Hace 59 minutos", bgIcon: "#e7f1fe", iconColor: "#000000", icon: UserIcon },
-    { title: "Atraso de pago", time: "Hace 12 horas", bgIcon: "#f4faeb", iconColor: "#000000", icon: ChartBarIcon },
-    { title: "Próximo pago pendiente", time: "Hoy, a las 11:59 am", bgIcon: "#e6f1fd", iconColor: "#000000", icon: ChartBarIcon },
-  ];
-
+  const [notifications, setNotifications] = useState([]);
   const [chatContacts, setChatContacts] = useState([]);
+  const socket = useSocket();
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    // 1. Cargar notificaciones históricas
+    const fetchNotifications = async () => {
+      try {
+        const data = await notificationsService.getRecentNotifications(5);
+        if (isMounted && Array.isArray(data)) {
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+    
+    fetchNotifications();
+
+    // 2. Escuchar nuevas notificaciones por WebSocket
+    if (socket) {
+      socket.on('new_notification', (newNotif) => {
+        setNotifications((prev) => [newNotif, ...prev].slice(0, 5));
+      });
+    }
+
+    return () => {
+      isMounted = false;
+      if (socket) {
+        socket.off('new_notification');
+      }
+    };
+  }, [socket]);
 
   useEffect(() => {
     let isMounted = true;
@@ -151,27 +188,35 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           <hr className="my-2" style={{ opacity: 0.1 }} />
         )}
         <div className="d-flex flex-column gap-3">
-          {notifications.map((notif, idx) => (
+          {notifications.map((notif, idx) => {
+            const IconComponent = notif.icon_name === 'ChartBarIcon' ? ChartBarIcon : UserIcon;
+            return (
             <div
               key={idx}
               className={`d-flex align-items-start px-2 py-1 transition-smooth hover-light rounded-3 ${!isExpanded ? "justify-content-center" : "gap-3"
                 }`}
-              title={!isExpanded ? notif.title : undefined}
+              title={notif.title}
+              style={{ minWidth: 0, maxWidth: "100%", overflow: "hidden" }}
             >
               <div
                 className="d-flex align-items-center justify-content-center flex-shrink-0"
-                style={{ width: "24px", height: "24px", minWidth: "24px", backgroundColor: notif.bgIcon, borderRadius: "8px" }}
+                style={{ width: "24px", height: "24px", minWidth: "24px", backgroundColor: notif.icon_bg || notif.bgIcon, borderRadius: "8px" }}
               >
-                <notif.icon style={{ width: "14px", height: "14px", color: notif.iconColor }} />
+                <IconComponent style={{ width: "14px", height: "14px", color: notif.icon_color || notif.iconColor }} />
               </div>
               {isExpanded && (
-                <div className="flex-grow-1 min-w-0">
-                  <p className="mb-0 fw-medium text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{notif.title}</p>
-                  <p className="mb-0 text-muted font-inter" style={{ fontSize: "11px" }}>{notif.time}</p>
+                <div className="flex-grow-1" style={{ minWidth: 0, overflow: "hidden" }}>
+                  <p className="mb-0 fw-medium text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>
+                    {notif.title}
+                  </p>
+                  <p className="mb-0 text-muted font-inter text-truncate" style={{ fontSize: "11px" }}>
+                    {formatRelativeTime(notif.created_at || notif.createdAt || notif.time || notif.fecha)}
+                  </p>
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -184,10 +229,17 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
           <hr className="my-2" style={{ opacity: 0.1 }} />
         )}
         <div className="d-flex flex-column gap-2">
-          {chatContacts.map((contact, idx) => (
-            <Link
-              href={`/clientes/${contact.id}`}
-              key={idx}
+          {chatContacts.map((contact, idx) => {
+            const initials = contact.name 
+              ? (contact.name.split(" ").filter(p => p.trim()).length >= 2 
+                  ? (contact.name.split(" ").filter(p => p.trim())[0][0] + contact.name.split(" ").filter(p => p.trim())[1][0]) 
+                  : contact.name.substring(0, 2)).toUpperCase()
+              : "CL";
+
+            return (
+            <Link 
+              href={`/clientes/${contact.id}`} 
+              key={idx} 
               className="text-decoration-none"
             >
               <div
@@ -196,13 +248,19 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
                 title={!isExpanded ? contact.name : undefined}
                 style={{ cursor: "pointer" }}
               >
-                <img
-                  src={contact.avatar}
-                  alt={contact.name}
-                  className="rounded-circle flex-shrink-0 animate-fade-in"
-                  style={{ width: "24px", height: "24px", minWidth: "24px", objectFit: "cover" }}
-                  onError={(e) => { e.target.src = "/avatars/avatar-male-01.png"; }}
-                />
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    minWidth: "24px",
+                    backgroundColor: "#e7f1fe",
+                    color: "#0c5cc6",
+                    fontSize: "10px",
+                  }}
+                >
+                  {initials}
+                </div>
                 {isExpanded && (
                   <div className="flex-grow-1" style={{ minWidth: 0, overflow: "hidden" }}>
                     <p className="mb-0 fw-normal text-dark text-truncate font-inter" style={{ fontSize: "13px" }}>{contact.name}</p>
@@ -213,7 +271,8 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
                 )}
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </aside>

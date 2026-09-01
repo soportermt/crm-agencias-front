@@ -12,10 +12,7 @@ const quotesMock = [
   { id: 2, title: "Redondo", details: "Hotel - Aeropuerto", dateRange: "15/06/2026 al 19/06/2026", type: "Traslado", icon: "shuttle" },
 ];
 
-const documentsMock = [
-  { id: 1, name: "Acta_nacimiento.pdf", size: "290 kb", type: "PDF" },
-  { id: 2, name: "Pasaporte.pdf", size: "340 kb", type: "PDF" },
-];
+
 
 const notesMock = [
   { id: 1, text: 'Confirmar con el operador receptivo en Europa el cambio de horario para el tour del grupo "Bloqueo Mayo".' },
@@ -70,7 +67,22 @@ export const clientsService = {
   },
 
   async getClientDocuments(id) {
-    return documentsMock;
+    const { data } = await api.get(`/clientes/clienteDocuments/${id}`);
+    return data;
+  },
+
+  async uploadClientDocument(id, formData) {
+    const { data } = await api.post(`/clientes/clienteDocumentsUpload/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return data;
+  },
+
+  async deleteClientDocument(documentId) {
+    const { data } = await api.delete(`/clientes/clienteDocumentsDelete/${documentId}`);
+    return data;
   },
 
   async getClientNotes(id) {

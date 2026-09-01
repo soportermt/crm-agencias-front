@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import StatusBadge from "@/components/common/StatusBadge";
 import StatCard from "@/components/common/StatCard";
 
@@ -12,26 +13,26 @@ export default function ClientProfileHeader({ client }) {
     <div className="mb-4">
       <div className="d-flex align-items-start justify-content-between mb-4">
         <div className="d-flex align-items-center gap-3">
-          <div
-            className="rounded-circle overflow-hidden position-relative d-flex align-items-center justify-content-center"
-            style={{ width: "64px", height: "64px", flexShrink: 0, backgroundColor: "#f3f4f6" }}
-          >
-            {client.foto || client.avatar ? (
-              <img
-                src={client.foto || client.avatar || "/avatar-placeholder.jpg"}
-                alt="Avatar de cliente"
-                className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
-                style={{ zIndex: 2 }}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.style.display = "none";
+          {(() => {
+            const name = client.nombreCompleto || client.name || "Cliente";
+            const initials = name.split(" ").filter(p => p.trim()).length >= 2 
+                ? (name.split(" ").filter(p => p.trim())[0][0] + name.split(" ").filter(p => p.trim())[1][0]).toUpperCase()
+                : name.substring(0, 2).toUpperCase();
+            return (
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold animate-fade-in"
+                style={{
+                  width: "64px",
+                  height: "64px",
+                  backgroundColor: "#e7f1fe",
+                  color: "#0c5cc6",
+                  fontSize: "24px",
                 }}
-              />
-            ) : null}
-            <div className="w-100 h-100 d-flex align-items-center justify-content-center">
-              <i className="bi bi-person-fill text-secondary" style={{ fontSize: "36px" }}></i>
-            </div>
-          </div>
+              >
+                {initials}
+              </div>
+            );
+          })()}
 
           <div>
             <div className="d-flex align-items-center gap-2 mb-1">
@@ -64,18 +65,28 @@ export default function ClientProfileHeader({ client }) {
           </div>
         </div>
 
-        <button
-          className="btn d-flex align-items-center gap-2 transition-smooth fw-medium p-0"
-          style={{
-            backgroundColor: "transparent",
-            border: "none",
-            color: "#0c5cc6",
-            fontSize: "13px",
-          }}
-        >
-          <i className="bi bi-pencil" style={{ fontSize: "14px" }}></i>
-          Editar datos
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          <Link
+            href={`/mensajeria?clientId=${client.id || client.id_cliente}`}
+            className="btn btn-bg-style d-flex align-items-center gap-2 fw-medium"
+            style={{ fontSize: "13px", padding: "8px 14px", borderRadius: "10px" }}
+          >
+            <i className="bi bi-whatsapp" style={{ fontSize: "14px", color: "#25D366" }}></i>
+            Abrir chat
+          </Link>
+          <button
+            className="btn d-flex align-items-center gap-2 transition-smooth fw-medium p-0 ms-2"
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              color: "#0c5cc6",
+              fontSize: "13px",
+            }}
+          >
+            <i className="bi bi-pencil" style={{ fontSize: "14px" }}></i>
+            Editar datos
+          </button>
+        </div>
       </div>
 
       <div className="row g-3">

@@ -1,8 +1,8 @@
 # Registro de Cambios para Despliegue en Servidor Estático (Subdominio /app)
 
-Este documento detalla todas las modificaciones realizadas en el proyecto para asegurar su correcto funcionamiento al ser exportado como un sitio web estático y alojado bajo el subdominio o subdirectorio `/app`.
+Este documento detalla todas las modificaciones realizadas en el proyecto para asegurar su correcto funcionamiento al ser exportado como un sitio web estático (`output: 'export'`) y alojado bajo el subdominio o subdirectorio `/app`.
 
-## 1. Configuración de Next.js (`next.config.mjs`)
+## 1. Configuración de Next.js (`next.config.mjs`) y Scripts
 
 Para permitir la exportación estática y configurar la ruta base, se realizaron los siguientes ajustes en el archivo de configuración:
 
@@ -14,69 +14,95 @@ const nextConfig = {
   images: {
     unoptimized: true,       // Deshabilita la optimización automática de imágenes (requerido para exportaciones estáticas completas sin servidor Node)
   },
-  trailingSlash: true,       // (Opcional) Agrega una barra al final de las URLs, recomendado para compatibilidad con servidores web como Apache o Nginx
+  trailingSlash: true,       // Agrega una barra al final de las URLs, recomendado para compatibilidad con servidores web como Apache o Nginx
 };
 
 export default nextConfig;
 ```
 
-## 2. Reestructuración de Rutas Dinámicas
+> **Nota sobre `rewrites`:** Se eliminaron las reglas de `rewrites` en `next.config.mjs` debido a que Next.js no permite el uso de `rewrites` junto con `output: 'export'`. Las peticiones a APIs externas se manejan directamente mediante la URL completa configurada en las variables de entorno.
 
-Next.js requiere conocer todos los posibles valores de las rutas dinámicas (carpetas como `[id]`) durante el tiempo de construcción (`build time`) si se utiliza una exportación estática. Para un CRM donde los IDs de clientes y pagos son dinámicos, esto no es posible. 
+> **Nota sobre `package.json`:** Se actualizó el script de compilación a `"build": "next build"` (eliminando el flag experimental `--turbopack` en build) para garantizar la correcta recolección y exportación de páginas estáticas.
 
-Por lo tanto, se migraron las rutas dinámicas al uso de **Parámetros de Consulta (Query Parameters)**:
+## 2. Reestructuración de Rutas Dinámicas y Manejo de `useSearchParams`
 
-- **De:** `/clientes/[id]` (ej. `/clientes/123`)
-- **A:** `/clientes/detalle?id=123`
+Next.js requiere conocer todos los posibles valores de las rutas dinámicas (carpetas como `[id]`) durante el tiempo de construcción (`build time`) si se utiliza una exportación estática. Para un CRM donde los IDs de clientes, vendedores, pagos y reservaciones son dinámicos, esto no es viable con rutas en el sistema de archivos.
+
+Por lo tanto, se migraron todas las rutas dinámicas al uso de **Parámetros de Consulta (Query Parameters)**:
+
+- **De:** `/clientes/[id]` (ej. `/clientes/123`) ➔ **A:** `/clientes/detalle?id=123`
+- **De:** `/pagos/[id]` ➔ **A:** `/pagos/detalle?id=123`
+- **De:** `/vendedores/[id]` ➔ **A:** `/vendedores/detalle?id=123`
+- **De:** `/reservaciones/editar/[id]` ➔ **A:** `/reservaciones/editar?id=123`
 
 ### Pasos aplicados:
-1. Se crearon las carpetas `detalle` (o se usó la carpeta principal) y se movieron los archivos `page.js` a su interior en:
+1. Se crearon las páginas estáticas correspondientes en:
    - `src/app/(crm)/clientes/detalle/page.js`
    - `src/app/(crm)/pagos/detalle/page.js`
+   - `src/app/(crm)/vendedores/detalle/page.js`
    - `src/app/(crm)/reservaciones/editar/page.js`
-2. **Importante:** Las carpetas antiguas `[id]` fueron eliminadas por completo. Si se dejan en el proyecto, Next.js intentará compilarlas y generará un error de `generateStaticParams()` durante el proceso de build.
-3. En lugar de usar `params.id`, los componentes ahora utilizan el hook `useSearchParams()` de Next.js para leer el `id` desde la URL (`const id = searchParams.get("id")`).
-4. Todo componente que haga uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica, y el componente de página principal exportado (`export default function`) que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación durante la fase de exportación estática.
+2. **Eliminación de carpetas dinámicas:** Las carpetas antiguas `[id]` fueron eliminadas por completo para evitar errores de compilación (`generateStaticParams`).
+3. En lugar de usar `params.id`, los componentes utilizan el hook `useSearchParams()` de Next.js para leer el parámetro `id` (`const id = searchParams.get("id")`).
+4. **Envoltura con `<Suspense>`:** Todo componente que hace uso de `useSearchParams()` se dividió en dos: un componente interno con la lógica y un componente exportado por defecto que envuelve al interno en un bloque `<Suspense fallback={...}>`. Esto es un requisito estricto de Next.js para prevenir errores de hidratación y permitir la generación estática.
+   - Aplica también a la página de **Mensajería** (`src/app/(crm)/mensajeria/page.js`), la cual utiliza `useSearchParams` para el parámetro `clientId`.
 
 ## 3. Actualización de Enlaces (`<Link>`)
 
-Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas dinámicas fueron actualizados.
+Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas dinámicas fueron actualizados:
 
-- Se cambió ``href={`/clientes/${row.id}`}`` a ``href={`/clientes/detalle?id=${row.id}`}`` en `ClientTable.js`.
-- Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}`` en `IngresosTable.js` y `EgresosTable.js`.
-- Se cambió ``href={`reservaciones/editar/${row.id_venta}`}`` a ``href={`/reservaciones/editar?id=${row.id_venta}`}`` en `BookingsList.js`.
+- En `ClientTable.js`: Se cambió ``href={`/clientes/${row.id}`}`` a ``href={`/clientes/detalle?id=${row.id}`}``.
+- En `ClientInfoPanel.js` y `ChatPanel.js`: Se cambió ``href={`/clientes/${clientInfo.id}`}`` a ``href={`/clientes/detalle?id=${clientInfo.id}`}``.
+- En `RightBar.js`: Se cambió ``href={`/clientes/${contact.id}`}`` a ``href={`/clientes/detalle?id=${contact.id}`}``.
+- En `IngresosTable.js` y `EgresosTable.js`: Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}``.
+- En `VendedoresTable.js`: Se cambió ``href={`/vendedores/${row.id}`}`` a ``href={`/vendedores/detalle?id=${row.id}`}``.
+- En `BookingsList.js` e `InfoTableVendedor.js`: Se cambió ``href={`reservaciones/editar/${row.id_venta}`}`` a ``href={`/reservaciones/editar?id=${row.id_venta}`}``.
+- En `BookingTableHeader.js`: Se cambió la etiqueta HTML nativa `<a href="reservaciones/crear">` por el componente `<Link href="/reservaciones/crear">` de Next.js para asegurar el correcto enrutamiento bajo el prefijo `/app`.
 
-Adicionalmente, se corrigió un problema de rutas relativas:
-- En `BookingTableHeader.js`, el botón de nueva reserva usaba una etiqueta HTML nativa `<a href="reservaciones/crear">`. Estando en `/reservaciones`, esto provocaba que el navegador navegara hacia `/reservaciones/reservaciones/crear`.
-- Se cambió por el componente `<Link href="/reservaciones/crear">` de Next.js. El componente `<Link>` inyecta automáticamente el prefijo `/app` a cualquier ruta absoluta que inicie con `/`.
+## 4. Corrección de Rutas de Imágenes y Recursos Estáticos
 
-## 4. Corrección de Rutas de Imágenes (Logo, Avatares, etc.)
+Cuando se usa `output: 'export'` y `basePath: '/app'`, las rutas de recursos públicos directos en cadenas de texto y componentes de imagen requieren el prefijo del subdirectorio:
 
-Cuando se usa `output: 'export'` y `basePath: '/app'`, Next.js no antepone automáticamente el `basePath` a las rutas de imágenes en crudo. Para asegurar que las imágenes carguen correctamente tanto en desarrollo como en producción (dentro de `/app`), se actualizaron todas las rutas estáticas de las imágenes:
+1. **Logo (`2bt2025.png`)**:
+   - Modificado en `src/components/layout/Header.js` y `src/app/login/page.js` a `src="/app/2bt2025.png"` para prevenir errores 404 en peticiones directas al dominio raíz.
 
-1. **Logo (`2bt2025.png`)**: 
-   - Modificado en `src/components/layout/Header.js` y `src/app/login/page.js`.
-   - Se reemplazó `src="/2bt2025.png"` por `src="/app/2bt2025.png"`.
-
-2. **Avatares y Placeholders**:
-   - Modificado en `ClientProfileHeader.js` y `ClientProfileChat.js` (placeholder) a `src="/app/avatar-placeholder.jpg"`.
-   - Modificado en `RightBar.js` para los contactos en la barra lateral derecha a `src="/app/avatars/avatar-female-06.png"`, etc.
-   - En `RightBar.js` también se reemplazó la etiqueta nativa `<img>` por el componente de Next.js `<Image>`.
+2. **Avatares y Contactos**:
+   - Modificado en `src/components/layout/RightBar.js` para usar `src="/app/avatars/avatar-..."`.
 
 3. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
-   - Al igual que las imágenes normales, la librería de PDFs requiere rutas absolutas exactas cuando hace la petición de red (fetch) para incrustarlas en el documento.
    - Modificado en `src/components/pdf/fonts.js` reemplazando `/fonts/` por `/app/fonts/` (ej. `/app/fonts/Inter-Regular.ttf`).
-   - Modificado en `src/components/pdf/BookingPdf.js` para los iconos e imágenes estáticas (ej. `/app/pdf/header-pdf.png`, `bed.png`, `location.png`).
+   - Modificado en `src/components/pdf/BookingPdf.js` para iconos e imágenes estáticas (`/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `map.png`, `location.png`, `email.png`, `phone-call.png`).
 
-## Instrucciones para el Despliegue
+## 5. Control de Versiones (`.gitignore`)
 
-Cada vez que necesites generar la versión para subir al servidor, debes ejecutar:
+Se agregaron al `.gitignore` las exclusiones para la carpeta temporal `/tmp/` y archivos comprimidos `*.zip` generados durante el empaquetado.
+
+---
+
+## Instrucciones de Compilación y Generación del Paquete ZIP
+
+### 1. Compilación del proyecto
+Para generar los archivos estáticos optimizados, ejecuta en la terminal dentro de la carpeta `crm_2bussiness`:
 
 ```bash
 pnpm build
 ```
 
-Una vez terminado el proceso:
-1. Se generará una carpeta llamada `out/` en la raíz del proyecto.
-2. Todo el contenido dentro de la carpeta `out/` es el que debes subir a tu servidor web (FTP, cPanel, Nginx, Apache, etc.).
-3. Asegúrate de colocar estos archivos exactamente dentro del directorio público que corresponde al subdominio o subcarpeta `/app` de tu dominio principal.
+Esto generará la carpeta `out/` con todos los archivos HTML, JS, CSS y recursos estáticos.
+
+### 2. Compresión directa del contenido (ZIP)
+Para subir al servidor, se debe comprimir **el contenido directo** de la carpeta `out/` (sin incluir la carpeta contenedora `out/` en la raíz del zip).
+
+#### En Windows (PowerShell):
+```powershell
+Get-ChildItem -Path "out" -Force | Compress-Archive -DestinationPath "crm_estatico.zip" -Force
+```
+
+#### En Linux / macOS / Bash:
+```bash
+cd out && zip -r ../crm_estatico.zip . && cd ..
+```
+
+### 3. Despliegue en el Servidor Web
+1. Sube el archivo `crm_estatico.zip` al servidor web (cPanel, Plesk, Nginx, Apache, FTP, etc.).
+2. Descomprime el contenido directamente en la carpeta pública correspondiente a la ruta `/app` de tu dominio (ejemplo: `public_html/app/` o `/var/www/html/app/`).
+3. Al descomprimir, la raíz del directorio `/app` debe contener directamente archivos como `index.html`, `login/`, `dashboard/`, `_next/`, `2bt2025.png`, etc.
