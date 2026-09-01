@@ -17,7 +17,8 @@ import {
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   PlusIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
 
@@ -186,14 +187,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           </div> */}
 
           <div className="mb-3">
-            {renderCategoryHeader("Utilidad por venta")}
-            {renderNavLink("/precio-venta", "Precio por venta", CurrencyDollarIcon)}
-            <div className="mt-1">
-              {renderNavLink("/ganancia-operacion", "Ganancia por operación", ChartBarIcon)}
-            </div>
-            <div className="mt-1">
-              {renderNavLink("/margen-utilidad", "Margen de utilidad", ChartPieIcon)}
-            </div>
+            {renderCategoryHeader("Reportes")}
+            {renderNavLink("/precio-venta", "Reportes", DocumentTextIcon)}
           </div>
         </nav>
 
