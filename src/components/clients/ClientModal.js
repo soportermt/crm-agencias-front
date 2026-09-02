@@ -117,8 +117,8 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
             }
             if (types.includes('country')) {
               country = component.long_name;
-              const matchedCountry = COUNTRIES.find(c => c.name.localeCompare(country, undefined, { sensitivity: 'base' }) === 0);
-              if (matchedCountry) country = matchedCountry.name;
+              const matchedCountry = Object.values(es).find(c => c.localeCompare(country, undefined, { sensitivity: 'base' }) === 0);
+              if (matchedCountry) country = matchedCountry;
             }
             if (types.includes('postal_code')) {
               postalCode = component.long_name;
@@ -158,9 +158,10 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
           pais: client.pais || "México",
           rfc: client.rfc || "",
         });
-      } else {
-        resetForm();
       }
+    } else {
+      resetForm();
+      setError(null);
     }
   }, [show, client]);
 
@@ -219,7 +220,6 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
         backgroundColor: "rgba(0, 0, 0, 0.4)",
         zIndex: 1050,
       }}
-      onClick={onClose}
     >
       <div
         className="bg-white shadow-premium font-inter w-100 transition-smooth"

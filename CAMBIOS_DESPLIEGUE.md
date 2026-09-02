@@ -58,14 +58,16 @@ Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas
 - En `IngresosTable.js` y `EgresosTable.js`: Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}``.
 - En `VendedoresTable.js`: Se cambió ``href={`/vendedores/${row.id}`}`` a ``href={`/vendedores/detalle?id=${row.id}`}``.
 - En `BookingsList.js` e `InfoTableVendedor.js`: Se cambió ``href={`reservaciones/editar/${row.id_venta}`}`` a ``href={`/reservaciones/editar?id=${row.id_venta}`}``.
+- En `calendario/page.js`: Se cambió ``href={`/reservaciones/editar/${ev.id_venta}`}`` a ``href={`/reservaciones/editar?id=${ev.id_venta}`}``.
 - En `BookingTableHeader.js`: Se cambió la etiqueta HTML nativa `<a href="reservaciones/crear">` por el componente `<Link href="/reservaciones/crear">` de Next.js para asegurar el correcto enrutamiento bajo el prefijo `/app`.
 
 ## 4. Corrección de Rutas de Imágenes y Recursos Estáticos
 
 Cuando se usa `output: 'export'` y `basePath: '/app'`:
 
-1. **Next.js Image (`next/image`)**:
-   - Los componentes de Next.js que usan `<Image src="/2bt2025.png" ... />` reciben automáticamente el prefijo `basePath` durante el renderizado estático.
+1. **Logos e Imágenes (`next/image`)**:
+   - Con `output: 'export'` e `images: { unoptimized: true }`, las imágenes estáticas locales se configuraron con el prefijo explícito `/app/`:
+     - En `Header.js` y `login/page.js`: `/app/2bt2025.png`.
 
 2. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
    - Dado que React-PDF se ejecuta en el navegador/canvas fuera del pipeline de Next.js, se configuraron rutas absolutas con `/app/`:
