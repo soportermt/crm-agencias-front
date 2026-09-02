@@ -238,7 +238,7 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
 
             return (
             <Link 
-              href={`/clientes/${contact.id}`} 
+              href={`/mensajeria?clientId=${contact.id}`} 
               key={idx} 
               className="text-decoration-none"
             >

@@ -11,11 +11,13 @@ import ClientProfileQuotes from "@/components/client-profile/ClientProfileQuotes
 import ClientProfilePurchases from "@/components/client-profile/ClientProfilePurchases";
 import ClientProfileDocuments from "@/components/client-profile/ClientProfileDocuments";
 import { clientsService } from "@/services/clients.service";
+import ClientModal from "@/components/clients/ClientModal";
 
 export default function ClienteDetailPage({ params }) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
   const [activeTab, setActiveTab] = useState("Conversaciones");
+  const [showClientModal, setShowClientModal] = useState(false);
   
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function ClienteDetailPage({ params }) {
         {/* Columna principal (Izquierda) */}
         <div className="col-12 col-xl-9">
           <div className="bg-white p-4 p-md-5" style={{ borderRadius: "12px", boxShadow: "0 8px 16px 0 rgba(12, 12, 13, 0.1)" }}>
-            <ClientProfileHeader client={client} />
+            <ClientProfileHeader client={client} onEditClick={() => setShowClientModal(true)} />
             
             <hr className="my-4" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }} />
             
@@ -89,6 +91,12 @@ export default function ClienteDetailPage({ params }) {
           <ClientProfileNotes clientId={id} />
         </div>
       </div>
+      <ClientModal 
+        show={showClientModal} 
+        onClose={() => setShowClientModal(false)} 
+        client={client} 
+        onClientCreated={(updatedClient) => setClient(updatedClient)} 
+      />
     </div>
   );
 }
