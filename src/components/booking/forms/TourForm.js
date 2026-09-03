@@ -2,7 +2,7 @@
 
 import PassengersInput from "@/components/common/PassengersInput";
 import ProviderSelect from "@/components/common/ProviderSelect";
-import React from "react";
+import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import { useBookingForm } from "../booking-form/BookingFormContext";
 import { calcularTotalNeto } from "@/utils/pricing";
@@ -11,6 +11,8 @@ import { cleanDecimalInput } from "@/utils/inputFormatters";
 export default function TourForm() {
     const { draft, updateDraftField } = useBookingForm();
     const { data, errors } = draft;
+
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
 
     const updatePassenger = (grupo, index, field, value) => {
         const pasajeros = {
@@ -79,10 +81,17 @@ export default function TourForm() {
                         selectsRange
                         startDate={data.checkIn}
                         endDate={data.checkOut}
+                        open={datePickerOpen}
+                        onInputClick={() => setDatePickerOpen(true)}
+                        onClickOutside={() => setDatePickerOpen(false)}
                         onChange={(dates) => {
                             const [start, end] = dates;
                             updateDraftField("checkIn", start);
                             updateDraftField("checkOut", end);
+
+                            if (start && end) {
+                                setDatePickerOpen(false);
+                            }
                         }}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
@@ -90,7 +99,7 @@ export default function TourForm() {
                         monthsShown={2}
                         shouldCloseOnSelect={false}
                         isClearable
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
                         required
                         autoComplete='off'
@@ -160,7 +169,7 @@ export default function TourForm() {
                         onChange={(date) => updateDraftField("limitePago", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />
@@ -173,7 +182,7 @@ export default function TourForm() {
                         onChange={(date) => updateDraftField("limiteCliente", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />

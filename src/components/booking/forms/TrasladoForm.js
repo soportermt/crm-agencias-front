@@ -127,6 +127,23 @@ export default function TrasladoForm() {
                     </div>
                 </div>
 
+                <div className="col-12 col-md-4">
+                    <PassengersInput
+                        room={{ adultos: data.adultos ?? 2, menores: data.menores ?? 0 }}
+                        onChange={(adultos, menores) => {
+                            updateDraftField("adultos", adultos);
+                            updateDraftField("menores", menores);
+                            updateDraftField("pasajeros", {
+                                adultos: Array.from({ length: adultos }, (_, i) =>
+                                    data.pasajeros?.adultos?.[i] ?? { nombre: "", apellidos: "" }
+                                ),
+                                menores: Array.from({ length: menores }, (_, i) =>
+                                    data.pasajeros?.menores?.[i] ?? { nombre: "", apellidos: "", edad: "" }
+                                ),
+                            });
+                        }}
+                    />
+                </div>
 
                 <div className="col-12 col-md-4">
                     <label className="form-label">Fecha de servicio *</label>
@@ -150,26 +167,9 @@ export default function TrasladoForm() {
                         minDate={new Date()}
                         monthsShown={isRedondo ? 2 : 1}
                         isClearable
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText={isRedondo ? "Rango de fechas" : "Selecciona una fecha"}
                         autoComplete='off'
-                    />
-                </div>
-                <div className="col-12 col-md-4">
-                    <PassengersInput
-                        room={{ adultos: data.adultos ?? 2, menores: data.menores ?? 0 }}
-                        onChange={(adultos, menores) => {
-                            updateDraftField("adultos", adultos);
-                            updateDraftField("menores", menores);
-                            updateDraftField("pasajeros", {
-                                adultos: Array.from({ length: adultos }, (_, i) =>
-                                    data.pasajeros?.adultos?.[i] ?? { nombre: "", apellidos: "" }
-                                ),
-                                menores: Array.from({ length: menores }, (_, i) =>
-                                    data.pasajeros?.menores?.[i] ?? { nombre: "", apellidos: "", edad: "" }
-                                ),
-                            });
-                        }}
                     />
                 </div>
 
@@ -289,7 +289,7 @@ export default function TrasladoForm() {
                         onChange={(date) => updateDraftField("limitePago", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />
@@ -302,7 +302,7 @@ export default function TrasladoForm() {
                         onChange={(date) => updateDraftField("limiteCliente", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control"
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />

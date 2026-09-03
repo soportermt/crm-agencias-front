@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import IngresosTable from "@/components/ingresos/IngresosTable";
+import IngresosTable, { getEstatusByFechaLimite } from "@/components/ingresos/IngresosTable";
 import Chart from "@/components/ingresos/Chart";
 import { ingresosService } from "@/services/ingresos.service";
 
@@ -23,8 +23,8 @@ function getInitialMonthRange() {
   const month = now.getMonth();
 
   return {
-    startDate: new Date(year, month, 1),     
-    endDate: new Date(year, month + 1, 0),  
+    startDate: new Date(year, month, 1),
+    endDate: new Date(year, month + 1, 0),
   };
 }
 
@@ -34,6 +34,8 @@ export default function IngresosPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState(getInitialMonthRange);
 
+  const [statusFilter, setStatusFilter] = useState("");
+
   const [user, setUser] = useState(null);
   const [data, setData] = useState([]);
   const [resumen, setResumen] = useState([]);
@@ -41,7 +43,7 @@ export default function IngresosPage() {
   const [loadingVentas, setLoadingVentas] = useState(false);
 
   const ITEMS_PER_PAGE = 25;
-  
+
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -100,16 +102,20 @@ export default function IngresosPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, searchValue, dateRange]);
+  }, [activeTab, searchValue, dateRange, statusFilter]);
 
   const filteredData = ventas.filter((row) => {
     const term = searchValue.toLowerCase();
-    return (
+    const matchesSearch =
       row.cliente?.toLowerCase().includes(term) ||
       row.folio?.toLowerCase().includes(term) ||
       row.descripcion?.toLowerCase().includes(term) ||
-      row.tipo_servicio?.toLowerCase().includes(term)
-    );
+      row.tipo_servicio?.toLowerCase().includes(term);
+
+    const matchesStatus =
+      !statusFilter || getEstatusByFechaLimite(row.fecha_limite) === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
@@ -133,7 +139,7 @@ export default function IngresosPage() {
             Control de ingresos
           </h1>
 
-          <Chart chart={data} resumen={resumen}/>
+          <Chart chart={data} resumen={resumen} />
 
           <IngresosTable
             activeTab={activeTab}
@@ -141,6 +147,8 @@ export default function IngresosPage() {
             data={paginatedData}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={filteredData.length}

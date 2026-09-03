@@ -96,7 +96,7 @@ function getDiasEstadoInfo(fechaLimite) {
 function exportToCSV(data) {
   if (!data.length) return;
 
-  const headers = ["Reserva", "Proveedor", "Categoría", "Servicio", "Tarifa publica", "Comisión", "Tarifa neta", "Moneda", "Fecha límite", "Días restantes", "Estado"];
+  const headers = ["Reserva", "Proveedor", "Categoría", "Servicio", "Tarifa publica", "Fee", "Tarifa neta", "Moneda", "Fecha límite", "Días restantes", "Estado"];
 
   const rows = data.map((row) => [
     row.folio,
@@ -188,10 +188,10 @@ export default function EgresosTable({
           { key: "proveedor", label: "Proveedor", width: "225px" },
           { key: "tipo_servicio", label: "Categoría", width: "155px" },
           { key: "descripcion", label: "Servicio", width: "225px" },
-          { key: "tarifa_publica", label: "Tarifa publica", width: "130px" },
-          { key: "comision", label: "Comision", width: "130px" },
-          { key: "costo", label: "Tarifa neta", width: "130px" },
-          { key: "moneda", label: "Moneda", width: "130px" },
+          { key: "tarifa_publica", label: "Tarifa publica", width: "130px", align: "end"  },
+          { key: "comision", label: "Fee", width: "130px", align: "end"  },
+          { key: "costo", label: "Tarifa neta", width: "130px", align: "end" },
+          { key: "moneda", label: "Moneda", width: "130px", align: "end"  },
           { key: "fecha_limite", label: "Fecha límite", width: "130px" },
           { key: "diasRestantes", label: "Días restantes", width: "130px" },
           { key: "estado", label: "Estado", width: "130px" },
@@ -393,12 +393,23 @@ export default function EgresosTable({
             ) : (
               <>
                 <div className="d-flex align-items-center gap-2">
-                  <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
+                  <DatePicker
+                    selectsRange={true}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onChange={handleDateChange}
+                    isClearable={true}
+                    placeholderText="Filtrar por fecha límite"
+                    locale="es"
+                    dateFormat="dd/MM/yyyy"
+                    className="form-control form-control-sm"
+                    autoComplete="off"
+                  />
                   <select
                     name="categorias"
                     className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                     style={{
-                      height: "38px",
+                      height: "30px",
                       borderRadius: "8px",
                       borderColor: "#d0d5dd",
                       backgroundColor: "#fff",
@@ -419,25 +430,16 @@ export default function EgresosTable({
                       </option>
                     ))}
                   </select>
-                  <DatePicker
-                    selectsRange={true}
-                    startDate={startDate}
-                    endDate={endDate}
-                    onChange={handleDateChange}
-                    isClearable={true}
-                    placeholderText="Filtrar por fecha límite"
-                    locale="es"
-                    dateFormat="dd/MM/yyyy"
-                    className="form-control form-control-sm"
-                    autoComplete="off"
-                  />
                 </div>
-                <SearchBar
-                  value={searchValue}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Buscar por reserva, proveedor, categoria o servicio..."
-                  width="350px"
-                />
+                <div className="d-flex gap-2">
+                  <SearchBar
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder="Buscar por reserva, proveedor, categoria o servicio..."
+                    width="350px"
+                  />
+                  <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
+                </div>
               </>
             )}
           </div>
