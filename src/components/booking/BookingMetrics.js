@@ -8,7 +8,7 @@ const SKELETON_KEYS = ["total", "vigentes", "pagadas", "pasajeros"];
 export default function BookingMetrics({ metrics, loading = false }) {
   if (loading || !metrics) {
     return (
-      <div className="row g-3 mb-4">
+      <div className="row g-3 mb-2">
         {SKELETON_KEYS.map((key) => (
           <div className="col-12 col-sm-6 col-xl-3" key={key}>
             <div
@@ -35,12 +35,12 @@ export default function BookingMetrics({ metrics, loading = false }) {
   }
 
   return (
-    <div className="row g-3 mb-4">
+    <div className="row g-3 mb-2">
       <div className="col-12 col-sm-6 col-xl-3">
         <StatCard
           title="Total reservas"
           value={metrics.total_reservas}
-          subtext="+8 este mes"
+          dashboard
           valueColor="#0c5cc6"
         />
       </div>
@@ -48,7 +48,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Reservas vigentes"
           value={metrics.reservas_vigentes}
-          subtext="Requieren atención"
+          dashboard
           valueColor="#f59e0b"
         />
       </div>
@@ -56,7 +56,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Reservas pagadas"
           value={metrics.reservas_pagadas}
-          subtext=""
+          dashboard
           valueColor="#0E803C"
         />
       </div>
@@ -64,7 +64,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Pasajeros totales"
           value={metrics.pasajeros_totales}
-          subtext="Adultos + menores"
+          dashboard
           valueColor="#0F1901"
         />
       </div>

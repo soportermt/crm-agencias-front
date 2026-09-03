@@ -84,7 +84,7 @@ export default function ClientProfilePurchases({ clientId }) {
     { key: "date", label: "Fecha de venta", sortable: true, width: "155px" },
     { key: "destination", label: "Destino", sortable: true, width: "155px" },
     { key: "description", label: "Descripción", sortable: true, width: "155px" },
-    { key: "total", label: "Total", sortable: true, width: "155px" },
+    { key: "total", label: "Total", sortable: true, width: "155px", align: "end" },
     { key: "currency", label: "Moneda", sortable: true, width: "130px" },
   ];
 

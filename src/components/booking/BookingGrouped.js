@@ -12,7 +12,7 @@ const COLUMNS = [
   { key: "plan", label: "Tipo de plan", width: "130px", align: "start" },
   { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
   { key: "destino", label: "Destino", width: "130px", align: "start" },
-  { key: "total", label: "Total", width: "130px", align: "start" },
+  { key: "total", label: "Total", width: "130px", align: "end" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
 ];
 

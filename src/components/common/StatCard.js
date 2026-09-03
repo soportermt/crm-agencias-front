@@ -31,12 +31,12 @@ export default function StatCard({
         borderRadius: "12px",
         boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
-        minHeight: size === "sm" ? "86px" : "104px",
-        padding: "8px 14px",
+        minHeight: size === "sm" ? "64px" : "86px",
+        padding: "6px 16px",
         overflow: "hidden",
       }}
     >
-      <div className="d-flex justify-content-between align-items-start mb-1">
+      <div className="d-flex justify-content-between align-items-start mb-0">
         <span
           className={`${titleFontFamily} fw-normal`}
           style={{

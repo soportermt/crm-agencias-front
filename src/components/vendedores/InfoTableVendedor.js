@@ -10,11 +10,11 @@ const ITEMS_PER_PAGE = 25;
 const columns = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
     { key: "cliente", label: "Cliente", width: "180px", align: "start" },
-    { key: "hotel", label: "Hotel", width: "125px", align: "start" },
+    { key: "hotel", label: "Descripción", width: "125px", align: "start" },
     { key: "plan", label: "Servicio", width: "1250px", align: "start" },
     { key: "estancia", label: "Fecha de estancia", width: "200px", align: "start" },
     { key: "destino", label: "Destino", width: "125px", align: "start" },
-    { key: "total", label: "Total", width: "125px", align: "start" },
+    { key: "total", label: "Total", width: "125px", align: "end" },
     { key: "estatus", label: "Estatus", width: "80px", align: "center" },
 ];
 
@@ -106,21 +106,24 @@ function mapVentaToRow(venta) {
         fecha: formatDate(venta.fecha),
         id_vendedor: venta.id_vendedor,
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
-        _venta: venta
+        _venta: venta,
+        inicio_servicio: primero.inicio_servicio,
+        fin_servicio: primero.fin_servicio
     };
 }
 
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
+    const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
 
     const rows = data.map((row) => [
         row.folio,
         row.cliente,
         row.hotel,
         row.plan,
-        row.estancia,
+        row.inicio_servicio,
+        row.fin_servicio,
         row.destino,
         row.total,
         row.estatus === "venta" ? "Activo" : row.estatus,
@@ -179,10 +182,11 @@ export default function InfoTableVendedor({ data, dashboard, vendedores, dashboa
 
             const matchesStatus = !statusFilter || row.estatus === statusFilter;
             const matchesDestination = !destinationFilter || row.destino === destinationFilter;
+            const matchesVendedor = !vendedorFilter || String(row.id_vendedor) === String(vendedorFilter);
 
-            return matchesSearch && matchesStatus && matchesDestination;
+            return matchesSearch && matchesStatus && matchesDestination && matchesVendedor;
         });
-    }, [rows, searchValue, statusFilter, destinationFilter]);
+    }, [rows, searchValue, statusFilter, destinationFilter, vendedorFilter]);
 
     const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
 

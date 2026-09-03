@@ -26,8 +26,8 @@ export default function CustomersSelect({
 
             setOptions(
                 customers.map((customer) => ({
-                    value: customer.id,
-                    label: customer.text,
+                    value: customer.id_cliente,
+                    label: customer.nombre,
                     ...customer,
                 }))
             );
@@ -40,8 +40,8 @@ export default function CustomersSelect({
 
     function handleClientCreated(newClient) {
         const newOption = {
-            value: newClient.id,
-            label: newClient.text ?? newClient.nombreCompleto,
+            value: newClient.id_cliente,
+            label: newClient.nombre ?? newClient.nombreCompleto,
             ...newClient,
         };
 

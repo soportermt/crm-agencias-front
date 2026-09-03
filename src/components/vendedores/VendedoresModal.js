@@ -109,7 +109,6 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
         backgroundColor: "rgba(0, 0, 0, 0.4)",
         zIndex: 1050,
       }}
-      onClick={onClose}
     >
       <div
         className="bg-white shadow-premium font-inter w-100 transition-smooth"
