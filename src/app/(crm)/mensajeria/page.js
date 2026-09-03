@@ -104,7 +104,8 @@ function MensajeriaContent() {
                 ...c,
                 lastMessagePreview: newMsg.text,
                 lastMessageAt: newMsg.createdAt,
-                unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1
+                unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1,
+                status: c.status === 'closed' ? 'open' : c.status
               };
             }
             return c;
@@ -381,6 +382,12 @@ function MensajeriaContent() {
       } else {
         showToast("Mensaje enviado");
       }
+      
+      setAllConversations((prev) =>
+        (prev || []).map((c) => (c.id === selectedConv.id ? { ...c, status: "pending" } : c))
+      );
+      setSelectedConv((prev) => ({ ...prev, status: "pending" }));
+
     } catch (err) {
       console.error("Error al enviar mensaje:", err);
       showToast("No se pudo enviar el mensaje. Intenta de nuevo.", "error");
