@@ -22,12 +22,13 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
       try {
         setLoading(true);
         const data = await catalogosService.searchCustomers();
-        const normalized = (data || [])
+        const rawList = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+        const normalized = rawList
           .map((c) => ({
-            id: c.id,
-            name: c.text || c.name || "Cliente",
-            phone: c.phone || c.telefono || "",
-            mail: c.mail || c.correo || c.email || "",
+            id: c.id ?? c.id_cliente ?? c.value,
+            name: c.nombreCompleto || c.nombre || c.name || c.text || c.label || "Cliente",
+            phone: c.celular || c.telefono || c.phone || c.tel || "",
+            mail: c.correo || c.email || c.mail || "",
           }))
           .filter((c) => c.phone);
         setContacts(normalized);

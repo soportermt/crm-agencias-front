@@ -15,7 +15,7 @@ export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onR
     );
   }
 
-  const name = clientInfo.nombreCompleto || clientInfo.name || "Cliente";
+  const name = clientInfo.nombreCompleto || clientInfo.nombre || clientInfo.name || "Cliente";
 
   return (
     <div className="d-flex flex-column gap-3">

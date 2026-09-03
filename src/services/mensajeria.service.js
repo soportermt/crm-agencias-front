@@ -1,10 +1,11 @@
 import { connectivityApi as api } from "@/lib/axios";
 
 export const mensajeriaService = {
-  async getConversations(channel, status) {
-    const params = {};
+  async getConversations(channel, status, search, page = 1, limit = 20) {
+    const params = { page, limit };
     if (channel && channel !== "all") params.channel = channel;
     if (status) params.status = status;
+    if (search) params.search = search;
     const { data } = await api.get("/messages/conversations", { params });
     return data;
   },

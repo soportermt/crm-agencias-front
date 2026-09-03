@@ -184,8 +184,8 @@ export default function ChatPanel({
     );
   }
 
-  const clientName = clientInfo?.nombreCompleto || clientInfo?.name || conversation.clientName || conversation.client_name || "Cliente";
-  const clientPhone = formatPhone(clientInfo?.celular || conversation.clientPhone || conversation.client_phone || "");
+  const clientName = clientInfo?.nombreCompleto || clientInfo?.nombre || clientInfo?.name || conversation?.clientName || conversation?.client_name || conversation?.nombreCompleto || conversation?.nombre || "Cliente";
+  const clientPhone = formatPhone(clientInfo?.celular || clientInfo?.telefono || clientInfo?.phone || conversation?.clientPhone || conversation?.client_phone || "");
   const statusMeta = WA_STATUS[conversation?.status] || WA_STATUS.open;
 
   return (
@@ -250,7 +250,9 @@ export default function ChatPanel({
           <span className="small fw-medium flex-shrink-0" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
             Seguimiento:
           </span>
-          {Object.entries(WA_STATUS).map(([key, meta]) => {
+          {Object.entries(WA_STATUS)
+            .filter(([key]) => key !== "not_opened")
+            .map(([key, meta]) => {
             const isActive = conversation?.status === key;
             return (
               <button
