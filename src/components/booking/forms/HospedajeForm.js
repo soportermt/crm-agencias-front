@@ -192,9 +192,9 @@ export default function HospedajeForm() {
                 onChange={(e) => updateRoom(i, "tipo_cama", e.target.value)}
               >
                 <option value="" disabled>-- Seleccione --</option>
-                <option value="matrimoniales">2 matrimoniales</option>
-                <option value="king">King</option>
-                <option value="queen">Queen</option>
+                <option value="Matrimonial(es)">Matrimonial(es)</option>
+                <option value="King">King</option>
+                <option value="Queen">Queen</option>
               </select>
             </div>
             <div className="col-12 col-md-4">

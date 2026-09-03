@@ -5,8 +5,6 @@ import {
     View,
     StyleSheet,
     Image,
-    Svg,
-    Path,
 } from "@react-pdf/renderer";
 import "./fonts";
 
@@ -152,7 +150,7 @@ const styles = StyleSheet.create({
         fontSize: 8,
         color: "rgba(0, 0, 0, 0.4)",
         textAlign: "center",
-        marginTop: 16
+        marginTop: 8
     },
     footer: {
         position: "absolute",
@@ -223,7 +221,7 @@ function formatShortDate(date) {
         .replace(".", "");
 }
 
-export default function BookingPdf({ venta }) {
+export default function BookingPdf({ venta, terminos }) {
     const servicios = (venta.ventasServicioses || []).map((s) => ({
         ...s,
         desglose: parseDesglose(s),
@@ -239,7 +237,7 @@ export default function BookingPdf({ venta }) {
                 <View style={styles.headerContent}>
                     <View style={styles.agencyHeader}>
                         <Text style={styles.agencyName}>
-                            Demo Travel
+                            {venta.idAgencia.nombre_comercial}
                         </Text>
 
                         <Text style={styles.agencyDate}>
@@ -620,7 +618,7 @@ export default function BookingPdf({ venta }) {
                     <View style={styles.row}>
                         <View style={{ width: "100%" }}>
                             <Text style={styles.titleData}>Términos y condiciones</Text>
-                            <Text style={{ fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)" }}>Nuestros términos...</Text>
+                            <Text style={{ fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)" }}>{terminos}</Text>
                         </View>
                     </View>
                 </View>
@@ -631,14 +629,14 @@ export default function BookingPdf({ venta }) {
                         <View style={styles.agencyContainer}>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/location.png" style={styles.agencyIcon} />
-                                <Text>Calle 3 # 236 depto. 1 entre 20 y 22 Col. García Ginerés</Text></View>
+                                <Text>{venta.idAgencia.direccion}</Text></View>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/email.png" style={styles.agencyIcon} />
-                                <Text>soporte@2businesstravel.com</Text>
+                                <Text>{venta.idAgencia.correo}</Text>
                             </View>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/phone-call.png" style={styles.agencyIcon} />
-                                <Text>(999) 636-8720</Text>
+                                <Text>{venta.idAgencia.telefono}</Text>
                             </View>
                         </View>
                         <Image
