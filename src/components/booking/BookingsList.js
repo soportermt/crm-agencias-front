@@ -15,7 +15,7 @@ const COLUMNS = [
     { key: "plan", label: "Servicio", width: "130px", align: "start" },
     { key: "estancia", label: "Fecha de estancia", width: "225px", align: "start" },
     { key: "destino", label: "Destino", width: "130px", align: "start" },
-    { key: "total", label: "Total", width: "130px", align: "start" },
+    { key: "total", label: "Total", width: "130px", align: "end" },
     { key: "estatus", label: "Estatus", width: "100px", align: "center" },
     // { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
@@ -102,32 +102,34 @@ function mapVentaToRow(venta) {
         hotel: hoteles.join(", ") || "-",
         plan: tipos.join(", ") || "-",
         estancia: primero.fin_servicio
-        ? formatDateRange(primero.inicio_servicio, primero.fin_servicio)
-        : "",
+            ? formatDateRange(primero.inicio_servicio, primero.fin_servicio)
+            : "",
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
         fecha: formatDate(venta.fecha),
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
-        _venta: venta
+        _venta: venta,
+        inicio_servicio: primero.inicio_servicio,
+        fin_servicio: primero.fin_servicio
     };
 }
 
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha de estancia", "Destino", "Total", "Estatus"];
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
 
     const rows = data.map((row) => [
         row.folio,
         row.cliente,
         row.hotel,
         row.plan,
-        row.estancia,
+        row.inicio_servicio,
+        row.fin_servicio,
         row.destino,
         row.total,
         row.estatus === "venta" ? "Activo" : row.estatus,
-        row.id_venta,
     ]);
 
     const escapeCsvValue = (value) => {
@@ -233,7 +235,6 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
                         <select name="estado"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
@@ -277,12 +278,15 @@ export default function BookingList() {
                             ))}
                         </select>
                     </div>
-                    <SearchBar
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder="Buscar por cliente, folio, hotel"
-                        width="300px"
-                    />
+                    <div className="d-flex gap-2">
+                        <SearchBar
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            placeholder="Buscar por cliente, folio, hotel"
+                            width="300px"
+                        />
+                        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
+                    </div>
                 </div>
                 {error && (
                     <div className="alert alert-danger py-2 mb-0" role="alert">
