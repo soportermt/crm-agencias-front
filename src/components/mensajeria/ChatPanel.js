@@ -70,7 +70,7 @@ export default function ChatPanel({
     return () => clearTimeout(timer);
   }, [conversation?.id, loadingMessages]);
 
-  // Manejo de scroll para el indicador "Nuevo mensaje" y limpieza de divisor
+  // Manejo de scroll para el indicador "Nuevo mensaje" (solo botón)
   const handleScroll = useCallback(() => {
     if (!bodyRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
@@ -78,7 +78,6 @@ export default function ChatPanel({
     
     if (isAtBottom) {
       setShowScrollButton(false);
-      setUnreadToDisplay(0);
     } else {
       setShowScrollButton(true);
     }
@@ -103,21 +102,24 @@ export default function ChatPanel({
     const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
     const isAtBottom = scrollHeight - scrollTop - clientHeight < 150; // Tolerancia
     
+    // Contamos los nuevos mensajes inbound para mantener el divisor hasta que conteste
+    let newInboundCount = 0;
+    for (let i = prevLength; i < messages.length; i++) {
+      if (messages[i].direction === "inbound") {
+         newInboundCount++;
+      }
+    }
+    if (newInboundCount > 0) {
+      setUnreadToDisplay(prev => prev + newInboundCount);
+    }
+
     if (isAtBottom) {
-      // Si está abajo, auto-scroll y limpiar divisor
-      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-      setUnreadToDisplay(0);
-    } else {
-      // Si está leyendo arriba, incrementamos contador
-      let newInboundCount = 0;
-      for (let i = prevLength; i < messages.length; i++) {
-        if (messages[i].direction === "inbound") {
-           newInboundCount++;
+      // Si está abajo, auto-scroll sin limpiar divisor
+      setTimeout(() => {
+        if (bodyRef.current) {
+          bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
         }
-      }
-      if (newInboundCount > 0) {
-        setUnreadToDisplay(prev => prev + newInboundCount);
-      }
+      }, 50);
     }
   }, [messages.length]);
 
@@ -125,7 +127,6 @@ export default function ChatPanel({
     if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
       setShowScrollButton(false);
-      setUnreadToDisplay(0);
     }
   };
 
@@ -144,6 +145,7 @@ export default function ChatPanel({
     if (textareaRef.current) {
       textareaRef.current.style.height = "43px";
     }
+    setUnreadToDisplay(0);
   };
 
   const handleKeyDown = (e) => {
