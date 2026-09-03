@@ -10,6 +10,20 @@ function formatMessageTime(timeStr, dateStr) {
   return dt.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
+function formatDateGroup(dateStr) {
+  if (!dateStr || dateStr === "Desconocido") return "Desconocido";
+  const dt = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(dt.getTime())) return dateStr;
+  const today = new Date();
+  const isToday = dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear();
+  if (isToday) return "Hoy";
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const isYesterday = dt.getDate() === yesterday.getDate() && dt.getMonth() === yesterday.getMonth() && dt.getFullYear() === yesterday.getFullYear();
+  if (isYesterday) return "Ayer";
+  return dt.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
+}
+
 export default function ChatPanel({
   conversation,
   clientInfo,
@@ -321,60 +335,47 @@ export default function ChatPanel({
           </div>
         ) : (
           <div className="d-flex flex-column gap-2">
-            {(() => {
-              // Calcular índice del divisor de mensajes no leídos
-              let unreadDividerIndex = -1;
-              if (unreadToDisplay > 0 && messages.length > 0) {
-                let inboundCount = 0;
-                for (let i = messages.length - 1; i >= 0; i--) {
-                  const msg = messages[i];
+            {Object.entries(
+              messages.reduce((acc, msg) => {
+                const d = msg.date || "Desconocido";
+                if (!acc[d]) acc[d] = [];
+                acc[d].push(msg);
+                return acc;
+              }, {})
+            ).map(([dateKey, msgsForDate]) => (
+              <React.Fragment key={dateKey}>
+                <div className="text-center my-2">
+                  <span
+                    className="px-3 py-1 rounded-pill small shadow-sm"
+                    style={{ backgroundColor: "#fff", color: "#54656f", fontSize: "12px", fontWeight: "500", border: "1px solid #f0f0f0" }}
+                  >
+                    {formatDateGroup(dateKey)}
+                  </span>
+                </div>
+                {msgsForDate.map((msg) => {
                   const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
-                  if (!isAgent) {
-                    inboundCount++;
-                    if (inboundCount === unreadToDisplay) {
-                      unreadDividerIndex = i;
-                      break;
-                    }
-                  }
-                }
-              }
-
-              return messages.map((msg, index) => {
-                const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
-                const isDivider = index === unreadDividerIndex;
-                
-                return (
-                  <React.Fragment key={msg.id || `${msg.clientId}-${msg.time}`}>
-                    {isDivider && (
-                      <div className="d-flex align-items-center my-3" id="first-unread-divider">
-                        <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
-                        <span className="mx-3 fw-medium" style={{ fontSize: "12px", color: "#0c5cc6", backgroundColor: "#e7f1fe", padding: "2px 10px", borderRadius: "12px" }}>
-                          {unreadToDisplay} mensaje{unreadToDisplay !== 1 ? 's' : ''} nuevo{unreadToDisplay !== 1 ? 's' : ''}
-                        </span>
-                        <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
-                      </div>
-                    )}
-                    <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
-                      <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`}>
-                        <span>{msg.text}</span>
-                        <span
-                          className="d-flex align-items-center gap-1 flex-shrink-0"
+                  return (
+                    <div key={msg.id || `${msg.clientId}-${msg.time}`} className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
+                      <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
+                        <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                        <div
+                          className="d-flex align-items-center justify-content-end gap-1 mt-1"
                           style={{
                             fontSize: "11px",
                             color: isAgent ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
-                            marginLeft: "8px",
-                            marginTop: "2px",
+                            minWidth: "65px",
+                            alignSelf: "flex-end"
                           }}
                         >
-                          {msg.time || formatMessageTime(msg.time, msg.date)}
-                          {isAgent && <i className="bi bi-check-all" style={{ fontSize: "13px" }}></i>}
-                        </span>
+                          <span>{msg.time || formatMessageTime(msg.time, msg.date)}</span>
+                          {isAgent && <i className="bi bi-check-all" style={{ fontSize: "14px" }}></i>}
+                        </div>
                       </div>
                     </div>
-                  </React.Fragment>
-                );
-              });
-            })()}
+                  );
+                })}
+              </React.Fragment>
+            ))}
           </div>
         )}
       </div>

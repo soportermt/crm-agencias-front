@@ -20,7 +20,7 @@ export default function SearchBar({ value, onChange, placeholder = "Buscar", wid
           borderColor: "#d0d5dd",
           borderRadius: "8px",
           fontSize: "13px",
-          height: "38px",
+          height: "30px",
           boxShadow: "0px 1px 1px rgba(16, 24, 40, 0.05)",
         }}
       />

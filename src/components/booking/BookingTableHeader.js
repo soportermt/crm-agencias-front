@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function BookingTableHeader() {
     return (
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-2">
             <h1 className="font-inter fw-medium mb-1" style={{ color: "#0f1901", fontSize: "24px", lineHeight: "1.2" }}>
                 Gestión de reservas
             </h1>

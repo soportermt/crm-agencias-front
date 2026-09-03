@@ -8,7 +8,7 @@ const SKELETON_KEYS = ["total", "vigentes", "pagadas", "pasajeros"];
 export default function BookingMetrics({ metrics, loading = false }) {
   if (loading || !metrics) {
     return (
-      <div className="row g-3 mb-4">
+      <div className="row g-3 mb-2">
         {SKELETON_KEYS.map((key) => (
           <div className="col-12 col-sm-6 col-xl-3" key={key}>
             <div
@@ -16,7 +16,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
               style={{
                 borderRadius: "12px",
                 backgroundColor: "#f2f2f2",
-                minHeight: "96px",
+                minHeight: "76px",
               }}
             >
               <div
@@ -25,7 +25,6 @@ export default function BookingMetrics({ metrics, loading = false }) {
               >
                 <span className="placeholder col-6" style={{ height: "14px", borderRadius: "4px" }} />
                 <span className="placeholder col-4" style={{ height: "24px", borderRadius: "4px" }} />
-                <span className="placeholder col-8" style={{ height: "12px", borderRadius: "4px" }} />
               </div>
             </div>
           </div>
@@ -35,12 +34,12 @@ export default function BookingMetrics({ metrics, loading = false }) {
   }
 
   return (
-    <div className="row g-3 mb-4">
+    <div className="row g-3 mb-2">
       <div className="col-12 col-sm-6 col-xl-3">
         <StatCard
           title="Total reservas"
           value={metrics.total_reservas}
-          subtext="+8 este mes"
+          dashboard
           valueColor="#0c5cc6"
         />
       </div>
@@ -48,7 +47,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Reservas vigentes"
           value={metrics.reservas_vigentes}
-          subtext="Requieren atención"
+          dashboard
           valueColor="#f59e0b"
         />
       </div>
@@ -56,7 +55,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Reservas pagadas"
           value={metrics.reservas_pagadas}
-          subtext=""
+          dashboard
           valueColor="#0E803C"
         />
       </div>
@@ -64,7 +63,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
         <StatCard
           title="Pasajeros totales"
           value={metrics.pasajeros_totales}
-          subtext="Adultos + menores"
+          dashboard
           valueColor="#0F1901"
         />
       </div>
