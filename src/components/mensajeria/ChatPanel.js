@@ -28,18 +28,41 @@ export default function ChatPanel({
   const [text, setText] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [unreadNew, setUnreadNew] = useState(0);
+  const [initialUnread, setInitialUnread] = useState(0);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
 
-  // Auto-scroll inicial o cuando cambia de conversación
+  // Guardar unreadCount inicial al cambiar de conversación
   useEffect(() => {
-    if (bodyRef.current) {
-      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-      setShowScrollButton(false);
-      setUnreadNew(0);
+    if (conversation) {
+      setInitialUnread(conversation.unreadCount || 0);
     }
   }, [conversation?.id]);
+
+  // Auto-scroll inicial o cuando cambia de conversación/cargan mensajes
+  useEffect(() => {
+    if (loadingMessages) return; // Esperar a que carguen los mensajes
+
+    const timer = setTimeout(() => {
+      if (bodyRef.current) {
+        if (initialUnread > 0) {
+          const unreadEl = document.getElementById("first-unread-divider");
+          if (unreadEl) {
+            unreadEl.scrollIntoView({ behavior: "auto", block: "center" });
+          } else {
+            bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+          }
+        } else {
+          bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+        }
+        setShowScrollButton(false);
+        setUnreadNew(0);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [conversation?.id, loadingMessages, initialUnread]);
 
   // Manejo de scroll para el indicador "Nuevo mensaje"
   const handleScroll = useCallback(() => {
@@ -271,28 +294,60 @@ export default function ChatPanel({
           </div>
         ) : (
           <div className="d-flex flex-column gap-2">
-            {messages.map((msg) => {
-              const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
-              return (
-                <div key={msg.id || `${msg.clientId}-${msg.time}`} className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
-                  <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`}>
-                    <span>{msg.text}</span>
-                    <span
-                      className="d-flex align-items-center gap-1 flex-shrink-0"
-                      style={{
-                        fontSize: "11px",
-                        color: isAgent ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
-                        marginLeft: "8px",
-                        marginTop: "2px",
-                      }}
-                    >
-                      {msg.time || formatMessageTime(msg.time, msg.date)}
-                      {isAgent && <i className="bi bi-check-all" style={{ fontSize: "13px" }}></i>}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+            {(() => {
+              // Calcular índice del divisor de mensajes no leídos
+              let unreadDividerIndex = -1;
+              if (initialUnread > 0 && messages.length > 0) {
+                let inboundCount = 0;
+                for (let i = messages.length - 1; i >= 0; i--) {
+                  const msg = messages[i];
+                  const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
+                  if (!isAgent) {
+                    inboundCount++;
+                    if (inboundCount === initialUnread) {
+                      unreadDividerIndex = i;
+                      break;
+                    }
+                  }
+                }
+              }
+
+              return messages.map((msg, index) => {
+                const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
+                const isDivider = index === unreadDividerIndex;
+                
+                return (
+                  <React.Fragment key={msg.id || `${msg.clientId}-${msg.time}`}>
+                    {isDivider && (
+                      <div className="d-flex align-items-center my-3" id="first-unread-divider">
+                        <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
+                        <span className="mx-3 fw-medium" style={{ fontSize: "12px", color: "#0c5cc6", backgroundColor: "#e7f1fe", padding: "2px 10px", borderRadius: "12px" }}>
+                          {initialUnread} mensaje{initialUnread !== 1 ? 's' : ''} nuevo{initialUnread !== 1 ? 's' : ''}
+                        </span>
+                        <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
+                      </div>
+                    )}
+                    <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
+                      <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`}>
+                        <span>{msg.text}</span>
+                        <span
+                          className="d-flex align-items-center gap-1 flex-shrink-0"
+                          style={{
+                            fontSize: "11px",
+                            color: isAgent ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.5)",
+                            marginLeft: "8px",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {msg.time || formatMessageTime(msg.time, msg.date)}
+                          {isAgent && <i className="bi bi-check-all" style={{ fontSize: "13px" }}></i>}
+                        </span>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              });
+            })()}
           </div>
         )}
       </div>
