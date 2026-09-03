@@ -106,9 +106,11 @@ export function mapVentaToBooking(venta) {
             ? {
                 value: cliente.id_cliente,
                 label: cliente.nombre,
-                phone: cliente.telefono,
-                email: cliente.correo,
-                direccion: cliente.direccion,
+                telefono: cliente.telefono,
+                correo: cliente.correo,
+                ciudad: cliente.ciudad,
+                estado: cliente.estado,
+                pais: cliente.pais,
             }
             : null,
         servicios: (venta.ventasServicioses || []).map(mapVentaServicioToItem),

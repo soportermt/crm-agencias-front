@@ -4,6 +4,7 @@ import { calcularResumenServicio, formatMoney } from "@/utils/pricing";
 import dynamic from 'next/dynamic';
 import PaymentsPromisesModal from '@/components/common/PaymentsPromisesModal';
 import { bookingService } from '@/services/booking.service';
+import Link from 'next/link';
 
 const PdfViewer = dynamic(
   () => import("@/components/pdf/PdfViewer"),
@@ -64,7 +65,12 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }} className='mb-0'>Detalles del cliente</h5>
       <div className='d-flex flex-column gap-2 mb-3'>
-        <p className='mb-0' style={{ color: "var(--brand-blue)", fontWeight: 600 }}>{vendedor?.label || "Selecciona un vendedor"}</p>
+        <Link
+          href={`/clientes/${vendedor?.value}`}
+          style={{textDecoration: "none"}}
+        >
+          <p className='mb-0' style={{ color: "var(--brand-blue)", fontWeight: 600 }}>{vendedor?.label || "Selecciona un vendedor"}</p>
+        </Link>
         <p className='d-flex mb-0' style={{ color: "rgba(64, 64, 64, 0.8)", fontSize: 14, alignItems: "flex-start" }}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
