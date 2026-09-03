@@ -15,7 +15,9 @@ export default function ClientProfileChat({ clientId }) {
         setLoading(true);
         if (clientId) {
           const res = await conectividadService.getClientChats(clientId);
-          setMessages(Array.isArray(res) ? res : res?.data || []);
+          const allMessages = Array.isArray(res) ? res : res?.data || [];
+          // Mostrar solo los últimos 5 mensajes
+          setMessages(allMessages.slice(-5));
         }
       } catch (error) {
         console.error("Error al cargar chats:", error);

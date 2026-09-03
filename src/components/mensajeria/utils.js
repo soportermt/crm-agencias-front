@@ -40,6 +40,7 @@ export const WA_STATUS = {
   open: { label: "Nuevo", color: "#16a34a", bg: "rgba(22,163,74,0.1)" },
   pending: { label: "En proceso", color: "#b9861f", bg: "rgba(245,158,11,0.1)" },
   closed: { label: "Cerrado", color: "#475569", bg: "rgba(71,71,71,0.08)" },
+  not_opened: { label: "No abierta", color: "#64748b", bg: "#f1f5f9" },
 };
 
 export const WA_TEMPLATES = [

@@ -12,19 +12,20 @@ import ClientInfoPanel from "@/components/mensajeria/ClientInfoPanel";
 import EmailComposerModal from "@/components/mensajeria/EmailComposerModal";
 import NewWhatsAppConversationModal from "@/components/mensajeria/NewWhatsAppConversationModal";
 import { WA_STATUS } from "@/components/mensajeria/utils";
+import { useSocket } from "@/hooks/useSocket";
 
 function normalizeConversation(raw) {
   return {
     id: raw.id ?? null,
-    clientId: raw.clientId ?? raw.client_id ?? null,
+    clientId: raw.clientId ?? raw.client_id ?? raw.id_cliente ?? null,
     channel: raw.channel || "whatsapp",
-    clientName: raw.clientName || raw.client_name || "Cliente",
-    clientPhone: raw.clientPhone || raw.client_phone || "",
-    clientEmail: raw.clientEmail || raw.client_email || "",
+    clientName: raw.clientName || raw.client_name || raw.nombreCompleto || raw.nombre || raw.name || raw.text || "Cliente",
+    clientPhone: raw.clientPhone || raw.client_phone || raw.celular || raw.telefono || raw.phone || "",
+    clientEmail: raw.clientEmail || raw.client_email || raw.correo || raw.email || raw.mail || "",
     status: raw.status || "open",
     unreadCount: raw.unreadCount ?? raw.unread_count ?? 0,
-    lastMessageAt: raw.lastMessageAt || raw.last_message_at || null,
-    lastMessagePreview: raw.lastMessagePreview || raw.last_message_preview || "",
+    lastMessageAt: raw.lastMessageAt || raw.last_message_at || raw.createdAt || raw.created_at || null,
+    lastMessagePreview: raw.lastMessagePreview || raw.last_message_preview || raw.text || raw.message || "",
     assignedUserId: raw.assignedUserId ?? raw.assigned_user_id ?? null,
     assignedUserName: raw.assignedUserName || raw.assigned_user_name || null,
   };
@@ -55,11 +56,110 @@ function MensajeriaContent() {
   const [waWindow, setWaWindow] = useState({ open: false, lastInboundAt: null, expiresInSeconds: 0 });
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [globalSearchResults, setGlobalSearchResults] = useState([]);
+  const [isSearchingGlobal, setIsSearchingGlobal] = useState(false);
   const [error, setError] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleNewMessage = (newMsg) => {
+      console.log("WebSocket [new_message] recibido:", newMsg);
+      // 1. Si la conversación actual es la del mensaje nuevo, actualizamos la lista de mensajes
+      if (
+        (selectedConv?.id && Number(selectedConv.id) === Number(newMsg.conversationId)) || 
+        (selectedConv?.clientId && Number(selectedConv.clientId) === Number(newMsg.clientId))
+      ) {
+        setMessages((prev) => {
+          // Evitar duplicados si ya existe
+          if (prev.some(m => Number(m.id) === Number(newMsg.id))) return prev;
+          return [...(prev || []), newMsg];
+        });
+        if (newMsg.conversationId) {
+          mensajeriaService.markConversationRead(newMsg.conversationId).catch(() => {});
+        }
+      }
+      
+      // 2. Actualizamos el preview o unread count en la lista de conversaciones
+      setAllConversations((prev) => {
+        // Verificar si la conversación ya existe en la lista
+        const exists = prev.some(c => 
+          (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+          (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+        );
+        
+        if (exists) {
+          const updatedList = prev.map(c => {
+            if (
+              (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+              (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+            ) {
+              const isSelected = 
+                (selectedConv?.id && Number(selectedConv.id) === Number(c.id)) || 
+                (selectedConv?.clientId && Number(selectedConv.clientId) === Number(c.clientId));
+              return {
+                ...c,
+                lastMessagePreview: newMsg.text,
+                lastMessageAt: newMsg.createdAt || new Date().toISOString(),
+                unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1,
+                status: c.status === 'closed' ? 'open' : c.status
+              };
+            }
+            return c;
+          });
+          
+          // Ordenar descendente por fecha del último mensaje
+          return updatedList.sort((a, b) => {
+            const timeA = new Date(a.lastMessageAt || 0).getTime();
+            const timeB = new Date(b.lastMessageAt || 0).getTime();
+            return timeB - timeA;
+          });
+        } else {
+          // Si es una conversación que no está cargada actualmente (ej. página anterior),
+          // obtenemos los detalles del cliente e insertamos el bloque al inicio para no romper el infinite scroll.
+          if (newMsg.clientId) {
+            clientsService.getClientById(newMsg.clientId).then(res => {
+               const client = res?.data || res;
+               if (client) {
+                 const fullName =
+                   client.nombreCompleto ||
+                   [client.nombre, client.apellidoPaterno, client.apellidoMaterno].filter(Boolean).join(" ") ||
+                   client.nombre ||
+                   client.name ||
+                   "Cliente";
+                   
+                 const newConv = {
+                   id: newMsg.conversationId,
+                   clientId: newMsg.clientId,
+                   channel: newMsg.channel || "whatsapp",
+                   clientName: fullName,
+                   clientPhone: client.celular || client.telefono || client.phone || "",
+                   clientEmail: client.correo || client.email || client.mail || "",
+                   status: "open",
+                   unreadCount: 1,
+                   lastMessageAt: newMsg.createdAt || new Date().toISOString(),
+                   lastMessagePreview: newMsg.text,
+                 };
+                 setAllConversations(current => [newConv, ...current]);
+               }
+            }).catch(console.error);
+          }
+          return prev;
+        }
+      });
+    };
+
+    socket.on('new_message', handleNewMessage);
+
+    return () => {
+      socket.off('new_message', handleNewMessage);
+    };
+  }, [socket, selectedConv]);
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
@@ -73,29 +173,69 @@ function MensajeriaContent() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Limpia la búsqueda de forma inmediata (input + debounced)
+  // Limpia la búsqueda de forma inmediata (input + debounced + resultados globales)
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
     setDebouncedSearch("");
+    setGlobalSearchResults([]);
   }, []);
 
-  // Cargar todas las conversaciones WhatsApp (sin filtro de estado para poder buscar entre todas)
-  useEffect(() => {
-    async function load() {
-      try {
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Fetch paginado de conversaciones unificado con búsqueda
+  const loadConversations = useCallback(async (isLoadMore = false) => {
+    if (view !== "whatsapp") return;
+    
+    try {
+      if (!isLoadMore) {
         setLoadingList(true);
-        setError(null);
-        const convs = await mensajeriaService.getConversations("whatsapp");
-        setAllConversations((convs || []).map(normalizeConversation));
-      } catch (err) {
-        console.error("Error al cargar conversaciones:", err);
-        setError("No se pudieron cargar las conversaciones de WhatsApp.");
-      } finally {
-        setLoadingList(false);
+        setPage(1);
+      } else {
+        setLoadingMore(true);
       }
+      
+      setError(null);
+      const currentPage = isLoadMore ? page + 1 : 1;
+      
+      // Enviamos el search y status al backend
+      const response = await mensajeriaService.getConversations(
+        "whatsapp", 
+        waStatus !== "all" ? waStatus : undefined,
+        debouncedSearch.trim(),
+        currentPage,
+        20
+      );
+      
+      const newConvs = (response.data || []).map(normalizeConversation);
+      
+      if (isLoadMore) {
+        setAllConversations(prev => [...prev, ...newConvs]);
+      } else {
+        setAllConversations(newConvs);
+      }
+      
+      setPage(currentPage);
+      setHasMore(response.meta?.hasMore || false);
+    } catch (err) {
+      console.error("Error al cargar conversaciones:", err);
+      setError("No se pudieron cargar las conversaciones de WhatsApp.");
+    } finally {
+      setLoadingList(false);
+      setLoadingMore(false);
     }
-    load();
-  }, []);
+  }, [view, waStatus, debouncedSearch, page]);
+
+  useEffect(() => {
+    loadConversations(false);
+  }, [view, waStatus, debouncedSearch]);
+
+  const handleLoadMoreConversations = () => {
+    if (hasMore && !loadingMore) {
+      loadConversations(true);
+    }
+  };
 
   // Cargar contactos con correos
   useEffect(() => {
@@ -129,7 +269,7 @@ function MensajeriaContent() {
       setClientInfo(null);
       setWaWindow({ open: false, lastInboundAt: null, expiresInSeconds: 0 });
       if (conv.id) {
-        const res = await mensajeriaService.getConversationMessages(conv.id, 1, 100);
+        const res = await mensajeriaService.getConversationMessages(conv.id, 1, 20);
         setMessages(res.data || []);
         const expiresInSeconds = Math.max(0, Number(res.window?.expiresInSeconds || 0));
         setWaWindow({
@@ -139,7 +279,7 @@ function MensajeriaContent() {
         });
         mensajeriaService.markConversationRead(conv.id).catch(() => {});
       } else if (conv.clientId) {
-        const res = await mensajeriaService.getClientMessages(conv.clientId, 1, 100);
+        const res = await mensajeriaService.getClientMessages(conv.clientId, 1, 20);
         setMessages(res.data || (Array.isArray(res) ? res : []));
       }
       setSelectedConv(conv);
@@ -183,9 +323,9 @@ function MensajeriaContent() {
             const pseudoConv = {
               id: null,
               clientId: client.id || client.id_cliente || cid,
-              clientName: client.nombreCompleto || client.name || "Cliente",
-              clientPhone: client.celular || "",
-              clientEmail: client.correo || "",
+              clientName: client.nombreCompleto || client.nombre || client.name || "Cliente",
+              clientPhone: client.celular || client.telefono || client.phone || "",
+              clientEmail: client.correo || client.email || "",
               status: "open",
               channel: "whatsapp",
             };
@@ -252,7 +392,9 @@ function MensajeriaContent() {
 
   const handleSelectConversation = (conv) => {
     loadSelectedConversation(conv);
-    setAllConversations((prev) => prev.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)));
+    if (conv?.id) {
+      setAllConversations((prev) => prev.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)));
+    }
   };
 
   const handleCloseConversation = () => {
@@ -316,6 +458,12 @@ function MensajeriaContent() {
       } else {
         showToast("Mensaje enviado");
       }
+      
+      setAllConversations((prev) =>
+        (prev || []).map((c) => (c.id === selectedConv.id ? { ...c, status: "pending" } : c))
+      );
+      setSelectedConv((prev) => ({ ...prev, status: "pending" }));
+
     } catch (err) {
       console.error("Error al enviar mensaje:", err);
       showToast("No se pudo enviar el mensaje. Intenta de nuevo.", "error");
@@ -393,22 +541,10 @@ function MensajeriaContent() {
     return (c.name || "").toLowerCase().includes(q) || (c.email || "").toLowerCase().includes(q);
   });
 
-  // Conversaciones visibles: con búsqueda se buscan TODOS los clientes;
+  // Conversaciones visibles: con búsqueda se buscan TODOS los clientes y se combinan con clientes del CRM;
   // sin búsqueda se respeta el filtro de estado activo.
-  const visibleConversations = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase();
-
-    if (!q) {
-      return allConversations.filter((c) => c.status === waStatus);
-    }
-
-    return allConversations.filter((c) => {
-      const name = (c.clientName || "").toLowerCase();
-      const phone = (c.clientPhone || "").toLowerCase();
-      const preview = (c.lastMessagePreview || "").toLowerCase();
-      return name.includes(q) || phone.includes(q) || preview.includes(q);
-    });
-  }, [allConversations, waStatus, debouncedSearch]);
+  // Las conversaciones y búsqueda se manejan 100% desde el servidor.
+  const visibleConversations = allConversations;
 
   return (
     <div className="container-fluid p-0 font-inter">
@@ -469,6 +605,7 @@ function MensajeriaContent() {
               <ConversationList
                 conversations={visibleConversations}
                 selectedId={selectedConv?.id}
+                selectedClientId={selectedConv?.clientId}
                 onSelect={handleSelectConversation}
                 statusFilter={waStatus}
                 onStatusChange={setWaStatus}
@@ -476,6 +613,10 @@ function MensajeriaContent() {
                 onSearchChange={setSearchQuery}
                 onClearSearch={handleClearSearch}
                 loading={loadingList}
+                isSearchingGlobal={isSearchingGlobal}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMoreConversations}
               />
             ) : (
               <ClientContactsList

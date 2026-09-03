@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { WA_STATUS, formatPhone } from "./utils";
 
@@ -40,15 +40,109 @@ export default function ChatPanel({
   onClose,
 }) {
   const [text, setText] = useState("");
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [unreadToDisplay, setUnreadToDisplay] = useState(0);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
 
+  // Guardar unreadCount inicial al cambiar de conversación
   useEffect(() => {
+    if (conversation) {
+      setUnreadToDisplay(conversation.unreadCount || 0);
+    }
+  }, [conversation?.id]);
+
+  // Auto-scroll inicial o cuando cargan mensajes
+  useEffect(() => {
+    if (loadingMessages) return; // Esperar a que carguen los mensajes
+
+    const timer = setTimeout(() => {
+      if (bodyRef.current) {
+        if (unreadToDisplay > 0) {
+          const unreadEl = document.getElementById("first-unread-divider");
+          if (unreadEl) {
+            unreadEl.scrollIntoView({ behavior: "auto", block: "center" });
+          } else {
+            bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+          }
+        } else {
+          bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+        }
+        
+        const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+        
+        if (isAtBottom && unreadToDisplay === 0) {
+          setShowScrollButton(false);
+        } else if (!isAtBottom) {
+          setShowScrollButton(true);
+        }
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [conversation?.id, loadingMessages]);
+
+  // Manejo de scroll para el indicador "Nuevo mensaje" (solo botón)
+  const handleScroll = useCallback(() => {
+    if (!bodyRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50; // Margen de 50px
+    
+    if (isAtBottom) {
+      setShowScrollButton(false);
+    } else {
+      setShowScrollButton(true);
+    }
+  }, []);
+
+  const prevMessagesLengthRef = useRef(0);
+
+  // Efecto cuando llegan nuevos mensajes
+  useEffect(() => {
+    if (!bodyRef.current) {
+      prevMessagesLengthRef.current = messages.length;
+      return;
+    }
+    
+    const prevLength = prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (prevLength === 0 || messages.length <= prevLength) {
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 150; // Tolerancia
+    
+    // Contamos los nuevos mensajes inbound para mantener el divisor hasta que conteste
+    let newInboundCount = 0;
+    for (let i = prevLength; i < messages.length; i++) {
+      if (messages[i].direction === "inbound") {
+         newInboundCount++;
+      }
+    }
+    if (newInboundCount > 0) {
+      setUnreadToDisplay(prev => prev + newInboundCount);
+    }
+
+    if (isAtBottom) {
+      // Si está abajo, auto-scroll sin limpiar divisor
+      setTimeout(() => {
+        if (bodyRef.current) {
+          bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+        }
+      }, 50);
+    }
+  }, [messages.length]);
+
+  const scrollToBottom = () => {
     if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+      setShowScrollButton(false);
     }
-  }, [messages.length, conversation?.id]);
+  };
 
   useEffect(() => {
     setText("");
@@ -65,6 +159,7 @@ export default function ChatPanel({
     if (textareaRef.current) {
       textareaRef.current.style.height = "43px";
     }
+    setUnreadToDisplay(0);
   };
 
   const handleKeyDown = (e) => {
@@ -103,8 +198,8 @@ export default function ChatPanel({
     );
   }
 
-  const clientName = clientInfo?.nombreCompleto || clientInfo?.name || conversation.clientName || conversation.client_name || "Cliente";
-  const clientPhone = formatPhone(clientInfo?.celular || conversation.clientPhone || conversation.client_phone || "");
+  const clientName = clientInfo?.nombreCompleto || clientInfo?.nombre || clientInfo?.name || conversation?.clientName || conversation?.client_name || conversation?.nombreCompleto || conversation?.nombre || "Cliente";
+  const clientPhone = formatPhone(clientInfo?.celular || clientInfo?.telefono || clientInfo?.phone || conversation?.clientPhone || conversation?.client_phone || "");
   const statusMeta = WA_STATUS[conversation?.status] || WA_STATUS.open;
 
   return (
@@ -169,7 +264,9 @@ export default function ChatPanel({
           <span className="small fw-medium flex-shrink-0" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
             Seguimiento:
           </span>
-          {Object.entries(WA_STATUS).map(([key, meta]) => {
+          {Object.entries(WA_STATUS)
+            .filter(([key]) => key !== "not_opened")
+            .map(([key, meta]) => {
             const isActive = conversation?.status === key;
             return (
               <button
@@ -193,7 +290,38 @@ export default function ChatPanel({
       )}
 
       {/* Cuerpo del chat */}
-      <div className="mensajeria-chat-body flex-grow-1 px-3 py-3" ref={bodyRef}>
+      <div 
+        className="mensajeria-chat-body flex-grow-1 px-3 py-3 position-relative" 
+        ref={bodyRef} 
+        onScroll={handleScroll}
+        style={{ overflowY: 'auto' }}
+      >
+        {/* Botón flotante para hacer scroll al final */}
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="btn btn-light rounded-circle shadow position-sticky d-flex align-items-center justify-content-center"
+            style={{
+              bottom: "16px",
+              left: "calc(100% - 48px)",
+              width: "40px",
+              height: "40px",
+              zIndex: 10,
+              backgroundColor: "white",
+              border: "1px solid #e2e8f0"
+            }}
+          >
+            <i className="bi bi-chevron-down text-secondary" style={{ fontSize: "18px", WebkitTextStroke: "1px" }}></i>
+            {unreadToDisplay > 0 && (
+              <span 
+                className="position-absolute translate-middle badge rounded-pill bg-success"
+                style={{ top: "0", left: "0", fontSize: "10px", padding: "4px 6px" }}
+              >
+                {unreadToDisplay}
+              </span>
+            )}
+          </button>
+        )}
         {loadingMessages ? (
           <div className="text-center py-5">
             <div className="spinner-border text-primary" role="status" style={{ width: "22px", height: "22px" }}></div>

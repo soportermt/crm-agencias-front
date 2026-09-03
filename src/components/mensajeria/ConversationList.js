@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import { getInitials, formatTime, WA_STATUS } from "./utils";
 
 export default function ConversationList({
   conversations,
   selectedId,
+  selectedClientId,
   onSelect,
   statusFilter,
   onStatusChange,
@@ -13,7 +14,24 @@ export default function ConversationList({
   onSearchChange,
   onClearSearch,
   loading,
+  isSearchingGlobal,
+  hasMore,
+  loadingMore,
+  onLoadMore,
 }) {
+  const observer = useRef();
+  
+  const lastElementRef = useCallback((node) => {
+    if (loading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        onLoadMore();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore, onLoadMore]);
+
   const statuses = [
     { key: "open", label: "Nuevas", icon: "bi-stars" },
     { key: "pending", label: "En proceso", icon: "bi-hourglass-split" },
@@ -34,11 +52,23 @@ export default function ConversationList({
           <input
             type="text"
             className="form-control input-custom ps-5 pe-5"
-            placeholder="Buscar conversación..."
+            placeholder="Buscar conversación o cliente..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             style={{ height: "40px", fontSize: "13px" }}
           />
+          {isSearchingGlobal && (
+            <div
+              className="position-absolute d-flex align-items-center justify-content-center"
+              style={{
+                right: isSearching ? "32px" : "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              <div className="spinner-border text-primary" role="status" style={{ width: "14px", height: "14px", borderWidth: "2px" }}></div>
+            </div>
+          )}
           {isSearching && (
             <button
               type="button"
@@ -101,21 +131,29 @@ export default function ConversationList({
           <div className="text-center py-5 px-3">
             <i className="bi bi-chat-dots text-secondary" style={{ fontSize: "28px" }}></i>
             <p className="small text-secondary mt-2 mb-0" style={{ color: "var(--grey-text)" }}>
-              No hay conversaciones {statusFilter !== "all" ? `en "${WA_STATUS[statusFilter]?.label || statusFilter}"` : "todavía"}
+              {isSearching
+                ? `No se encontraron resultados para "${searchQuery}"`
+                : `No hay conversaciones ${statusFilter !== "all" ? `en "${WA_STATUS[statusFilter]?.label || statusFilter}"` : "todavía"}`}
             </p>
           </div>
         ) : (
-          conversations.map((conv) => {
-            const isSelected = selectedId === conv.id;
-            const name = conv.clientName || conv.client_name || "Cliente";
+          conversations.map((conv, index) => {
+            const isSelected = conv.id
+              ? selectedId === conv.id
+              : Boolean(selectedClientId && Number(selectedClientId) === Number(conv.clientId));
+            const isNotOpened = conv.status === "not_opened";
+            const name = conv.clientName || conv.client_name || conv.nombreCompleto || conv.nombre || conv.name || "Cliente";
             const preview = conv.lastMessagePreview || conv.last_message_preview || "Sin mensajes";
             const time = conv.lastMessageAt || conv.last_message_at;
             const unread = conv.unreadCount ?? conv.unread_count ?? 0;
             const statusMeta = WA_STATUS[conv.status] || WA_STATUS.open;
+            const key = conv.id ? `conv-${conv.id}` : `client-${conv.clientId}`;
+            const isLastElement = conversations.length === index + 1;
 
             return (
               <button
-                key={conv.id}
+                key={key}
+                ref={isLastElement ? lastElementRef : null}
                 onClick={() => onSelect(conv)}
                 className={`w-100 text-start border-0 bg-transparent d-flex align-items-center gap-2 px-3 py-2 mensajeria-conversation-item ${isSelected ? "active" : ""}`}
                 style={{ fontSize: "13px" }}
@@ -125,9 +163,10 @@ export default function ConversationList({
                   style={{
                     width: "40px",
                     height: "40px",
-                    backgroundColor: isSelected ? "#dbeafe" : "#e7f1fe",
-                    color: "#0c5cc6",
+                    backgroundColor: isSelected ? "#dbeafe" : isNotOpened ? "#f8fafc" : "#e7f1fe",
+                    color: isNotOpened ? "#64748b" : "#0c5cc6",
                     fontSize: "13px",
+                    border: isNotOpened ? "1px dashed #cbd5e1" : "none",
                   }}
                 >
                   {getInitials(name)}
@@ -143,7 +182,14 @@ export default function ConversationList({
                     </span>
                   </div>
                   <div className="d-flex align-items-center justify-content-between gap-2">
-                    <span className="text-truncate text-secondary" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
+                    <span
+                      className="text-truncate text-secondary"
+                      style={{
+                        color: isNotOpened ? "#94a3b8" : "var(--grey-text)",
+                        fontSize: "12px",
+                        fontStyle: isNotOpened ? "italic" : "normal",
+                      }}
+                    >
                       {preview}
                     </span>
                     <span className="d-flex align-items-center gap-1 flex-shrink-0">
@@ -169,6 +215,11 @@ export default function ConversationList({
               </button>
             );
           })
+        )}
+        {loadingMore && (
+          <div className="text-center py-3">
+            <div className="spinner-border text-primary" role="status" style={{ width: "18px", height: "18px", borderWidth: "2px" }}></div>
+          </div>
         )}
       </div>
     </div>
