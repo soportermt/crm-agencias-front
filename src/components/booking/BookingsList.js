@@ -20,7 +20,7 @@ const COLUMNS = [
     // { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
-const ITEMS_PER_PAGE = 25;
+const ITEMS_PER_PAGE = 15;
 
 function parseDesglose(desgloseStr) {
     try {
@@ -227,7 +227,7 @@ export default function BookingList() {
             <div className="d-flex flex-column" style={{ gap: "16px" }}>
                 <h1
                     className="font-inter fw-medium mb-0"
-                    style={{ fontSize: "24px", color: "#0f1901", lineHeight: "1.2" }}
+                    style={{ fontSize: "20px", color: "#0f1901", lineHeight: "1.2" }}
                 >
                     Lista de reservaciones
                 </h1>
@@ -237,7 +237,7 @@ export default function BookingList() {
                         <select name="estado"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
-                                height: "38px",
+                                height: "30px",
                                 borderRadius: "8px",
                                 borderColor: "#d0d5dd",
                                 backgroundColor: "#fff",
@@ -257,7 +257,7 @@ export default function BookingList() {
                         <select name="destino"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
-                                height: "38px",
+                                height: "30px",
                                 borderRadius: "8px",
                                 borderColor: "#d0d5dd",
                                 backgroundColor: "#fff",
