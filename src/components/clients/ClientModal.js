@@ -167,7 +167,7 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
 
   const handleSubmit = async () => {
 
-    if (!formData.nombreCompleto || !formData.fechaNacimiento || !formData.celular || !formData.ciudad || !formData.estado || !formData.pais) {
+    if (!formData.nombreCompleto || !formData.celular || !formData.ciudad || !formData.estado || !formData.pais) {
       setError("Completa los campos obligatorios (*).");
       return;
     }
@@ -186,6 +186,7 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
       
       const submitData = {
         ...formData,
+        fechaNacimiento: formData.fechaNacimiento || null,
         celular: fullPhoneNumber
       };
       
@@ -304,11 +305,10 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
 
               <div className="col-6 mb-3">
                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
-                  Fecha de nacimiento *
+                  Fecha de nacimiento
                 </label>
                 <input
                   type="date"
-                  required
                   className="form-control input-custom"
                   value={formData.fechaNacimiento}
                   onChange={(e) =>

@@ -12,7 +12,9 @@ export default function DataTable({
   totalItems = 0,
   onPageChange,
   emptyMessage = "No se encontraron registros.",
-  minWidth = "1200px"
+  minWidth = "1200px",
+  cellPadding = "6px 16px",
+  headerPadding = "6px 16px"
 }) {
   const getPageNumbers = () => {
     const pages = [];
@@ -45,7 +47,7 @@ export default function DataTable({
                   style={{
                     backgroundColor: "#e7f1fe",
                     color: "#0c5cc6",
-                    padding: "6px 16px",
+                    padding: headerPadding,
                     borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
                     borderTop: "none",
                     whiteSpace: "nowrap",
@@ -74,8 +76,13 @@ export default function DataTable({
                     return (
                       <td
                         key={colIndex}
-                        className={`py-3 px-3 font-inter ${col.align ? `text-${col.align}` : ""}`}
-                        style={{ color: "#0f1901", fontSize: "13px", whiteSpace: "nowrap" }}
+                        className={`font-inter ${col.align ? `text-${col.align}` : ""}`}
+                        style={{
+                          color: "#0f1901",
+                          fontSize: "13px",
+                          whiteSpace: "nowrap",
+                          padding: cellPadding
+                        }}
                       >
                         {content !== undefined ? content : row[col.key]}
                       </td>
@@ -85,7 +92,7 @@ export default function DataTable({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="text-center py-5 text-secondary font-inter" style={{ fontSize: "13px" }}>
+                <td colSpan={columns.length} className="text-center py-4 text-secondary font-inter" style={{ fontSize: "13px" }}>
                   {emptyMessage}
                 </td>
               </tr>
@@ -95,7 +102,7 @@ export default function DataTable({
       </div>
 
       {pagination && (
-        <div className="d-flex justify-content-center align-items-center p-3 border-top gap-3 bg-white">
+        <div className="d-flex justify-content-center align-items-center py-2 px-3 border-top gap-3 bg-white">
           <nav aria-label="Navegación de registros">
             <div className="d-inline-flex align-items-center">
               <a

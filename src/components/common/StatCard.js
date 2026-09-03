@@ -20,8 +20,6 @@ export default function StatCard({
   const isDown = trend === "down";
   const isUser = trend === "user";
 
-  const finalLinkText = linkText || (size === "md" ? "Ver detalles" : null);
-  const showFooter = !dashboard && (!!subtext || !!finalLinkText);
 
   return (
     <div
@@ -31,7 +29,7 @@ export default function StatCard({
         borderRadius: "12px",
         boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
-        minHeight: size === "sm" ? "86px" : "104px",
+        minHeight: size === "sm" ? "64px" : "76px",
         padding: "8px 14px",
         overflow: "hidden",
       }}
@@ -84,36 +82,6 @@ export default function StatCard({
         >
           {value}
         </span>
-
-        {showFooter && (
-          <div className="text-end">
-            {subtext ? (
-              <span
-                className="font-inter fw-medium"
-                style={{
-                  color: "rgba(0, 0, 0, 0.4)",
-                  fontSize: "14px",
-                  lineHeight: "1.2",
-                }}
-              >
-                {subtext}
-              </span>
-            ) : (
-              <a
-                href="#"
-                onClick={onLinkClick}
-                className="font-inter fw-semibold text-decoration-none hover-underline"
-                style={{
-                  color: "rgba(0, 0, 0, 0.4)",
-                  fontSize: "14px",
-                  lineHeight: "1.2",
-                }}
-              >
-                {finalLinkText}
-              </a>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
