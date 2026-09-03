@@ -195,7 +195,7 @@ function MensajeriaContent() {
       setClientInfo(null);
       setWaWindow({ open: false, lastInboundAt: null, expiresInSeconds: 0 });
       if (conv.id) {
-        const res = await mensajeriaService.getConversationMessages(conv.id, 1, 100);
+        const res = await mensajeriaService.getConversationMessages(conv.id, 1, 20);
         setMessages(res.data || []);
         const expiresInSeconds = Math.max(0, Number(res.window?.expiresInSeconds || 0));
         setWaWindow({
@@ -205,7 +205,7 @@ function MensajeriaContent() {
         });
         mensajeriaService.markConversationRead(conv.id).catch(() => {});
       } else if (conv.clientId) {
-        const res = await mensajeriaService.getClientMessages(conv.clientId, 1, 100);
+        const res = await mensajeriaService.getClientMessages(conv.clientId, 1, 20);
         setMessages(res.data || (Array.isArray(res) ? res : []));
       }
       setSelectedConv(conv);
