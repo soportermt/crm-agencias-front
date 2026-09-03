@@ -56,7 +56,7 @@ export default function BookingForm({ mode }) {
         </div>
         <div className="col-12 col-md-6 col-lg-3">
           <label htmlFor="fechaLimite" className="form-label">
-            Límite de cambios *
+            Límite de cambios 
           </label>
           <DatePicker
             id="fechaLimite"
