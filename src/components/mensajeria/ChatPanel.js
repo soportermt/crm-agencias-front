@@ -27,8 +27,7 @@ export default function ChatPanel({
 }) {
   const [text, setText] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [unreadNew, setUnreadNew] = useState(0);
-  const [initialUnread, setInitialUnread] = useState(0);
+  const [unreadToDisplay, setUnreadToDisplay] = useState(0);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
@@ -36,17 +35,17 @@ export default function ChatPanel({
   // Guardar unreadCount inicial al cambiar de conversación
   useEffect(() => {
     if (conversation) {
-      setInitialUnread(conversation.unreadCount || 0);
+      setUnreadToDisplay(conversation.unreadCount || 0);
     }
   }, [conversation?.id]);
 
-  // Auto-scroll inicial o cuando cambia de conversación/cargan mensajes
+  // Auto-scroll inicial o cuando cargan mensajes
   useEffect(() => {
     if (loadingMessages) return; // Esperar a que carguen los mensajes
 
     const timer = setTimeout(() => {
       if (bodyRef.current) {
-        if (initialUnread > 0) {
+        if (unreadToDisplay > 0) {
           const unreadEl = document.getElementById("first-unread-divider");
           if (unreadEl) {
             unreadEl.scrollIntoView({ behavior: "auto", block: "center" });
@@ -56,15 +55,22 @@ export default function ChatPanel({
         } else {
           bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
         }
-        setShowScrollButton(false);
-        setUnreadNew(0);
+        
+        const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+        
+        if (isAtBottom && unreadToDisplay === 0) {
+          setShowScrollButton(false);
+        } else if (!isAtBottom) {
+          setShowScrollButton(true);
+        }
       }
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [conversation?.id, loadingMessages, initialUnread]);
+  }, [conversation?.id, loadingMessages]);
 
-  // Manejo de scroll para el indicador "Nuevo mensaje"
+  // Manejo de scroll para el indicador "Nuevo mensaje" y limpieza de divisor
   const handleScroll = useCallback(() => {
     if (!bodyRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
@@ -72,28 +78,45 @@ export default function ChatPanel({
     
     if (isAtBottom) {
       setShowScrollButton(false);
-      setUnreadNew(0);
+      setUnreadToDisplay(0);
     } else {
       setShowScrollButton(true);
     }
   }, []);
 
+  const prevMessagesLengthRef = useRef(0);
+
   // Efecto cuando llegan nuevos mensajes
   useEffect(() => {
-    if (!bodyRef.current) return;
+    if (!bodyRef.current) {
+      prevMessagesLengthRef.current = messages.length;
+      return;
+    }
     
+    const prevLength = prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (prevLength === 0 || messages.length <= prevLength) {
+      return;
+    }
+
     const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
     const isAtBottom = scrollHeight - scrollTop - clientHeight < 150; // Tolerancia
     
     if (isAtBottom) {
-      // Si está abajo, auto-scroll y no mostrar indicador
+      // Si está abajo, auto-scroll y limpiar divisor
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-      setUnreadNew(0);
+      setUnreadToDisplay(0);
     } else {
       // Si está leyendo arriba, incrementamos contador
-      const incomingMessage = messages[messages.length - 1];
-      if (incomingMessage && incomingMessage.direction === "inbound") {
-        setUnreadNew(prev => prev + 1);
+      let newInboundCount = 0;
+      for (let i = prevLength; i < messages.length; i++) {
+        if (messages[i].direction === "inbound") {
+           newInboundCount++;
+        }
+      }
+      if (newInboundCount > 0) {
+        setUnreadToDisplay(prev => prev + newInboundCount);
       }
     }
   }, [messages.length]);
@@ -102,7 +125,7 @@ export default function ChatPanel({
     if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
       setShowScrollButton(false);
-      setUnreadNew(0);
+      setUnreadToDisplay(0);
     }
   };
 
@@ -271,12 +294,12 @@ export default function ChatPanel({
             }}
           >
             <i className="bi bi-chevron-down text-secondary" style={{ fontSize: "18px", WebkitTextStroke: "1px" }}></i>
-            {unreadNew > 0 && (
+            {unreadToDisplay > 0 && (
               <span 
                 className="position-absolute translate-middle badge rounded-pill bg-success"
                 style={{ top: "0", left: "0", fontSize: "10px", padding: "4px 6px" }}
               >
-                {unreadNew}
+                {unreadToDisplay}
               </span>
             )}
           </button>
@@ -297,14 +320,14 @@ export default function ChatPanel({
             {(() => {
               // Calcular índice del divisor de mensajes no leídos
               let unreadDividerIndex = -1;
-              if (initialUnread > 0 && messages.length > 0) {
+              if (unreadToDisplay > 0 && messages.length > 0) {
                 let inboundCount = 0;
                 for (let i = messages.length - 1; i >= 0; i--) {
                   const msg = messages[i];
                   const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
                   if (!isAgent) {
                     inboundCount++;
-                    if (inboundCount === initialUnread) {
+                    if (inboundCount === unreadToDisplay) {
                       unreadDividerIndex = i;
                       break;
                     }
@@ -322,7 +345,7 @@ export default function ChatPanel({
                       <div className="d-flex align-items-center my-3" id="first-unread-divider">
                         <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
                         <span className="mx-3 fw-medium" style={{ fontSize: "12px", color: "#0c5cc6", backgroundColor: "#e7f1fe", padding: "2px 10px", borderRadius: "12px" }}>
-                          {initialUnread} mensaje{initialUnread !== 1 ? 's' : ''} nuevo{initialUnread !== 1 ? 's' : ''}
+                          {unreadToDisplay} mensaje{unreadToDisplay !== 1 ? 's' : ''} nuevo{unreadToDisplay !== 1 ? 's' : ''}
                         </span>
                         <div className="flex-grow-1 border-bottom" style={{ borderColor: "#e2e8f0" }}></div>
                       </div>
