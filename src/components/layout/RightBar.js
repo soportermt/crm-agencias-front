@@ -83,13 +83,18 @@ export default function RightBar({ onRegisterClientClick, isPinned, onTogglePin 
     };
 
     fetchContacts();
-    const intervalId = setInterval(fetchContacts, 60000);
+
+    if (socket) {
+      socket.on('new_message', fetchContacts);
+    }
 
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
+      if (socket) {
+        socket.off('new_message', fetchContacts);
+      }
     };
-  }, []);
+  }, [socket]);
 
   return (
     <aside
