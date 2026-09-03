@@ -46,6 +46,13 @@ export default function ChatPanel({
   const textareaRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
 
+  const firstUnreadMessageId = React.useMemo(() => {
+    if (unreadToDisplay > 0 && messages.length >= unreadToDisplay) {
+      return messages[messages.length - unreadToDisplay]?.id;
+    }
+    return null;
+  }, [messages, unreadToDisplay]);
+
   // Guardar unreadCount inicial al cambiar de conversación
   useEffect(() => {
     if (conversation) {
@@ -354,10 +361,22 @@ export default function ChatPanel({
                 </div>
                 {msgsForDate.map((msg) => {
                   const isAgent = msg.sender !== "client" && msg.direction !== "inbound";
+                  const isFirstUnread = firstUnreadMessageId && msg.id === firstUnreadMessageId;
+                  
                   return (
-                    <div key={msg.id || `${msg.clientId}-${msg.time}`} className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
-                      <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
-                        <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                    <React.Fragment key={msg.id || `${msg.clientId}-${msg.time}`}>
+                      {isFirstUnread && (
+                        <div id="first-unread-divider" className="d-flex align-items-center justify-content-center my-3" style={{ width: "100%" }}>
+                          <div style={{ flex: 1, height: "1px", backgroundColor: "#e2e8f0" }}></div>
+                          <span className="px-3 text-muted small fw-medium py-1" style={{ fontSize: "11.5px", backgroundColor: "#f8f9fa", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                            {unreadToDisplay} {unreadToDisplay === 1 ? 'mensaje nuevo' : 'mensajes nuevos'}
+                          </span>
+                          <div style={{ flex: 1, height: "1px", backgroundColor: "#e2e8f0" }}></div>
+                        </div>
+                      )}
+                      <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
+                        <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
+                          <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
                         <div
                           className="d-flex align-items-center justify-content-end gap-1 mt-1"
                           style={{
@@ -371,7 +390,8 @@ export default function ChatPanel({
                           {isAgent && <i className="bi bi-check-all" style={{ fontSize: "14px" }}></i>}
                         </div>
                       </div>
-                    </div>
+                      </div>
+                    </React.Fragment>
                   );
                 })}
               </React.Fragment>
