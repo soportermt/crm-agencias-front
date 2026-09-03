@@ -6,18 +6,19 @@ export default function ExportButton({ onExport, disabled = false, className = "
     <button
       onClick={onExport}
       disabled={disabled}
-      className={`btn d-flex align-items-center gap-2 px-3 py-2 transition-smooth ${className}`}
+      className={`btn d-flex align-items-center gap-2 px-2 py-0 transition-smooth ${className}`}
       style={{
         backgroundColor: "#e7f1fe",
         border: "1px solid #0c5cc6",
         borderRadius: "8px",
         color: "#0c5cc6",
-        fontSize: "13px",
+        fontSize: "12px",
         fontWeight: 500,
-        width: "fit-content"
+        width: "fit-content",
+        height:30
       }}
     >
-      <CloudArrowDownIcon style={{ width: "20px", height: "20px" }} />
+      <CloudArrowDownIcon style={{ width: "18px", height: "18px" }} />
       <span>Exportar</span>
     </button>
   );

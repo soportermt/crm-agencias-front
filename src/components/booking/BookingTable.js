@@ -16,7 +16,7 @@ export default function BookingTable({ activeTab, onTabChange }) {
 
     return (
         <div>
-            <div className="d-flex flex-column flex-md-row gap-2 mb-3">
+            <div className="d-flex flex-column flex-md-row gap-2 mb-2">
                 {["lista", "agrupado", "pasajeros"].map((tab) => {
                     const isActive = activeTab === tab;
 
@@ -33,7 +33,7 @@ export default function BookingTable({ activeTab, onTabChange }) {
                             className={`btn border-0 transition-smooth ${isActive ? "bg-brand-blue-light text-brand-blue" : ""
                                 }`}
                             style={{
-                                padding: "12px 24px",
+                                padding: "8px 16px",
                                 borderRadius: "24px",
                                 fontSize: "14px",
                                 color: isActive ? undefined : "rgba(0,0,0,0.4)",

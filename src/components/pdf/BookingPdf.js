@@ -258,17 +258,6 @@ export default function BookingPdf({ venta }) {
                 </View>
 
                 <View style={styles.content}>
-                    <View style={styles.row}>
-                        <View style={{ width: "100%" }}>
-                            <Text style={styles.titleData}>Fecha límite de pago</Text>
-                            <Text style={styles.data}>{formatShortDate(venta.limite_cancelacion)}</Text>
-                        </View>
-
-                        <View style={{ width: "100%" }}>
-                            <Text style={styles.titleData}>Fecha de reservación</Text>
-                            <Text style={styles.data}>{formatShortDate(venta.fecha)}</Text>
-                        </View>
-                    </View>
                     <Text style={styles.title}>Descripción de servicios</Text>
 
                     {/* servicios: uno o más, hospedaje y/o traslado */}
@@ -291,6 +280,12 @@ export default function BookingPdf({ venta }) {
                                                 Hotel
                                             </Text>
                                         </View>
+
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
+
                                         <View style={styles.row}>
                                             <View style={{ width: "100%" }}>
                                                 <Text style={styles.titleData}>Nombre</Text>
@@ -411,6 +406,11 @@ export default function BookingPdf({ venta }) {
                                             </Text>
                                         </View>
 
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
+
                                         <View style={styles.row}>
                                             <View style={{ width: "100%" }}>
                                                 <Text style={styles.titleData}>Origen</Text>
@@ -521,6 +521,10 @@ export default function BookingPdf({ venta }) {
                                             </Text>
                                         </View>
 
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
 
                                         <View style={styles.row}>
                                             <View style={{ width: "100%" }}>
