@@ -78,7 +78,13 @@ function MensajeriaContent() {
         setMessages((prev) => {
           // Evitar duplicados si ya existe
           if (prev.some(m => Number(m.id) === Number(newMsg.id))) return prev;
-          return [...(prev || []), newMsg];
+          
+          const dt = newMsg.createdAt ? new Date(newMsg.createdAt) : new Date();
+          const d = dt.toISOString().split("T")[0];
+          const t = dt.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: true });
+          const formattedMsg = { ...newMsg, date: d, time: t };
+          
+          return [...(prev || []), formattedMsg];
         });
         if (newMsg.conversationId) {
           mensajeriaService.markConversationRead(newMsg.conversationId).catch(() => {});
@@ -440,10 +446,12 @@ function MensajeriaContent() {
     try {
       setSending(true);
       const res = await mensajeriaService.sendMessage(payload);
+      const dt = new Date();
       const msg = {
         id: res.messageId,
         text,
-        time: new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: true }),
+        date: dt.toISOString().split("T")[0],
+        time: dt.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: true }),
         sender: "agent",
         direction: "outbound",
         channel: "whatsapp",
