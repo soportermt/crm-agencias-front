@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { conectividadService } from "./conectividad.service";
 
 export const bookingService = {
     async create(booking) {
@@ -77,5 +78,9 @@ export const bookingService = {
             withCredentials: true,
         });
         return data;
+    },
+
+    async sendWhatsappReceipt(formData) {
+        return conectividadService.sendReceiptWhatsapp(formData);
     },
 };

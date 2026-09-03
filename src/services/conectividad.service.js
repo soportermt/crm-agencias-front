@@ -30,5 +30,14 @@ export const conectividadService = {
   async saveEmailSettings(settingsData) {
     const { data } = await api.post('/settings/email', settingsData);
     return data;
+  },
+
+  async sendReceiptWhatsapp(formData) {
+    const { data } = await api.post('/messages/send-receipt', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
   }
 };

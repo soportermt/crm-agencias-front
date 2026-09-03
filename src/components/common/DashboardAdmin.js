@@ -123,7 +123,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
                 style={{
                   borderRadius: "12px",
                   backgroundColor: "#f2f2f2",
-                  minHeight: "96px",
+                  minHeight: "76px",
                 }}
               >
                 <div
@@ -132,7 +132,6 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
                 >
                   <span className="placeholder col-6" style={{ height: "14px", borderRadius: "4px" }} />
                   <span className="placeholder col-4" style={{ height: "24px", borderRadius: "4px" }} />
-                  <span className="placeholder col-8" style={{ height: "12px", borderRadius: "4px" }} />
                 </div>
               </div>
             </div>

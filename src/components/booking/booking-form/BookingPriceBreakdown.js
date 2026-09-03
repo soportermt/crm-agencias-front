@@ -163,7 +163,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
         </button>
       )}
       {isEditMode && (
-        <PdfViewer venta={rawVenta} />
+        <PdfViewer venta={rawVenta} customer={booking?.customer} />
       )}
 
 
