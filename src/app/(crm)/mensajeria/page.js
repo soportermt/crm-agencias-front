@@ -12,6 +12,7 @@ import ClientInfoPanel from "@/components/mensajeria/ClientInfoPanel";
 import EmailComposerModal from "@/components/mensajeria/EmailComposerModal";
 import NewWhatsAppConversationModal from "@/components/mensajeria/NewWhatsAppConversationModal";
 import { WA_STATUS } from "@/components/mensajeria/utils";
+import { useSocket } from "@/hooks/useSocket";
 
 function normalizeConversation(raw) {
   return {
@@ -60,6 +61,59 @@ function MensajeriaContent() {
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleNewMessage = (newMsg) => {
+      // 1. Si la conversación actual es la del mensaje nuevo, actualizamos la lista de mensajes
+      if (selectedConv?.id === newMsg.conversationId || selectedConv?.clientId === newMsg.clientId) {
+        setMessages((prev) => {
+          // Evitar duplicados si ya existe
+          if (prev.some(m => m.id === newMsg.id)) return prev;
+          return [...(prev || []), newMsg];
+        });
+        if (newMsg.conversationId) {
+          mensajeriaService.markConversationRead(newMsg.conversationId).catch(() => {});
+        }
+      }
+      
+      // 2. Actualizamos el preview o unread count en la lista de conversaciones
+      setAllConversations((prev) => {
+        // Verificar si la conversación ya existe en la lista
+        const exists = prev.some(c => c.id === newMsg.conversationId || c.clientId === newMsg.clientId);
+        
+        if (exists) {
+          return prev.map(c => {
+            if (c.id === newMsg.conversationId || c.clientId === newMsg.clientId) {
+              const isSelected = selectedConv?.id === c.id || selectedConv?.clientId === c.clientId;
+              return {
+                ...c,
+                lastMessagePreview: newMsg.text,
+                lastMessageAt: newMsg.createdAt,
+                unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1
+              };
+            }
+            return c;
+          });
+        } else {
+          // Si es una conversación nueva que no teníamos, habría que recargar la lista o agregarla
+          // Por simplicidad recargamos la lista
+          mensajeriaService.getConversations("whatsapp").then(convs => {
+             setAllConversations((convs || []).map(normalizeConversation));
+          });
+          return prev;
+        }
+      });
+    };
+
+    socket.on('new_message', handleNewMessage);
+
+    return () => {
+      socket.off('new_message', handleNewMessage);
+    };
+  }, [socket, selectedConv]);
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
