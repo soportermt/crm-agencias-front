@@ -67,11 +67,15 @@ function MensajeriaContent() {
     if (!socket) return;
     
     const handleNewMessage = (newMsg) => {
+      console.log("WebSocket [new_message] recibido:", newMsg);
       // 1. Si la conversación actual es la del mensaje nuevo, actualizamos la lista de mensajes
-      if (selectedConv?.id === newMsg.conversationId || selectedConv?.clientId === newMsg.clientId) {
+      if (
+        (selectedConv?.id && Number(selectedConv.id) === Number(newMsg.conversationId)) || 
+        (selectedConv?.clientId && Number(selectedConv.clientId) === Number(newMsg.clientId))
+      ) {
         setMessages((prev) => {
           // Evitar duplicados si ya existe
-          if (prev.some(m => m.id === newMsg.id)) return prev;
+          if (prev.some(m => Number(m.id) === Number(newMsg.id))) return prev;
           return [...(prev || []), newMsg];
         });
         if (newMsg.conversationId) {
@@ -82,12 +86,20 @@ function MensajeriaContent() {
       // 2. Actualizamos el preview o unread count en la lista de conversaciones
       setAllConversations((prev) => {
         // Verificar si la conversación ya existe en la lista
-        const exists = prev.some(c => c.id === newMsg.conversationId || c.clientId === newMsg.clientId);
+        const exists = prev.some(c => 
+          (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+          (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+        );
         
         if (exists) {
           return prev.map(c => {
-            if (c.id === newMsg.conversationId || c.clientId === newMsg.clientId) {
-              const isSelected = selectedConv?.id === c.id || selectedConv?.clientId === c.clientId;
+            if (
+              (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+              (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+            ) {
+              const isSelected = 
+                (selectedConv?.id && Number(selectedConv.id) === Number(c.id)) || 
+                (selectedConv?.clientId && Number(selectedConv.clientId) === Number(c.clientId));
               return {
                 ...c,
                 lastMessagePreview: newMsg.text,
@@ -98,8 +110,7 @@ function MensajeriaContent() {
             return c;
           });
         } else {
-          // Si es una conversación nueva que no teníamos, habría que recargar la lista o agregarla
-          // Por simplicidad recargamos la lista
+          // Si es una conversación nueva que no teníamos, recargamos la lista
           mensajeriaService.getConversations("whatsapp").then(convs => {
              setAllConversations((convs || []).map(normalizeConversation));
           });
