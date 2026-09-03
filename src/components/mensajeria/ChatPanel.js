@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { WA_STATUS, formatPhone } from "./utils";
 
@@ -26,15 +26,62 @@ export default function ChatPanel({
   onClose,
 }) {
   const [text, setText] = useState("");
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [unreadNew, setUnreadNew] = useState(0);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
 
+  // Auto-scroll inicial o cuando cambia de conversación
   useEffect(() => {
     if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+      setShowScrollButton(false);
+      setUnreadNew(0);
     }
-  }, [messages.length, conversation?.id]);
+  }, [conversation?.id]);
+
+  // Manejo de scroll para el indicador "Nuevo mensaje"
+  const handleScroll = useCallback(() => {
+    if (!bodyRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50; // Margen de 50px
+    
+    if (isAtBottom) {
+      setShowScrollButton(false);
+      setUnreadNew(0);
+    } else {
+      setShowScrollButton(true);
+    }
+  }, []);
+
+  // Efecto cuando llegan nuevos mensajes
+  useEffect(() => {
+    if (!bodyRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = bodyRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 150; // Tolerancia
+    
+    if (isAtBottom) {
+      // Si está abajo, auto-scroll y no mostrar indicador
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+      setUnreadNew(0);
+    } else {
+      // Si está leyendo arriba, incrementamos contador
+      const incomingMessage = messages[messages.length - 1];
+      if (incomingMessage && incomingMessage.direction === "inbound") {
+        setUnreadNew(prev => prev + 1);
+      }
+    }
+  }, [messages.length]);
+
+  const scrollToBottom = () => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+      setShowScrollButton(false);
+      setUnreadNew(0);
+    }
+  };
 
   useEffect(() => {
     setText("");
@@ -179,7 +226,38 @@ export default function ChatPanel({
       )}
 
       {/* Cuerpo del chat */}
-      <div className="mensajeria-chat-body flex-grow-1 px-3 py-3" ref={bodyRef}>
+      <div 
+        className="mensajeria-chat-body flex-grow-1 px-3 py-3 position-relative" 
+        ref={bodyRef} 
+        onScroll={handleScroll}
+        style={{ overflowY: 'auto' }}
+      >
+        {/* Botón flotante para hacer scroll al final */}
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="btn btn-light rounded-circle shadow position-sticky d-flex align-items-center justify-content-center"
+            style={{
+              bottom: "16px",
+              left: "calc(100% - 48px)",
+              width: "40px",
+              height: "40px",
+              zIndex: 10,
+              backgroundColor: "white",
+              border: "1px solid #e2e8f0"
+            }}
+          >
+            <i className="bi bi-chevron-down text-secondary" style={{ fontSize: "18px", WebkitTextStroke: "1px" }}></i>
+            {unreadNew > 0 && (
+              <span 
+                className="position-absolute translate-middle badge rounded-pill bg-success"
+                style={{ top: "0", left: "0", fontSize: "10px", padding: "4px 6px" }}
+              >
+                {unreadNew}
+              </span>
+            )}
+          </button>
+        )}
         {loadingMessages ? (
           <div className="text-center py-5">
             <div className="spinner-border text-primary" role="status" style={{ width: "22px", height: "22px" }}></div>
