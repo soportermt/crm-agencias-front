@@ -25,7 +25,7 @@ export default function StatusBadge({ status }) {
     bg = "rgba(58, 134, 255, 0.1)";
     color = "#3A86FF";
     dotBg = "#3A86FF";
-  } else if (status === "Inactivo" || status === "Vigente") {
+  } else if (status === "Inactivo" || status === "Vigente" || status === "D") {
     bg = "rgba(71, 71, 71, 0.08)";
     color = "#475569";
     dotBg = "#475569";

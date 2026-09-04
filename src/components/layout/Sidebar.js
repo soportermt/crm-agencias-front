@@ -87,9 +87,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
       <aside
         onMouseEnter={() => !mobileOpen && setIsHovered(true)}
         onMouseLeave={() => !mobileOpen && setIsHovered(false)}
-        className={`bg-white border-end d-flex flex-column justify-content-between ${
-          mobileOpen ? "d-flex position-fixed h-100 shadow-premium" : "d-none"
-        } d-lg-flex font-jakarta`}
+        className={`bg-white border-end d-flex flex-column justify-content-between ${mobileOpen ? "d-flex position-fixed h-100 shadow-premium" : "d-none"
+          } d-lg-flex font-jakarta`}
         style={{
           width: isExpanded ? "284px" : "80px",
           minWidth: isExpanded ? "284px" : "80px",
@@ -156,8 +155,9 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           </div>
 
           <div className="mb-3">
-            {renderCategoryHeader("Vendedores")}
+            {renderCategoryHeader("Gestión")}
             {renderNavLink("/vendedores", "Gestión de vendedores", IdentificationIcon)}
+            {renderNavLink("/proveedores", "Gestión de proveedores", UsersIcon)}
           </div>
 
           <div className="mb-3">
@@ -180,7 +180,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             )}
           </div>
 
-{/* 
+          {/* 
           <div className="mb-3">
             {renderCategoryHeader("Servicios")}
             {renderNavLink("/productos", "Productos", BriefcaseIcon)}
@@ -198,9 +198,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           </div>
           <button
             onClick={handleLogout}
-            className={`w-100 d-flex align-items-center ${
-              !isExpanded ? "justify-content-center px-0" : "gap-3 px-3"
-            } py-2 text-danger small bg-transparent border-0 text-start rounded hover-light fw-medium`}
+            className={`w-100 d-flex align-items-center ${!isExpanded ? "justify-content-center px-0" : "gap-3 px-3"
+              } py-2 text-danger small bg-transparent border-0 text-start rounded hover-light fw-medium`}
             style={{ fontSize: "13px" }}
             title={!isExpanded ? "Cerrar sesión" : undefined}
           >

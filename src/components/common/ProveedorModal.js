@@ -1,14 +1,14 @@
 "use client";
 
 import { catalogosService } from "@/services/catalogos.service";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
+export default function ProveedorModal({ show, onClose, onProveedorCreated, proveedorAEditar }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const id_agencia = 1;
 
-    const [formData, setFormData] = useState({
+    const initialForm = {
         id_proveedor: 0,
         id_agencia: id_agencia,
         nombre_comercial: "",
@@ -19,28 +19,29 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
         detalles: "",
         comision: "",
         estatus: "A"
-    });
+    };
+
+    const [formData, setFormData] = useState(initialForm);
+
+    useEffect(() => {
+        if (show) {
+            if (proveedorAEditar) {
+                setFormData({
+                    ...proveedorAEditar,
+                    id_proveedor: Number(proveedorAEditar.id),
+                });
+            } else {
+                setFormData(initialForm);
+            }
+
+            setError(null);
+        }
+    }, [show, proveedorAEditar]);
 
     if (!show) return null;
 
-    const resetForm = () => {
-        setFormData({
-            id_proveedor: 0,
-            id_agencia: id_agencia,
-            nombre_comercial: "",
-            correo: "",
-            direccion: "",
-            cuidad: "",
-            estado: "",
-            detalles: "",
-            comision: "",
-            estatus: "A"
-        });
-    };
-
     const handleSubmit = async () => {
-
-        if (!formData.nombre_comercial || !formData.correo || !formData.direccion || !formData.comision) {
+        if (!formData.nombre_comercial || !formData.correo || !formData.comision) {
             setError("Completa los campos obligatorios (*).");
             return;
         }
@@ -48,22 +49,28 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
         try {
             setSubmitting(true);
             setError(null);
-            
-            const newProveedor = await catalogosService.createProveedor(formData);
-            if (onProveedorCreated) {
-                onProveedorCreated(newProveedor);
+
+            let resultado;
+            if (proveedorAEditar) {
+                console.log("EDITANDO:", formData);
+                resultado = await catalogosService.updateProveedor(formData);
+            } else {
+                console.log("CREANDO:", formData);
+                resultado = await catalogosService.createProveedor(formData);
             }
 
-            resetForm();
+            if (onProveedorCreated) {
+                onProveedorCreated(resultado);
+            }
+
             onClose();
         } catch (err) {
-            console.error("Error al registrar proveedor:", err);
+            console.error("Error al registrar/actualizar proveedor:", err);
             setError("Error al guardar proveedor en el backend. Intenta nuevamente.");
         } finally {
             setSubmitting(false);
         }
     };
-
 
     return (
         <div
@@ -77,7 +84,6 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                 backgroundColor: "rgba(0, 0, 0, 0.4)",
                 zIndex: 1050,
             }}
-            onClick={onClose}
         >
             <div
                 className="bg-white shadow-premium font-inter w-100 transition-smooth"
@@ -95,7 +101,7 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                         className="font-inter h4 mb-0 fw-medium"
                         style={{ color: "var(--dark-green)" }}
                     >
-                        Registro de nuevo proveedor
+                        {proveedorAEditar ? "Editar proveedor" : "Registro de nuevo proveedor"}
                     </h2>
                     <button
                         type="button"
@@ -119,7 +125,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                     type="text"
                                     required
                                     className="form-control input-custom"
-                                    value={formData.nombre_comercial}
+                                    // Solución: Agregamos || ""
+                                    value={formData.nombre_comercial || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, nombre_comercial: e.target.value })
                                     }
@@ -134,7 +141,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                     type="email"
                                     placeholder="@"
                                     className="form-control input-custom"
-                                    value={formData.correo}
+                                    // Solución: Agregamos || ""
+                                    value={formData.correo || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, correo: e.target.value })
                                     }
@@ -144,13 +152,13 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
 
                             <div className="col-12 mb-3">
                                 <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
-                                    Direccion *
+                                    Direccion
                                 </label>
                                 <input
                                     type="text"
-                                    required
                                     className="form-control input-custom"
-                                    value={formData.direccion}
+                                    // Solución: Agregamos || ""
+                                    value={formData.direccion || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, direccion: e.target.value })
                                     }
@@ -164,7 +172,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                 <input
                                     type="text"
                                     className="form-control input-custom"
-                                    value={formData.cuidad}
+                                    // Solución: Agregamos || ""
+                                    value={formData.cuidad || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, cuidad: e.target.value })
                                     }
@@ -178,7 +187,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                 <input
                                     type="text"
                                     className="form-control input-custom"
-                                    value={formData.estado}
+                                    // Solución: Agregamos || ""
+                                    value={formData.estado || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, estado: e.target.value })
                                     }
@@ -192,7 +202,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                 <input
                                     type="text"
                                     className="form-control input-custom"
-                                    value={formData.detalles}
+                                    // Solución: Agregamos || ""
+                                    value={formData.detalles || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, detalles: e.target.value })
                                     }
@@ -207,12 +218,35 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated }) {
                                     type="number"
                                     required
                                     className="form-control input-custom"
-                                    value={formData.comision}
+                                    // Solución: Agregamos || ""
+                                    value={formData.comision || ""}
                                     onChange={(e) =>
                                         setFormData({ ...formData, comision: e.target.value })
                                     }
                                 />
                             </div>
+
+                            {proveedorAEditar && (
+                                <div className="col-12 mb-3">
+                                    <label className="form-label text-secondary small font-poppins mb-1" style={{ fontWeight: 400 }}>
+                                        Estatus
+                                    </label>
+                                    <select
+                                        name="estatus"
+                                        className="form-select input-custom"
+                                        value={formData.estatus || "A"}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                estatus: e.target.value,
+                                            })
+                                        }
+                                    >
+                                        <option value="A">Activo</option>
+                                        <option value="D">Inactivo</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
                     </div>
 
