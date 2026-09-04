@@ -256,12 +256,19 @@ export default function ChatPanel({
         </div>
       );
     } else {
+      let docName = "Descargar Archivo Adjunto";
+      if (msg.text && msg.text.startsWith('[Documento] ')) {
+        docName = msg.text.replace('[Documento] ', '').trim();
+      } else if (mediaUrl) {
+        const parts = mediaUrl.split('/');
+        docName = parts[parts.length - 1] || docName;
+      }
       return (
         <div className="mb-2">
           <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)", color: isAgent ? "#fff" : "#0c5cc6" }}>
             <i className="bi bi-file-earmark-text-fill" style={{ fontSize: "24px" }}></i>
             <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
-              Descargar Archivo Adjunto
+              {docName}
             </span>
           </a>
         </div>
