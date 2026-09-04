@@ -84,10 +84,7 @@ export default function PdfViewer({ venta, customer, terminos }) {
             formData.append("clientName", clientName);
             formData.append("templateName", "prueba_envio_docs");
             formData.append("language", "es");
-            formData.append(
-                "parameters",
-                JSON.stringify([clientName, `#${venta.folio || ""}`])
-            );
+            formData.append("parameters", "[]");
 
             const res = await conectividadService.sendReceiptWhatsapp(formData);
 
