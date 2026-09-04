@@ -52,10 +52,8 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated, prov
 
             let resultado;
             if (proveedorAEditar) {
-                console.log("EDITANDO:", formData);
                 resultado = await catalogosService.updateProveedor(formData);
             } else {
-                console.log("CREANDO:", formData);
                 resultado = await catalogosService.createProveedor(formData);
             }
 

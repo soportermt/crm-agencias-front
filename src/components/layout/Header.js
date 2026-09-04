@@ -11,10 +11,20 @@ export default function Header({ onToggleMobileSidebar }) {
     const fetchUser = async () => {
       try {
         const data = await usuariosService.getCurrentUser();
+        let currentUser = null;
+
         if (Array.isArray(data) && data.length > 0) {
-          setUser(data[0]);
+          currentUser = data[0];
         } else if (data && !Array.isArray(data)) {
-          setUser(data);
+          currentUser = data;
+        }
+
+        if (currentUser) {
+          setUser(currentUser);
+
+          if (currentUser.idAgencia) {
+            localStorage.setItem("agenciaInfo", JSON.stringify(currentUser.idAgencia));
+          }
         }
       } catch (error) {
         console.error("Error fetching current user:", error);
@@ -31,10 +41,11 @@ export default function Header({ onToggleMobileSidebar }) {
   const userName = user?.idUsuario?.profiles?.fullname || user?.nombre || "Usuario";
   const userRole = user?.rol || "Rol no asignado";
   const initials = getInitials(userName);
+
   return (
     <header
       className="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between position-sticky top-0 shadow-premium"
-      style={{ zIndex: 100, height: "76px" }}
+      style={{ zIndex: 100, height: "64px" }}
     >
       <div className="d-flex align-items-center gap-3">
         <button
@@ -45,15 +56,16 @@ export default function Header({ onToggleMobileSidebar }) {
           <i className="bi bi-list"></i>
         </button>
 
-        <div className="py-1">
-          <Image
+        <div className="py-0">
+          {/* <Image
             src="/2bt2025.png"
             alt="2Business Travel Logo"
             width={115}
             height={23}
             priority
             style={{ height: "auto", maxWidth: "115px" }}
-          />
+          /> */}
+          <h1 style={{ fontSize: 20, margin: 0, fontWeight: 600 }}>{user?.idAgencia?.nombre_comercial}</h1>
         </div>
       </div>
 
@@ -75,7 +87,7 @@ export default function Header({ onToggleMobileSidebar }) {
           <i className="bi bi-sun-fill" style={{ fontSize: "1rem" }}></i>
         </button> */}
 
-{/* border-start */}
+        {/* border-start */}
 
         <div className="d-flex align-items-center gap-2  ps-3">
           <div className="text-end d-none d-sm-block">
@@ -87,10 +99,10 @@ export default function Header({ onToggleMobileSidebar }) {
             style={{ width: "32px", height: "32px", fontSize: "13px" }}
           >
             {user?.foto ? (
-              <img 
-                src={`${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}`} 
-                alt={userName} 
-                className="w-100 h-100 object-fit-cover position-absolute top-0 start-0" 
+              <img
+                src={`${process.env.NEXT_PUBLIC_API_URL || ''}/images/usuarios/${user.foto}`}
+                alt={userName}
+                className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
                 style={{ zIndex: 2 }}
                 onError={(e) => {
                   e.target.onerror = null;

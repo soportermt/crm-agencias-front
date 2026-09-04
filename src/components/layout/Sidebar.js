@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/services/auth.service";
@@ -21,11 +21,34 @@ import {
   DocumentTextIcon
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
+import Image from "next/image";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
+
+  const [logoAgencia, setLogoAgencia] = useState("/2bt2025.png");
+  const [nombreAgencia, setNombreAgencia] = useState("2Business Travel");
+
+  useEffect(() => {
+    try {
+      const storedAgencia = localStorage.getItem("agenciaInfo");
+      if (storedAgencia) {
+        const agenciaData = JSON.parse(storedAgencia);
+
+        if (agenciaData.logotipo) {
+          setLogoAgencia(agenciaData.logotipo);
+        }
+
+        if (agenciaData.nombre) {
+          setNombreAgencia(agenciaData.nombre);
+        }
+      }
+    } catch (error) {
+      console.error("Error parseando la información de la agencia:", error);
+    }
+  }, []);
 
   const isExpanded = isPinned || isHovered;
 
@@ -105,7 +128,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
         }}
       >
         <div className="flex-shrink-0 mb-4">
-          <div className={`d-flex align-items-center mb-3 ${isExpanded ? "justify-content-end" : "justify-content-center"}`} style={{ height: "24px" }}>
+          <div className={`d-flex align-items-center mb-1 ${isExpanded ? "justify-content-end" : "justify-content-center"}`} style={{ height: "24px" }}>
             <button
               onClick={onTogglePin}
               className="btn btn-link text-secondary p-0 border-0"
@@ -114,6 +137,16 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             >
               <i className={`bi ${isPinned ? "bi-circle-fill text-primary" : "bi-circle"}`} style={{ fontSize: "14px" }}></i>
             </button>
+          </div>
+
+          <div className="d-flex justify-content-center">
+            <img
+              src={`http://crm.2businesstravel.com/admin/images/agencia/${logoAgencia}`}
+              alt={`${nombreAgencia} Logo`}
+              width={110}
+              height={20}
+              style={{ height: "auto", maxWidth: "115px" }}
+            />
           </div>
 
           <button
