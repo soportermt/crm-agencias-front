@@ -462,7 +462,7 @@ export default function ChatPanel({
                               </span>
                             </div>
                           ) : (
-                            msg.text && <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                            msg.text && !['[Imagen]', '[Video]', '[Audio]', '[Sticker]'].includes(msg.text) && <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
                           )}
                         <div
                           className="d-flex align-items-center justify-content-end gap-1 mt-1"
