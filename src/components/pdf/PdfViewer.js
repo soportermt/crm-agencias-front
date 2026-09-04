@@ -73,24 +73,19 @@ export default function PdfViewer({ venta, customer, terminos }) {
         try {
             setSendingWhatsapp(true);
 
-            // 1. Generar el Blob del PDF directamente desde el componente existente
             const blob = await pdf(<BookingPdf venta={venta} terminos={terminos}/>).toBlob();
             const fileName = `Reserva-${venta.folio || "comprobante"}.pdf`;
 
-            // 2. Preparar el FormData para el microservicio de conectividad (Node.js)
             const formData = new FormData();
             formData.append("file", blob, fileName);
             formData.append("folio", String(venta.folio || ""));
             if (clientId) formData.append("clientId", String(clientId));
             if (phone) formData.append("toPhone", String(phone));
             formData.append("clientName", clientName);
-            formData.append("templateName", "comprobante_reserva");
-            formData.append(
-                "parameters",
-                JSON.stringify([clientName, `#${venta.folio || ""}`])
-            );
+            formData.append("templateName", "prueba_envio_docs");
+            formData.append("language", "es");
+            formData.append("parameters", "[]");
 
-            // 3. Enviar solicitud al backend Node.js
             const res = await conectividadService.sendReceiptWhatsapp(formData);
 
             if (res && res.success) {

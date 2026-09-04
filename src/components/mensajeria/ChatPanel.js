@@ -40,10 +40,12 @@ export default function ChatPanel({
   onClose,
 }) {
   const [text, setText] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [unreadToDisplay, setUnreadToDisplay] = useState(0);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
   const isWindowOpen = Boolean(windowOpen);
 
   const firstUnreadMessageId = React.useMemo(() => {
@@ -153,6 +155,8 @@ export default function ChatPanel({
 
   useEffect(() => {
     setText("");
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     if (textareaRef.current) {
       textareaRef.current.style.height = "43px";
     }
@@ -160,13 +164,21 @@ export default function ChatPanel({
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed || sending || !isWindowOpen) return;
-    onSendMessage(trimmed);
+    if ((!trimmed && !selectedFile) || sending || !isWindowOpen) return;
+    onSendMessage(trimmed, selectedFile);
     setText("");
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     if (textareaRef.current) {
       textareaRef.current.style.height = "43px";
     }
     setUnreadToDisplay(0);
+  };
+
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -208,6 +220,61 @@ export default function ChatPanel({
   const clientName = clientInfo?.nombreCompleto || clientInfo?.nombre || clientInfo?.name || conversation?.clientName || conversation?.client_name || conversation?.nombreCompleto || conversation?.nombre || "Cliente";
   const clientPhone = formatPhone(clientInfo?.celular || clientInfo?.telefono || clientInfo?.phone || conversation?.clientPhone || conversation?.client_phone || "");
   const statusMeta = WA_STATUS[conversation?.status] || WA_STATUS.open;
+
+  const renderMedia = (msg, isAgent) => {
+    const mediaUrl = msg.media_url || msg.mediaUrl;
+    const mediaType = msg.media_type || msg.mediaType;
+    if (!mediaUrl) return null;
+    
+    const baseUrl = process.env.NEXT_PUBLIC_CONNECTIVITY_API_URL || "http://localhost:4000";
+    const fullUrl = `${baseUrl.replace(/\/+$/, '')}/${mediaUrl.replace(/^\/+/, '')}`;
+
+    if (mediaType === 'image') {
+      return (
+        <div className="mb-2">
+          <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+            <img src={fullUrl} alt="Imagen adjunta" style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', objectFit: 'cover' }} />
+          </a>
+        </div>
+      );
+    } else if (mediaType === 'video') {
+      return (
+        <div className="mb-2">
+          <video controls style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px' }}>
+            <source src={fullUrl} />
+            Tu navegador no soporta video.
+          </video>
+        </div>
+      );
+    } else if (mediaType === 'audio') {
+      return (
+        <div className="mb-2">
+          <audio controls style={{ maxWidth: '100%', minWidth: '200px' }}>
+            <source src={fullUrl} />
+            Tu navegador no soporta audio.
+          </audio>
+        </div>
+      );
+    } else {
+      let docName = "Descargar Archivo Adjunto";
+      if (msg.text && msg.text.startsWith('[Documento] ')) {
+        docName = msg.text.replace('[Documento] ', '').trim();
+      } else if (mediaUrl) {
+        const parts = mediaUrl.split('/');
+        docName = parts[parts.length - 1] || docName;
+      }
+      return (
+        <div className="mb-2">
+          <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)", color: isAgent ? "#fff" : "#0c5cc6" }}>
+            <i className="bi bi-file-earmark-text-fill" style={{ fontSize: "24px" }}></i>
+            <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+              {docName}
+            </span>
+          </a>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "12px", overflow: "hidden" }}>
@@ -376,7 +443,34 @@ export default function ChatPanel({
                       )}
                       <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
                         <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
-                          <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                          {(msg.media_url || msg.mediaUrl) && renderMedia(msg, isAgent)}
+                          {msg.text && msg.text.startsWith('[Comprobante WhatsApp:') ? (
+                            <div className="d-flex flex-column gap-1">
+                              <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
+                                <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "24px", color: isAgent ? "#fff" : "#dc3545" }}></i>
+                                <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+                                  Documento PDF Enviado
+                                </span>
+                              </div>
+                              <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
+                                {msg.text.replace(/\[Comprobante WhatsApp:.*?\]\s*/, '')}
+                              </span>
+                            </div>
+                          ) : msg.text && msg.text.startsWith('[Plantilla:') ? (
+                            <div className="d-flex flex-column gap-1">
+                              <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
+                                <i className="bi bi-layout-text-window" style={{ fontSize: "20px", color: isAgent ? "#fff" : "#0c5cc6" }}></i>
+                                <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+                                  Plantilla Enviada
+                                </span>
+                              </div>
+                              <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
+                                {msg.text.replace(/\[Plantilla:.*?\]\s*/, '')}
+                              </span>
+                            </div>
+                          ) : (
+                            msg.text && !['[Imagen]', '[Video]', '[Audio]', '[Sticker]'].includes(msg.text) && !msg.text.startsWith('[Documento] ') && <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                          )}
                         <div
                           className="d-flex align-items-center justify-content-end gap-1 mt-1"
                           style={{
@@ -416,7 +510,26 @@ export default function ChatPanel({
             <span className="flex-grow-1">La ventana de 24 horas está cerrada. Abre la conversación con una plantilla.</span>
           </div>
         )}
-        <div className="d-flex align-items-end gap-2">
+        
+        {selectedFile && (
+          <div className="mx-3 mb-2 p-2 rounded bg-light d-flex align-items-center justify-content-between border">
+            <div className="d-flex align-items-center gap-2 overflow-hidden">
+              <i className="bi bi-file-earmark text-secondary"></i>
+              <span className="text-truncate small text-secondary fw-medium">{selectedFile.name}</span>
+            </div>
+            <button 
+              type="button" 
+              className="btn-close shadow-none" 
+              style={{ fontSize: "10px" }} 
+              onClick={() => {
+                setSelectedFile(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+            ></button>
+          </div>
+        )}
+
+        <div className="d-flex align-items-end gap-2 px-3 pb-3">
           {!isWindowOpen && (
             <button
               type="button"
@@ -435,6 +548,24 @@ export default function ChatPanel({
               <span className="d-none d-md-inline">Abrir conversación</span>
             </button>
           )}
+
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileSelect} 
+            className="d-none" 
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" 
+          />
+          <button 
+            type="button" 
+            className="btn btn-light d-flex align-items-center justify-content-center flex-shrink-0 border"
+            style={{ width: "43px", height: "43px", borderRadius: "12px", color: "var(--grey-text)" }}
+            title="Adjuntar archivo"
+            disabled={!isWindowOpen || sending}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <i className="bi bi-paperclip" style={{ fontSize: "20px" }}></i>
+          </button>
           <textarea
             ref={textareaRef}
             className="form-control input-custom flex-grow-1"
@@ -464,7 +595,7 @@ export default function ChatPanel({
               padding: 0,
               borderRadius: "12px",
             }}
-            disabled={sending || !text.trim() || !isWindowOpen}
+            disabled={sending || (!text.trim() && !selectedFile) || !isWindowOpen}
             title="Enviar mensaje"
           >
             {sending ? (
