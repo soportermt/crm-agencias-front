@@ -59,9 +59,11 @@ export const mensajeriaService = {
     return data;
   },
 
-  async uploadMedia(file) {
+  async uploadMedia(file, agenciaId, clientId) {
     const formData = new FormData();
     formData.append("file", file);
+    if (agenciaId) formData.append("agenciaId", agenciaId);
+    if (clientId) formData.append("clientId", clientId);
     const { data } = await api.post("/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data"

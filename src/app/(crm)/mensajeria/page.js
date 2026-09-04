@@ -450,7 +450,7 @@ function MensajeriaContent() {
       let uploadedMediaType = null;
       
       if (file) {
-        const uploadRes = await mensajeriaService.uploadMedia(file);
+        const uploadRes = await mensajeriaService.uploadMedia(file, user?.id_agencia, selectedConv.clientId);
         if (uploadRes && uploadRes.file && uploadRes.file.path) {
            uploadedMediaUrl = uploadRes.file.path;
            
