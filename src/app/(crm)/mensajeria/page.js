@@ -421,7 +421,7 @@ function MensajeriaContent() {
   };
 
   // Enviar mensaje WhatsApp
-  const handleSendMessage = async (text) => {
+  const handleSendMessage = async (text, file) => {
     if (!selectedConv || !waWindow.open) {
       if (selectedConv && !waWindow.open) {
         showToast("La ventana de 24 horas está cerrada. Usa una plantilla para abrir la conversación.", "warning");
@@ -445,6 +445,25 @@ function MensajeriaContent() {
 
     try {
       setSending(true);
+      
+      let uploadedMediaUrl = null;
+      let uploadedMediaType = null;
+      
+      if (file) {
+        const uploadRes = await mensajeriaService.uploadMedia(file);
+        if (uploadRes && uploadRes.url) {
+           uploadedMediaUrl = uploadRes.url;
+           
+           if (file.type.startsWith('image/')) uploadedMediaType = 'image';
+           else if (file.type.startsWith('video/')) uploadedMediaType = 'video';
+           else if (file.type.startsWith('audio/')) uploadedMediaType = 'audio';
+           else uploadedMediaType = 'document';
+           
+           payload.mediaUrl = uploadedMediaUrl;
+           payload.mediaType = uploadedMediaType;
+        }
+      }
+
       const res = await mensajeriaService.sendMessage(payload);
       const dt = new Date();
       const msg = {
@@ -455,6 +474,8 @@ function MensajeriaContent() {
         sender: "agent",
         direction: "outbound",
         channel: "whatsapp",
+        media_url: uploadedMediaUrl,
+        media_type: uploadedMediaType
       };
       setMessages((prev) => [...(prev || []), msg]);
       if (res.delivered === false) {
