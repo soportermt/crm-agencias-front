@@ -87,7 +87,33 @@ export default function ClientProfileChat({ clientId }) {
                   maxWidth: "70%",
                 }}
               >
-                <span style={{ fontSize: "13px", lineHeight: "1.4" }}>{msg.text}</span>
+                {msg.text && msg.text.startsWith('[Comprobante WhatsApp:') ? (
+                  <div className="d-flex flex-column gap-1 w-100">
+                    <div className="d-flex align-items-center gap-2 mb-1 p-2 rounded" style={{ backgroundColor: isClient ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.2)" }}>
+                      <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "20px", color: isClient ? "#dc3545" : "#ffffff" }}></i>
+                      <span style={{ fontSize: "12px", fontWeight: "500", wordBreak: "break-word" }}>
+                        Documento PDF Enviado
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "12px", lineHeight: "1.4", opacity: 0.9 }}>
+                      {msg.text.replace(/\[Comprobante WhatsApp:.*?\]\s*/, '')}
+                    </span>
+                  </div>
+                ) : msg.text && msg.text.startsWith('[Plantilla:') ? (
+                  <div className="d-flex flex-column gap-1 w-100">
+                    <div className="d-flex align-items-center gap-2 mb-1 p-2 rounded" style={{ backgroundColor: isClient ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.2)" }}>
+                      <i className="bi bi-layout-text-window" style={{ fontSize: "18px", color: isClient ? "#0c5cc6" : "#ffffff" }}></i>
+                      <span style={{ fontSize: "12px", fontWeight: "500", wordBreak: "break-word" }}>
+                        Plantilla Enviada
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "12px", lineHeight: "1.4", opacity: 0.9 }}>
+                      {msg.text.replace(/\[Plantilla:.*?\]\s*/, '')}
+                    </span>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: "13px", lineHeight: "1.4", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                )}
                 <span
                   className="d-flex align-items-center gap-1 flex-shrink-0"
                   style={{

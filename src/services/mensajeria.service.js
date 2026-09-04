@@ -57,5 +57,18 @@ export const mensajeriaService = {
   async sendEmail(payload) {
     const { data } = await api.post("/email/send", payload);
     return data;
+  },
+
+  async uploadMedia(file, agenciaId, clientId) {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (agenciaId) formData.append("agenciaId", agenciaId);
+    if (clientId) formData.append("clientId", clientId);
+    const { data } = await api.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+    return data;
   }
 };

@@ -151,7 +151,37 @@ function MensajeriaContent() {
                    lastMessageAt: newMsg.createdAt || new Date().toISOString(),
                    lastMessagePreview: newMsg.text,
                  };
-                 setAllConversations(current => [newConv, ...current]);
+                 setAllConversations(current => {
+                   // Verificar nuevamente si ya existe (para evitar duplicados por asincronía)
+                   const alreadyExists = current.some(c => 
+                     (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+                     (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+                   );
+                   
+                   if (alreadyExists) {
+                     return current.map(c => {
+                       if (
+                         (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+                         (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+                       ) {
+                         const isSelected = 
+                           (selectedConv?.id && Number(selectedConv.id) === Number(c.id)) || 
+                           (selectedConv?.clientId && Number(selectedConv.clientId) === Number(c.clientId));
+                         return {
+                           ...c,
+                           id: c.id || newMsg.conversationId, // Update ID if it was null
+                           lastMessagePreview: newMsg.text,
+                           lastMessageAt: newMsg.createdAt || new Date().toISOString(),
+                           unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1,
+                           status: c.status === 'closed' ? 'open' : c.status
+                         };
+                       }
+                       return c;
+                     }).sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime());
+                   }
+                   
+                   return [newConv, ...current];
+                 });
                }
             }).catch(console.error);
           }
@@ -421,7 +451,7 @@ function MensajeriaContent() {
   };
 
   // Enviar mensaje WhatsApp
-  const handleSendMessage = async (text) => {
+  const handleSendMessage = async (text, file) => {
     if (!selectedConv || !waWindow.open) {
       if (selectedConv && !waWindow.open) {
         showToast("La ventana de 24 horas está cerrada. Usa una plantilla para abrir la conversación.", "warning");
@@ -445,6 +475,25 @@ function MensajeriaContent() {
 
     try {
       setSending(true);
+      
+      let uploadedMediaUrl = null;
+      let uploadedMediaType = null;
+      
+      if (file) {
+        const uploadRes = await mensajeriaService.uploadMedia(file, user?.id_agencia, selectedConv.clientId);
+        if (uploadRes && uploadRes.file && uploadRes.file.path) {
+           uploadedMediaUrl = uploadRes.file.path;
+           
+           if (file.type.startsWith('image/')) uploadedMediaType = 'image';
+           else if (file.type.startsWith('video/')) uploadedMediaType = 'video';
+           else if (file.type.startsWith('audio/')) uploadedMediaType = 'audio';
+           else uploadedMediaType = 'document';
+           
+           payload.mediaUrl = uploadedMediaUrl;
+           payload.mediaType = uploadedMediaType;
+        }
+      }
+
       const res = await mensajeriaService.sendMessage(payload);
       const dt = new Date();
       const msg = {
@@ -455,6 +504,8 @@ function MensajeriaContent() {
         sender: "agent",
         direction: "outbound",
         channel: "whatsapp",
+        media_url: uploadedMediaUrl,
+        media_type: uploadedMediaType
       };
       setMessages((prev) => [...(prev || []), msg]);
       if (res.delivered === false) {
