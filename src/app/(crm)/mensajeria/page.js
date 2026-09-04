@@ -151,7 +151,37 @@ function MensajeriaContent() {
                    lastMessageAt: newMsg.createdAt || new Date().toISOString(),
                    lastMessagePreview: newMsg.text,
                  };
-                 setAllConversations(current => [newConv, ...current]);
+                 setAllConversations(current => {
+                   // Verificar nuevamente si ya existe (para evitar duplicados por asincronía)
+                   const alreadyExists = current.some(c => 
+                     (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+                     (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+                   );
+                   
+                   if (alreadyExists) {
+                     return current.map(c => {
+                       if (
+                         (c.id && Number(c.id) === Number(newMsg.conversationId)) || 
+                         (c.clientId && Number(c.clientId) === Number(newMsg.clientId))
+                       ) {
+                         const isSelected = 
+                           (selectedConv?.id && Number(selectedConv.id) === Number(c.id)) || 
+                           (selectedConv?.clientId && Number(selectedConv.clientId) === Number(c.clientId));
+                         return {
+                           ...c,
+                           id: c.id || newMsg.conversationId, // Update ID if it was null
+                           lastMessagePreview: newMsg.text,
+                           lastMessageAt: newMsg.createdAt || new Date().toISOString(),
+                           unreadCount: isSelected ? 0 : (c.unreadCount || 0) + 1,
+                           status: c.status === 'closed' ? 'open' : c.status
+                         };
+                       }
+                       return c;
+                     }).sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime());
+                   }
+                   
+                   return [newConv, ...current];
+                 });
                }
             }).catch(console.error);
           }
