@@ -13,7 +13,7 @@ export default function StatusBadge({ status }) {
     bg = "rgba(245, 158, 11, 0.1)";
     color = "#f59e0b";
     dotBg = "#f59e0b";
-  } else if (status === "Cerrado") {
+  } else if (status === "Cerrado" || status === "Vencido") {
     bg = "rgba(220, 38, 38, 0.1)";
     color = "#dc2626";
     dotBg = "#dc2626";
@@ -22,17 +22,17 @@ export default function StatusBadge({ status }) {
     color = "#037847";
     dotBg = "#14BA6D";
   } else if (status === "Pendiente") {
-    bg = "rgba(245, 158, 11, 0.1)";
-    color = "#b9861f";
-    dotBg = "#b9861f";
-  } else if (status === "Vencido") {
-    bg = "rgba(175, 35, 58, 0.1)";
-    color = "#af233a";
-    dotBg = "#af233a";
+    bg = "rgba(58, 134, 255, 0.1)";
+    color = "#3A86FF";
+    dotBg = "#3A86FF";
   } else if (status === "Inactivo" || status === "Vigente") {
     bg = "rgba(71, 71, 71, 0.08)";
     color = "#475569";
     dotBg = "#475569";
+  } else if (status === "Próximo a vencer") {
+    bg = "rgba(255, 145, 0, 0.1)";
+    color = "#EF6905";
+    dotBg = "#EF6905";
   }
 
   return (

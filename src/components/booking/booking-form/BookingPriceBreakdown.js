@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useBookingForm } from './BookingFormContext';
 import { calcularResumenServicio, formatMoney } from "@/utils/pricing";
 import dynamic from 'next/dynamic';
 import PaymentsPromisesModal from '@/components/common/PaymentsPromisesModal';
 import { bookingService } from '@/services/booking.service';
 import Link from 'next/link';
+import { configService } from '@/services/config.service';
 
 const PdfViewer = dynamic(
   () => import("@/components/pdf/PdfViewer"),
@@ -19,6 +20,14 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
   const [paymentsPromises, setPaymentsPromises] = useState([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  const [term, setTerm] = useState(null);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+    configService.term()
+      .then((data) => setTerm(data?.terminos_general ?? ""))
+      .catch((err) => console.error("Error al cargar términos:", err));
+  }, [isEditMode]);
 
   const handleOpenPaymentsModal = async () => {
     setShowPaymentsModal(true);
@@ -67,7 +76,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
       <div className='d-flex flex-column gap-2 mb-3'>
         <Link
           href={`/clientes/${vendedor?.value}`}
-          style={{textDecoration: "none"}}
+          style={{ textDecoration: "none" }}
         >
           <p className='mb-0' style={{ color: "var(--brand-blue)", fontWeight: 600 }}>{vendedor?.label || "Selecciona un vendedor"}</p>
         </Link>
@@ -163,7 +172,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
         </button>
       )}
       {isEditMode && (
-        <PdfViewer venta={rawVenta} customer={booking?.customer} />
+        <PdfViewer venta={rawVenta} customer={booking?.customer} terminos={term} />
       )}
 
 

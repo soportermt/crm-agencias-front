@@ -18,9 +18,9 @@ const COLUMNS = [
   { key: "descripcion", label: "Descripción", width: "155px" },
   { key: "tipo_servicio", label: "Servicio", width: "155px" },
   { key: "fecha_limite", label: "Límite pago", width: "155px" },
-  { key: "tarifa_publica", label: "Total Publico", width: "100px" },
-  { key: "fee", label: "Comisión", width: "100px" },
-  { key: "moneda", label: "Moneda", width: "130px" },
+  { key: "tarifa_publica", label: "Total Publico", width: "100px", align: "end" },
+  { key: "fee", label: "Fee", width: "100px", align: "end" },
+  { key: "moneda", label: "Moneda", width: "130px", align: "end" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
 ];
 
@@ -62,7 +62,7 @@ function formatDateRange(inicio, fin) {
   return `${dInicio} a ${dFin}`;
 }
 
-function getEstatusByFechaLimite(fechaLimiteStr) {
+export function getEstatusByFechaLimite(fechaLimiteStr) {
   const fechaLimite = parseLocalDate(fechaLimiteStr);
   if (!fechaLimite) return "Pendiente";
 
@@ -85,7 +85,7 @@ function getEstatusByFechaLimite(fechaLimiteStr) {
 function exportToCSV(data) {
   if (!data.length) return;
 
-  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Comisión", "Moneda", "Estatus"];
+  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Fee", "Moneda", "Estatus"];
 
   const rows = data.map((row) => [
     row.folio,
@@ -128,6 +128,8 @@ export default function IngresosTable({
   data,
   searchValue,
   onSearchChange,
+  statusFilter,
+  onStatusFilterChange,
   currentPage,
   totalPages,
   totalItems,
@@ -169,7 +171,7 @@ export default function IngresosTable({
           <span
             className="font-inter"
             style={{
-              color: estatusCalculado === "Vencido" ? "#af233a" : "#0f1901",
+              color: estatusCalculado === "Vencido" ? "#dc2626" : estatusCalculado === "Próximo a vencer" ? "#EF6905" : "#0f1901",
               fontWeight: estatusCalculado === "Vencido" ? 600 : 400,
             }}
           >
@@ -219,7 +221,7 @@ export default function IngresosTable({
 
   return (
     <div>
-      <div className="d-flex align-items-center gap-2 mb-3">
+      <div className="d-flex align-items-center gap-2 mb-1">
         {[
           { key: "pendientes", label: "Pendientes" },
           { key: "lista", label: "Lista de pagos" },
@@ -231,7 +233,7 @@ export default function IngresosTable({
               onClick={() => onTabChange(tab.key)}
               className={`btn border-0 transition-smooth ${isActive ? "bg-brand-blue-light text-brand-blue" : ""}`}
               style={{
-                padding: "12px 24px",
+                padding: "8px 16px",
                 borderRadius: "24px",
                 fontSize: "14px",
                 color: isActive ? undefined : "rgba(0,0,0,0.4)",
@@ -245,17 +247,15 @@ export default function IngresosTable({
       </div>
 
       <div className="bg-white" style={{ borderRadius: "12px" }}>
-        <div className="px-0 pt-3">
-          <div className="d-flex justify-content-between align-items-start mb-2">
-            <div>
-              <div className="d-flex align-items-center gap-2 mb-1">
-                <h3
-                  className="font-inter fw-medium mb-0"
-                  style={{ fontSize: "18px", color: "#0f1901" }}
-                >
-                  Gestión de pagos
-                </h3>
-              </div>
+        <div className="px-0 pt-1">
+          <div className="d-flex justify-content-between align-items-start mb-1">
+            <div className="d-flex align-items-end gap-2">
+              <h3
+                className="font-inter fw-medium mb-0"
+                style={{ fontSize: "18px", color: "#0f1901" }}
+              >
+                Gestión de pagos
+              </h3>
               <p
                 className="font-inter mb-0"
                 style={{ fontSize: "13px", color: "#a1a1aa" }}
@@ -283,6 +283,17 @@ export default function IngresosTable({
                   className="form-control form-control-sm"
                   autoComplete="off"
                 />
+                <select
+                  className="form-select form-select-sm"
+                  style={{ width: "fit-content", minWidth: "180px" }}
+                  value={statusFilter}
+                  onChange={(e) => onStatusFilterChange(e.target.value)}
+                >
+                  <option value="">Todos los estatus</option>
+                  <option value="Vencido">Vencido</option>
+                  <option value="Próximo a vencer">Próximo a vencer</option>
+                  <option value="Pendiente">Pendiente</option>
+                </select>
               </div>
               <SearchBar
                 value={searchValue}

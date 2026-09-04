@@ -6,7 +6,7 @@ import BookingPdf from "./BookingPdf";
 import { conectividadService } from "@/services/conectividad.service";
 import AlertModal from "@/components/common/AlertModal";
 
-export default function PdfViewer({ venta, customer }) {
+export default function PdfViewer({ venta, customer, terminos }) {
     const [downloading, setDownloading] = useState(false);
     const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
     const [alertData, setAlertData] = useState(null);
@@ -19,7 +19,7 @@ export default function PdfViewer({ venta, customer }) {
 
         try {
             setDownloading(true);
-            const blob = await pdf(<BookingPdf venta={venta} />).toBlob();
+            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos} />).toBlob();
             const url = URL.createObjectURL(blob);
 
             const a = document.createElement("a");
@@ -74,7 +74,7 @@ export default function PdfViewer({ venta, customer }) {
             setSendingWhatsapp(true);
 
             // 1. Generar el Blob del PDF directamente desde el componente existente
-            const blob = await pdf(<BookingPdf venta={venta} />).toBlob();
+            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos}/>).toBlob();
             const fileName = `Reserva-${venta.folio || "comprobante"}.pdf`;
 
             // 2. Preparar el FormData para el microservicio de conectividad (Node.js)

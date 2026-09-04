@@ -49,7 +49,7 @@ export default function BookingForm({ mode }) {
             onChange={(date) => updateBooking("fecha", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control"
+            className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             autoComplete='off'
           />
@@ -64,7 +64,7 @@ export default function BookingForm({ mode }) {
             onChange={(date) => updateBooking("limiteCancelacion", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control"
+            className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             autoComplete='off'
           />

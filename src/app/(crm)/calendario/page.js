@@ -22,20 +22,19 @@ const TYPE_COLORS = {
     'Hospedaje': '#2563eb',
     'Traslado': '#ea580c',
     'Circuitos': '#059669',
-    'Vuelo': '#7c3aed',
 };
 
-function mapTipoServicioToBadge(tipoServicio) {
-    const tipo = (tipoServicio || '').toLowerCase();
-    if (tipo.includes('hotel') || tipo.includes('hosped')) return 'hotel';
-    if (tipo.includes('vuelo') || tipo.includes('aereo')) return 'vuelo';
-    if (tipo.includes('tour') || tipo.includes('excursion')) return 'tour';
-    return 'operador';
+function formatLimitDate(dateStr) {
+    if (!dateStr || dateStr === '0000-00-00' || dateStr === '0000-00-00 00:00:00') return 'Sin definir';
+    const [year, month, day] = dateStr.split(' ')[0].split('-').map(Number);
+    return format(new Date(year, month - 1, day), 'dd/MM/yyyy', { locale: es });
 }
 
 export default function Calendario({ onDayClick, alertMessage }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(null);
+
+    const [hoveredEvent, setHoveredEvent] = useState(null);
 
     const [events, setEvents] = useState({});
     const [loading, setLoading] = useState(false);
@@ -124,71 +123,95 @@ export default function Calendario({ onDayClick, alertMessage }) {
                         ›
                     </button>
                 </div>
+
+                <div style={styles.legend}>
+                    {Object.entries(TYPE_COLORS).map(([tipo, color]) => (
+                        <div key={tipo} style={styles.legendItem}>
+                            <span style={{ ...styles.legendDot, background: color }} />
+                            <span style={styles.legendLabel}>{tipo}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div style={{ position: 'relative' }}>
                 {loading && <div style={styles.loadingOverlay}>Cargando…</div>}
+                <div style={styles.gridScroll}>
+                    <div style={styles.grid}>
+                        {weekdayLabels.map((label) => (
+                            <div key={label} style={styles.weekdayCell}>
+                                {label}
+                            </div>
+                        ))}
 
-                <div style={styles.grid}>
-                    {weekdayLabels.map((label) => (
-                        <div key={label} style={styles.weekdayCell}>
-                            {label}
-                        </div>
-                    ))}
+                        {days.map((day) => {
+                            const inMonth = isSameMonth(day, currentMonth);
+                            const dayEvents = getEventsForDay(day);
+                            const selected = selectedDay && isSameDay(day, selectedDay);
 
-                    {days.map((day) => {
-                        const inMonth = isSameMonth(day, currentMonth);
-                        const dayEvents = getEventsForDay(day);
-                        const selected = selectedDay && isSameDay(day, selectedDay);
-
-                        return (
-                            <button
-                                key={day.toISOString()}
-                                onClick={() => handleDayClick(day)}
-                                style={{
-                                    ...styles.dayCell,
-                                    ...(inMonth ? {} : styles.dayCellOutside),
-                                    ...(isToday(day) && inMonth ? styles.dayCellToday : {}),
-                                    ...(selected ? styles.dayCellSelected : {}),
-                                }}
-                            >
-                                <span
+                            return (
+                                <button
+                                    key={day.toISOString()}
+                                    onClick={() => handleDayClick(day)}
                                     style={{
-                                        ...styles.dayNumber,
-                                        ...(inMonth ? {} : styles.dayNumberOutside),
+                                        ...styles.dayCell,
+                                        ...(inMonth ? {} : styles.dayCellOutside),
+                                        ...(isToday(day) && inMonth ? styles.dayCellToday : {}),
+                                        ...(selected ? styles.dayCellSelected : {}),
                                     }}
                                 >
-                                    {format(day, 'd')}
-                                </span>
+                                    <span
+                                        style={{
+                                            ...styles.dayNumber,
+                                            ...(inMonth ? {} : styles.dayNumberOutside),
+                                        }}
+                                    >
+                                        {format(day, 'd')}
+                                    </span>
 
-                                <div style={styles.eventList}>
-                                    {dayEvents.slice(0, 3).map((ev) => (
-                                        <Link key={ev.id} href={`/reservaciones/editar/${ev.id_venta}`} target="_blank" style={{textDecoration: "none"}}>
+                                    <div style={styles.eventList}>
+                                        {dayEvents.slice(0, 3).map((ev) => (
                                             <div
-                                                title={ev.label}
-                                                style={{
-                                                    ...styles.eventBadge,
-                                                    background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
-                                                    color: TYPE_COLORS[ev.type] || '#374151',
-                                                }}
+                                                key={ev.id}
+                                                style={styles.eventWrapper}
+                                                onMouseEnter={() => setHoveredEvent(ev.id)}
+                                                onMouseLeave={() => setHoveredEvent(null)}
                                             >
-                                                <span
-                                                    style={{
-                                                        ...styles.eventDot,
-                                                        background: TYPE_COLORS[ev.type] || '#6b7280',
-                                                    }}
-                                                />
-                                                {ev.label}
+                                                <Link href={`/reservaciones/editar/${ev.id_venta}`} target="_blank" style={{ textDecoration: "none" }}>
+                                                    <div
+                                                        style={{
+                                                            ...styles.eventBadge,
+                                                            background: `${TYPE_COLORS[ev.type] || '#6b7280'}1a`,
+                                                            color: TYPE_COLORS[ev.type] || '#374151',
+                                                        }}
+                                                    >
+                                                        {ev.label}
+                                                    </div>
+                                                </Link>
+
+                                                {hoveredEvent === ev.id && (
+                                                    <div style={styles.tooltip}>
+                                                        <div style={styles.tooltipTitle}>{ev.label}</div>
+                                                        <div style={styles.tooltipRow}>
+                                                            <span style={styles.tooltipLabel}>Límite cliente:</span>
+                                                            <span>{formatLimitDate(ev.lim_pago_cliente)}</span>
+                                                        </div>
+                                                        <div style={styles.tooltipRow}>
+                                                            <span style={styles.tooltipLabel}>Límite pago:</span>
+                                                            <span>{formatLimitDate(ev.lim_pago)}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </Link>
-                                    ))}
-                                    {dayEvents.length > 3 && (
-                                        <div style={styles.moreLabel}>+{dayEvents.length - 3} más</div>
-                                    )}
-                                </div>
-                            </button>
-                        );
-                    })}
+                                        ))}
+                                        {dayEvents.length > 3 && (
+                                            <div style={styles.moreLabel}>+{dayEvents.length - 3} más</div>
+                                        )}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
@@ -201,11 +224,11 @@ const styles = {
         borderRadius: 12,
         padding: 24,
         boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-        maxWidth: 1200,
+        maxWidth: 1300,
         margin: '0 auto',
         fontFamily: 'inherit',
     },
-    title: { margin: '0 0 16px', fontSize: 22, fontWeight: 600, color: '#111827' },
+    title: { margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: '#111827' },
     errorBanner: {
         background: '#fee2e2',
         border: '1px solid #fecaca',
@@ -232,7 +255,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 8,
         flexWrap: 'wrap',
         gap: 12,
     },
@@ -246,7 +269,7 @@ const styles = {
         padding: '2px 6px',
         borderRadius: 6,
     },
-    monthLabel: { fontSize: 16, fontWeight: 600, color: '#111827', minWidth: 130, textAlign: 'center' },
+    monthLabel: { fontSize: 16, fontWeight: 600, color: 'rgb(29, 78, 216)', minWidth: 130, textAlign: 'center' },
     viewSwitch: { display: 'flex', background: '#f3f4f6', borderRadius: 8, padding: 3, gap: 2 },
     viewBtn: {
         border: 'none',
@@ -269,13 +292,6 @@ const styles = {
         color: '#4b5563',
         zIndex: 1,
         borderRadius: 8,
-    },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        overflow: 'hidden',
     },
     weekdayCell: {
         background: '#1d4ed8',
@@ -301,7 +317,7 @@ const styles = {
     dayCellSelected: { outline: '2px solid #1d4ed8', outlineOffset: -2 },
     dayNumber: { fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 6 },
     dayNumberOutside: { color: '#9ca3af' },
-    eventList: { display: 'flex', flexDirection: 'column', gap: 3, width: '100%' },
+    eventList: { display: 'flex', flexDirection: 'column', gap: 3, width: '100%', minWidth: 0 },
     eventBadge: {
         display: 'flex',
         alignItems: 'center',
@@ -312,7 +328,78 @@ const styles = {
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
     },
     eventDot: { width: 6, height: 6, borderRadius: '50%', flexShrink: 0 },
     moreLabel: { fontSize: 10, color: '#6b7280', paddingLeft: 5 },
+    legend: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        flexWrap: 'wrap',
+    },
+    legendItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+    },
+    legendDot: {
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        flexShrink: 0,
+    },
+    legendLabel: {
+        fontSize: 12,
+        color: '#4b5563',
+        fontWeight: 500,
+    },
+    gridScroll: {
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+        border: '1px solid #e5e7eb',
+        borderRadius: 8,
+        overflow: 'hidden',
+        minWidth: 700,
+    },
+    eventWrapper: {
+        position: 'relative',
+        width: '100%',
+    },
+    tooltip: {
+        position: 'absolute',
+        bottom: '100%',
+        left: 0,
+        marginBottom: 6,
+        background: '#111827',
+        color: '#fff',
+        borderRadius: 8,
+        padding: '8px 10px',
+        fontSize: 11,
+        lineHeight: 1.5,
+        whiteSpace: 'nowrap',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+        zIndex: 20,
+        pointerEvents: 'none',
+    },
+    tooltipTitle: {
+        fontWeight: 600,
+        marginBottom: 4,
+        maxWidth: 220,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
+    tooltipRow: {
+        display: 'flex',
+        gap: 6,
+    },
+    tooltipLabel: {
+        color: '#9ca3af',
+    },
 };

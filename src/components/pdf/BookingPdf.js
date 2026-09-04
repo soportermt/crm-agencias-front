@@ -5,8 +5,6 @@ import {
     View,
     StyleSheet,
     Image,
-    Svg,
-    Path,
 } from "@react-pdf/renderer";
 import "./fonts";
 
@@ -70,6 +68,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         marginBottom: 10,
         gap: 32
     },
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
         fontSize: 8,
         color: "rgba(0, 0, 0, 0.4)",
         textAlign: "center",
-        marginTop: 16
+        marginTop: 8
     },
     footer: {
         position: "absolute",
@@ -169,12 +168,13 @@ const styles = StyleSheet.create({
     agency: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         color: "rgba(64, 64, 64, 0.8)",
         fontWeight: 500
     },
     agencyFooter: {
-        width: 150,
-        height: 40
+        width: 100,
+        height: 80
     },
     agencyInfo: {
         flexDirection: "row",
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     },
     agencyContainer: {
         flexDirection: "column",
-        gap: 3
+        gap: 3,
     }
 });
 
@@ -223,7 +223,7 @@ function formatShortDate(date) {
         .replace(".", "");
 }
 
-export default function BookingPdf({ venta }) {
+export default function BookingPdf({ venta, terminos }) {
     const servicios = (venta.ventasServicioses || []).map((s) => ({
         ...s,
         desglose: parseDesglose(s),
@@ -239,7 +239,7 @@ export default function BookingPdf({ venta }) {
                 <View style={styles.headerContent}>
                     <View style={styles.agencyHeader}>
                         <Text style={styles.agencyName}>
-                            Demo Travel
+                            {venta.idAgencia.nombre_comercial}
                         </Text>
 
                         <Text style={styles.agencyDate}>
@@ -620,7 +620,7 @@ export default function BookingPdf({ venta }) {
                     <View style={styles.row}>
                         <View style={{ width: "100%" }}>
                             <Text style={styles.titleData}>Términos y condiciones</Text>
-                            <Text style={{ fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)" }}>Nuestros términos...</Text>
+                            <Text style={{ fontSize: 8, fontStyle: "italic", fontWeight: 400, color: "rgba(64, 64, 64, 0.8)" }}>{terminos}</Text>
                         </View>
                     </View>
                 </View>
@@ -631,18 +631,22 @@ export default function BookingPdf({ venta }) {
                         <View style={styles.agencyContainer}>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/location.png" style={styles.agencyIcon} />
-                                <Text>Calle 3 # 236 depto. 1 entre 20 y 22 Col. García Ginerés</Text></View>
+                                <Text>{venta.idAgencia.direccion}</Text></View>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/email.png" style={styles.agencyIcon} />
-                                <Text>soporte@2businesstravel.com</Text>
+                                <Text>{venta.idAgencia.correo}</Text>
                             </View>
                             <View style={styles.agencyInfo}>
                                 <Image src="/pdf/phone-call.png" style={styles.agencyIcon} />
-                                <Text>(999) 636-8720</Text>
+                                <Text>{venta.idAgencia.telefono}</Text>
                             </View>
                         </View>
                         <Image
-                            src="https://dummyimage.com/150x40/e8e8e8/ffffff"
+                            src={
+                                venta.idAgencia.logotipo
+                                    ? `https://crm.2businesstravel.com/admin/images/agencia/${venta.idAgencia.logotipo}`
+                                    : "/pdf/logo-placeholder.png"
+                            }
                             style={styles.agencyFooter}
                         />
                     </View>

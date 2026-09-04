@@ -9,11 +9,14 @@ import "react-datepicker/dist/react-datepicker.css";
 import PassengersInput from "@/components/common/PassengersInput";
 import { calcularTotalNeto, formatMoney } from "@/utils/pricing";
 import { cleanDecimalInput } from "@/utils/inputFormatters";
+import { useState } from "react";
 
 registerLocale("es", es);
 export default function HospedajeForm() {
   const { draft, updateDraftField } = useBookingForm();
   const { data, errors } = draft;
+
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const addPasajero = () =>
     updateDraftField("habitaciones", [
@@ -129,10 +132,17 @@ export default function HospedajeForm() {
             selectsRange
             startDate={data.checkIn}
             endDate={data.checkOut}
+            open={datePickerOpen}
+            onInputClick={() => setDatePickerOpen(true)}
+            onClickOutside={() => setDatePickerOpen(false)}
             onChange={(dates) => {
               const [start, end] = dates;
               updateDraftField("checkIn", start);
               updateDraftField("checkOut", end);
+
+              if (start && end) {
+                setDatePickerOpen(false); 
+              }
             }}
             locale="es"
             dateFormat="dd/MM/yyyy"
@@ -140,10 +150,10 @@ export default function HospedajeForm() {
             monthsShown={2}
             shouldCloseOnSelect={false}
             isClearable
-            className="form-control"
+            className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             required
-            autoComplete='off'
+            autoComplete='off' 
           />
         </div>
         <div className="col-12 col-md-4">
@@ -192,9 +202,9 @@ export default function HospedajeForm() {
                 onChange={(e) => updateRoom(i, "tipo_cama", e.target.value)}
               >
                 <option value="" disabled>-- Seleccione --</option>
-                <option value="matrimoniales">2 matrimoniales</option>
-                <option value="king">King</option>
-                <option value="queen">Queen</option>
+                <option value="Matrimonial(es)">Matrimonial(es)</option>
+                <option value="King">King</option>
+                <option value="Queen">Queen</option>
               </select>
             </div>
             <div className="col-12 col-md-4">
@@ -309,7 +319,7 @@ export default function HospedajeForm() {
             onChange={(date) => updateDraftField("limitePago", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control"
+            className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             required
             autoComplete='off'
@@ -323,7 +333,7 @@ export default function HospedajeForm() {
             onChange={(date) => updateDraftField("limiteCliente", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control"
+            className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             autoComplete='off'
           />

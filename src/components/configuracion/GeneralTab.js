@@ -1,7 +1,7 @@
 "use client";
 
 import { configService } from "@/services/config.service";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function GeneralTab() {
   const [agencia, setAgencia] = useState(null);
@@ -9,6 +9,10 @@ export default function GeneralTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     async function loadAgencia() {
@@ -36,6 +40,10 @@ export default function GeneralTab() {
   function handleFileChange(e) {
     if (e.target.files && e.target.files[0]) {
       setLogoFile(e.target.files[0]);
+
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
     }
   }
 
@@ -151,6 +159,33 @@ export default function GeneralTab() {
               value={agencia.sitio_web ?? ""}
               onChange={(e) => handleChange("sitio_web", e.target.value)}
             />
+          </div>
+
+          <div className="col-12 col-md-6 mt-1">
+            <label className="form-label">Logotipo</label>
+            <div className="d-flex flex-column flex-sm-row align-items-center gap-2 border rounded-3 p-1 w-100" style={{ borderColor: "rgba(161, 161, 170, 0.35)" }}>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept="image/png, image/jpeg, image/jpg" />
+              <button
+                className="btn btn-sm flex-shrink-0"
+                style={{ backgroundColor: "#e7f1fe", color: "#0c5cc6", fontWeight: "500", borderRadius: "6px", fontSize: "12px", width: "100%", maxWidth: "150px" }}
+                onClick={() => fileInputRef.current.click()}
+              >
+                Seleccionar archivo
+              </button>
+              <span className="text-secondary font-poppins text-truncate pe-2 text-center text-sm-start" style={{ fontSize: "12px", maxWidth: "100%" }}>
+                {selectedFile ? selectedFile.name : "Ningún archivo seleccionado"}
+              </span>
+            </div>
+            {preview ? (
+              <img src={preview} alt="Preview logotipo" style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }} />
+            ) : agencia.logotipo ? (
+              <img
+                src={`https://crm.2businesstravel.com/admin/images/agencia/${agencia.logotipo}`}
+                alt="Logotipo actual"
+                style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }}
+              />
+            ) : null}
+            <span className="text-muted font-poppins" style={{ fontSize: "11px" }}>Tipo de archivos permitidos: jpg, png, jpeg.</span>
           </div>
         </div>
 
