@@ -84,7 +84,7 @@ export default function PdfViewer({ venta, customer, terminos }) {
             if (clientId) formData.append("clientId", String(clientId));
             if (phone) formData.append("toPhone", String(phone));
             formData.append("clientName", clientName);
-            formData.append("templateName", "comprobante_reserva");
+            formData.append("templateName", "prueba_envio_docs");
             formData.append(
                 "parameters",
                 JSON.stringify([clientName, `#${venta.folio || ""}`])

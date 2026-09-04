@@ -376,7 +376,33 @@ export default function ChatPanel({
                       )}
                       <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
                         <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
-                          <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                          {msg.text && msg.text.startsWith('[Comprobante WhatsApp:') ? (
+                            <div className="d-flex flex-column gap-1">
+                              <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
+                                <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "24px", color: isAgent ? "#fff" : "#dc3545" }}></i>
+                                <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+                                  Documento PDF Enviado
+                                </span>
+                              </div>
+                              <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
+                                {msg.text.replace(/\[Comprobante WhatsApp:.*?\]\s*/, '')}
+                              </span>
+                            </div>
+                          ) : msg.text && msg.text.startsWith('[Plantilla:') ? (
+                            <div className="d-flex flex-column gap-1">
+                              <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
+                                <i className="bi bi-layout-text-window" style={{ fontSize: "20px", color: isAgent ? "#fff" : "#0c5cc6" }}></i>
+                                <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+                                  Plantilla Enviada
+                                </span>
+                              </div>
+                              <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
+                                {msg.text.replace(/\[Plantilla:.*?\]\s*/, '')}
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                          )}
                         <div
                           className="d-flex align-items-center justify-content-end gap-1 mt-1"
                           style={{
