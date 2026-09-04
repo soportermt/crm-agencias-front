@@ -451,8 +451,8 @@ function MensajeriaContent() {
       
       if (file) {
         const uploadRes = await mensajeriaService.uploadMedia(file);
-        if (uploadRes && uploadRes.url) {
-           uploadedMediaUrl = uploadRes.url;
+        if (uploadRes && uploadRes.file && uploadRes.file.path) {
+           uploadedMediaUrl = uploadRes.file.path;
            
            if (file.type.startsWith('image/')) uploadedMediaType = 'image';
            else if (file.type.startsWith('video/')) uploadedMediaType = 'video';
