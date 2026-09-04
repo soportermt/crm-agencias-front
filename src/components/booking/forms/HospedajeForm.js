@@ -157,7 +157,7 @@ export default function HospedajeForm() {
           />
         </div>
         <div className="col-12 col-md-4">
-          <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#619E05", borderColor: "#619E05" }}>
+          <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#75BF06", borderColor: "#75BF06" }}>
             + Habitación
           </button>
         </div>
@@ -302,7 +302,7 @@ export default function HospedajeForm() {
           ))}
           <div className="row mb-2 justify-content-end align-items-center">
             <div className="col-12 col-md-4 text-end m-0">
-              <button type="button" className="btn btn-outline-primary" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>
+              <button type="button" className="btn btn-outline-danger" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>
                 Eliminar habitación
               </button>
             </div>

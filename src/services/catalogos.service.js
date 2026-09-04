@@ -2,7 +2,7 @@ import api from "@/lib/axios";
 
 export const catalogosService = {
     async searchHoteles(search) {
-        const { data } = await api.get("/reservas/searchHotel.html", {
+        const { data } = await api.get("/reservas/searchHotel", {
             params: {
                 q: search,
             },
@@ -12,18 +12,18 @@ export const catalogosService = {
     },
 
     async searchCustomers() {
-        const { data } = await api.get("/reservas/searchCustomers.html");
+        const { data } = await api.get("/reservas/searchCustomers");
         return data;
     },
 
     async searchProviders() {
-        const { data } = await api.get("/reservas/getProviders.html", {
+        const { data } = await api.get("/reservas/getProviders", {
         });
 
         return data;
     },
     async agencias() {
-        const { data } = await api.get("/agencia/get.html", {
+        const { data } = await api.get("/agencia/get", {
         });
 
         return data;
@@ -35,14 +35,14 @@ export const catalogosService = {
         return data;
     },
     // async roles() {
-    //     const { data } = await api.get("/reservas/getProviders.html", {
+    //     const { data } = await api.get("/reservas/getProviders", {
     //     });
 
     //     return data;
     // },
 
     async createProveedor(proveedorData) {
-        const { data } = await api.post("/proveedores/createApi/.html", proveedorData, {
+        const { data } = await api.post("/proveedores/createApi/", proveedorData, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -50,5 +50,19 @@ export const catalogosService = {
         });
         return data;
     },
+    async updateProveedor(proveedorData) {
+        const { data } = await api.post("/proveedores/updateApi/", proveedorData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
+    async searchProvidersP() {
+        const { data } = await api.get("/proveedores/getProviders", {
+        });
 
+        return data;
+    },
 };

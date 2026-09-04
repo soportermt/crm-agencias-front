@@ -49,8 +49,8 @@ export default function Services({ mode }) {
           <FormComponent />
           <div className="row justify-content-end">
             <div className="col-md-4">
-              <button type="button" onClick={confirmDraft} className="btn btn-primary w-100" style={{ backgroundColor: "var(--brand-blue)" }}>
-                Confirmar
+              <button type="button" onClick={confirmDraft} className="btn btn-primary w-100" style={{backgroundColor: "#7C3AED", borderColor: "#7C3AED"}}>
+                Agregar servicio
               </button>
             </div>
           </div>
