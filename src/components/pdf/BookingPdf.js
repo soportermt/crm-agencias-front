@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         marginBottom: 10,
         gap: 32
     },
@@ -167,12 +168,13 @@ const styles = StyleSheet.create({
     agency: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         color: "rgba(64, 64, 64, 0.8)",
         fontWeight: 500
     },
     agencyFooter: {
-        width: 150,
-        height: 40
+        width: 100,
+        height: 80
     },
     agencyInfo: {
         flexDirection: "row",
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
     },
     agencyContainer: {
         flexDirection: "column",
-        gap: 3
+        gap: 3,
     }
 });
 
@@ -640,7 +642,11 @@ export default function BookingPdf({ venta, terminos }) {
                             </View>
                         </View>
                         <Image
-                            src="https://dummyimage.com/150x40/e8e8e8/ffffff"
+                            src={
+                                venta.idAgencia.logotipo
+                                    ? `https://crm.2businesstravel.com/admin/images/agencia/${venta.idAgencia.logotipo}`
+                                    : "/pdf/logo-placeholder.png"
+                            }
                             style={styles.agencyFooter}
                         />
                     </View>
