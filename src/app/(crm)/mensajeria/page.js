@@ -9,6 +9,7 @@ import ConversationList from "@/components/mensajeria/ConversationList";
 import ChatPanel from "@/components/mensajeria/ChatPanel";
 import ClientContactsList from "@/components/mensajeria/ClientContactsList";
 import ClientInfoPanel from "@/components/mensajeria/ClientInfoPanel";
+import EmailPanel from "@/components/mensajeria/EmailPanel";
 import EmailComposerModal from "@/components/mensajeria/EmailComposerModal";
 import NewWhatsAppConversationModal from "@/components/mensajeria/NewWhatsAppConversationModal";
 import { WA_STATUS } from "@/components/mensajeria/utils";
@@ -60,10 +61,41 @@ function MensajeriaContent() {
   const [isSearchingGlobal, setIsSearchingGlobal] = useState(false);
   const [error, setError] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [initialEmailSubject, setInitialEmailSubject] = useState("");
+  const [syncingEmails, setSyncingEmails] = useState(false);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
   const socket = useSocket();
+
+  // Cargar contactos con correos
+  const loadEmailContacts = useCallback(async () => {
+    try {
+      setLoadingList(true);
+      const threads = await mensajeriaService.getEmailThreads();
+      const grouped = (threads || []).map((t) => ({
+        clientId: t.clientId ?? t.client_id,
+        name: t.clientName || t.client_name || "Cliente",
+        email: t.clientEmail || t.client_email || "",
+        unreadCount: t.unreadCount ?? t.unread_count ?? 0,
+        emails: (t.lastSubject || t.lastPreview) ? [{
+          subject: t.lastSubject || "Sin asunto",
+          date: t.lastEmailAt,
+          preview: t.lastPreview || "",
+        }] : [],
+      }));
+      setContacts(grouped);
+    } catch (err) {
+      console.error("Error al cargar contactos:", err);
+      setContacts([]);
+    } finally {
+      setLoadingList(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEmailContacts();
+  }, [loadEmailContacts]);
 
   useEffect(() => {
     if (!socket) return;
@@ -190,12 +222,25 @@ function MensajeriaContent() {
       });
     };
 
+    const handleNewEmail = (newEmail) => {
+      console.log("WebSocket [new_email] recibido:", newEmail);
+      if (selectedContact && Number(selectedContact.clientId) === Number(newEmail.clientId)) {
+        setEmails((prev) => {
+          if (prev.some((e) => Number(e.id) === Number(newEmail.id))) return prev;
+          return [newEmail, ...prev];
+        });
+      }
+      loadEmailContacts();
+    };
+
     socket.on('new_message', handleNewMessage);
+    socket.on('new_email', handleNewEmail);
 
     return () => {
       socket.off('new_message', handleNewMessage);
+      socket.off('new_email', handleNewEmail);
     };
-  }, [socket, selectedConv]);
+  }, [socket, selectedConv, selectedContact, loadEmailContacts]);
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
@@ -273,28 +318,35 @@ function MensajeriaContent() {
     }
   };
 
-  // Cargar contactos con correos
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoadingList(true);
-        const threads = await mensajeriaService.getEmailThreads();
-        const grouped = (threads || []).map((t) => ({
-          clientId: t.clientId ?? t.client_id,
-          name: t.clientName || t.client_name || "Cliente",
-          email: t.clientEmail || t.client_email || "",
-          emails: [],
-        }));
-        setContacts(grouped);
-      } catch (err) {
-        console.error("Error al cargar contactos:", err);
-        setContacts([]);
-      } finally {
-        setLoadingList(false);
+  // Forzar sincronización manual de correos
+  const handleSyncEmails = async () => {
+    if (syncingEmails) return;
+    try {
+      setSyncingEmails(true);
+      const res = await mensajeriaService.syncEmails();
+      const syncedCount = res?.synced ?? 0;
+      showToast(
+        syncedCount > 0
+          ? `Sincronización completada. Se obtuvieron ${syncedCount} correos nuevos.`
+          : "Sincronización completada. No hay correos nuevos.",
+        "success"
+      );
+      await loadEmailContacts();
+      if (selectedContact) {
+        await loadContactEmails(selectedContact);
       }
+    } catch (err) {
+      console.error("Error al sincronizar correos:", err);
+      showToast("No se pudo conectar al servidor de correos. Revisa tu configuración.", "error");
+    } finally {
+      setSyncingEmails(false);
     }
-    load();
-  }, []);
+  };
+
+  const handleComposeEmail = (subject = "") => {
+    setInitialEmailSubject(subject);
+    setShowEmailModal(true);
+  };
 
   // Cargar mensajes del chat WhatsApp
   const loadSelectedConversation = useCallback(async (conv) => {
@@ -532,8 +584,13 @@ function MensajeriaContent() {
   };
 
   // Enviar correo
-  const handleSendEmail = async ({ subject, body }) => {
-    if (!selectedContact?.clientId || !clientInfo?.correo) return;
+  const handleSendEmail = async ({ subject, body, html }) => {
+    if (!selectedContact?.clientId) return;
+    const targetEmail = clientInfo?.correo || clientInfo?.email || selectedContact.email;
+    if (!targetEmail) {
+      showToast("El cliente no tiene una dirección de correo válida.", "error");
+      return;
+    }
     let user = null;
     try {
       user = authService.getUser();
@@ -544,22 +601,17 @@ function MensajeriaContent() {
       setSending(true);
       await mensajeriaService.sendEmail({
         account_id: user?.id_cuenta_email || 0,
-        to: clientInfo.correo,
+        to: targetEmail,
         subject,
         body,
+        html: html || body,
       });
       setShowEmailModal(false);
-      showToast("Correo enviado");
+      setInitialEmailSubject("");
+      showToast("Correo enviado con éxito");
       const data = await mensajeriaService.getClientEmails(selectedContact.clientId);
-       setEmails(data || []);
-       // Actualizar preview en la lista de contactos
-       setContacts((prev) =>
-        prev.map((c) =>
-          c.clientId === selectedContact.clientId
-            ? { ...c, email: clientInfo.correo, emails: [{ subject, date: new Date().toISOString() }] }
-            : c
-        )
-      );
+      setEmails(data || []);
+      loadEmailContacts();
     } catch (err) {
       console.error("Error al enviar correo:", err);
       showToast("No se pudo enviar el correo. Revisa la configuración de SMTP.", "error");
@@ -569,9 +621,69 @@ function MensajeriaContent() {
     }
   };
 
-  // Abrir conversación WhatsApp (por ahora sin funcionalidad real)
-  const handleOpenConversation = () => {
-    showToast("La apertura de conversaciones estará disponible próximamente.", "warning");
+  // Abrir conversación WhatsApp
+  const handleOpenConversation = async (contact, template, paramsOrManual = []) => {
+    try {
+      setSending(true);
+      
+      let parameters = [];
+      if (Array.isArray(paramsOrManual)) {
+        parameters = paramsOrManual;
+      } else if (template?.variables_mapping) {
+        let mapping = template.variables_mapping;
+        if (typeof mapping === "string") {
+          try { mapping = JSON.parse(mapping); } catch { mapping = []; }
+        }
+        if (Array.isArray(mapping)) {
+          parameters = mapping.map(m => {
+            if (m.source === "client_name") return contact.name || "";
+            if (m.source === "client_phone") return contact.phone || "";
+            if (m.source === "client_email") return contact.mail || "";
+            return paramsOrManual[m.variable] || "";
+          });
+        }
+      }
+
+      let user = null;
+      try {
+        user = authService.getUser();
+      } catch (e) {
+        user = null;
+      }
+
+      const payload = {
+        agenciaId: user?.id_agencia || undefined,
+        userId: user?.id || undefined,
+        clientId: contact?.id,
+        templateId: template?.id,
+        templateName: template.name,
+        language: template.language || "es_MX",
+        toPhone: contact.phone,
+        parameters: parameters,
+      };
+
+      const res = await mensajeriaService.sendTemplate(payload);
+      showToast("Conversación iniciada y plantilla enviada con éxito");
+
+      await loadConversations();
+
+      if (res?.conversationId) {
+        handleSelectConversation({
+          id: res.conversationId,
+          clientId: contact.id,
+          clientName: contact.name,
+          clientPhone: contact.phone,
+          clientEmail: contact.mail,
+          channel: "whatsapp",
+          status: "open",
+        });
+      }
+    } catch (err) {
+      console.error("Error al enviar plantilla:", err);
+      showToast("Error al abrir conversación (plantilla no enviada).", "error");
+    } finally {
+      setSending(false);
+    }
   };
 
   // Cambiar estado de conversación WhatsApp
@@ -712,8 +824,10 @@ function MensajeriaContent() {
                 clientInfo={clientInfo}
                 emails={emails}
                 loadingEmails={loadingMessages}
-                onComposeEmail={() => setShowEmailModal(true)}
+                onComposeEmail={handleComposeEmail}
                 onClose={handleCloseContact}
+                onSyncEmails={handleSyncEmails}
+                syncingEmails={syncingEmails}
               />
             )}
           </div>
@@ -742,16 +856,21 @@ function MensajeriaContent() {
 
       <EmailComposerModal
         show={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        clientInfo={clientInfo}
+        onClose={() => {
+          setShowEmailModal(false);
+          setInitialEmailSubject("");
+        }}
+        clientInfo={clientInfo || selectedContact}
         onSend={handleSendEmail}
         sending={sending}
+        initialSubject={initialEmailSubject}
       />
 
       <NewWhatsAppConversationModal
         show={showNewConversationModal}
         onClose={() => setShowNewConversationModal(false)}
         onSendTemplate={handleOpenConversation}
+        initialContact={selectedConv || selectedContact || clientInfo}
       />
 
       {toast && (
@@ -775,126 +894,5 @@ export default function MensajeriaPage() {
     <Suspense fallback={<div className="container-fluid p-0 d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}><div className="spinner-border text-primary" role="status"></div></div>}>
       <MensajeriaContent />
     </Suspense>
-  );
-}
-
-// Panel de correos: historial de emails enviados y recibidos con el contacto
-function EmailPanel({ contact, clientInfo, emails, loadingEmails, onComposeEmail, onClose }) {
-  if (!contact) {
-    return (
-      <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-white" style={{ borderRadius: "12px" }}>
-        <i className="bi bi-envelope-paper text-secondary" style={{ fontSize: "44px", color: "#cbd5e1" }}></i>
-        <p className="mt-3 mb-1 fw-medium" style={{ color: "#0f1901", fontSize: "14px" }}>
-          Selecciona un contacto
-        </p>
-        <p className="small mb-0" style={{ color: "var(--grey-text)" }}>
-          Elige un cliente para ver sus correos enviados y recibidos
-        </p>
-      </div>
-    );
-  }
-
-  const name = clientInfo?.nombreCompleto || clientInfo?.name || contact.name || "Cliente";
-  const email = clientInfo?.correo || contact.email || "";
-
-  return (
-    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "12px", overflow: "hidden" }}>
-      {/* Header */}
-      <div className="d-flex align-items-center gap-2 px-3 py-2 border-bottom" style={{ borderColor: "#f0f0f0", minHeight: "64px" }}>
-        <div
-          className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-          style={{ width: "38px", height: "38px", backgroundColor: "#e7f1fe", color: "#0c5cc6", fontSize: "13px" }}
-        >
-          {name.substring(0, 2).toUpperCase()}
-        </div>
-        <div className="flex-grow-1 overflow-hidden">
-          <span className="fw-semibold text-truncate d-block" style={{ color: "#0f1901", fontSize: "14px" }}>
-            {name}
-          </span>
-          <span className="text-truncate d-block small" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
-            {email}
-          </span>
-        </div>
-        <button
-          onClick={onComposeEmail}
-          className="btn btn-bg-style d-flex align-items-center gap-1 flex-shrink-0 fw-medium"
-          style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "8px" }}
-          disabled={!email}
-        >
-          <i className="bi bi-envelope-plus" style={{ fontSize: "13px" }}></i>
-          Redactar
-        </button>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-bg-style d-flex align-items-center justify-content-center flex-shrink-0"
-            style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px", color: "var(--grey-text)" }}
-            title="Cerrar panel de correos"
-          >
-            <i className="bi bi-x-lg" style={{ fontSize: "13px" }}></i>
-          </button>
-        )}
-      </div>
-
-      {/* Lista de correos */}
-      <div className="flex-grow-1 overflow-y-auto p-2">
-        {loadingEmails ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status" style={{ width: "22px", height: "22px" }}></div>
-          </div>
-        ) : emails.length === 0 ? (
-          <div className="text-center py-5">
-            <i className="bi bi-envelope-dash text-secondary" style={{ fontSize: "30px", color: "#cbd5e1" }}></i>
-            <p className="small mt-2 mb-0" style={{ color: "var(--grey-text)" }}>
-              Sin correos con este contacto
-            </p>
-          </div>
-        ) : (
-          <div className="d-flex flex-column gap-1 p-2">
-            {emails.map((emailItem) => {
-              const isOutbound = emailItem.sender === "Agente" || emailItem.direction === "outbound";
-              return (
-                <div
-                  key={emailItem.id}
-                  className="d-flex align-items-start gap-2 rounded p-2"
-                  style={{ backgroundColor: isOutbound ? "#f1f5f9" : "#f4faeb", border: "1px solid #f0f0f0" }}
-                >
-                  <div
-                    className="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0"
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      backgroundColor: emailItem.avatarBg || (isOutbound ? "#0c5cc6" : "#d02c89"),
-                      fontSize: "10px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    {emailItem.initials || (isOutbound ? "AG" : "CL")}
-                  </div>
-                  <div className="flex-grow-1 overflow-hidden">
-                    <div className="d-flex align-items-center justify-content-between gap-2">
-                      <span className={`text-truncate ${emailItem.unread ? "fw-semibold" : ""}`} style={{ fontSize: "13px", color: emailItem.unread ? "#316ab7" : "#212121" }}>
-                        {emailItem.subject || "Sin asunto"}
-                      </span>
-                      <span className="flex-shrink-0" style={{ fontSize: "11px", color: "#9ca3af" }}>
-                        {emailItem.date || emailItem.created_at}
-                      </span>
-                    </div>
-                    <p className="text-truncate mb-0" style={{ fontSize: "12px", color: "#434343" }}>
-                      {emailItem.preview || (emailItem.body_text || "").substring(0, 120)}
-                    </p>
-                    <span className="d-flex align-items-center gap-1" style={{ fontSize: "11px", color: isOutbound ? "#0c5cc6" : "#16a34a" }}>
-                      <i className={`bi ${isOutbound ? "bi-send" : "bi-reply"}`} style={{ fontSize: "10px" }}></i>
-                      {isOutbound ? "Enviado" : "Recibido"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
   );
 }

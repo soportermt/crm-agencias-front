@@ -9,6 +9,7 @@ export default function ConfiguracionHeader({ activeTab }) {
     bancos: "Cuentas de banco",
     terminos: "Términos y condiciones",
     conectividad: "Conectividad",
+    plantillas: "Plantillas WhatsApp",
   };
   const section = titles[activeTab] || "General";
 

@@ -83,7 +83,14 @@ export default function ClientContactsList({
                     <span className="text-truncate text-secondary" style={{ color: "var(--grey-text)", fontSize: "12px" }}>
                       {lastEmail ? lastEmail.subject || "Sin asunto" : contact.email || "Sin correos"}
                     </span>
-                    <i className="bi bi-envelope flex-shrink-0" style={{ color: "#0c5cc6", fontSize: "13px" }}></i>
+                    <div className="d-flex align-items-center gap-1 flex-shrink-0">
+                      <i className="bi bi-envelope" style={{ color: "#0c5cc6", fontSize: "13px" }}></i>
+                      {contact.unreadCount > 0 && (
+                        <span className="badge rounded-pill bg-danger fw-bold" style={{ fontSize: "10px", padding: "2px 6px" }}>
+                          {contact.unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </button>

@@ -7,6 +7,7 @@ import UsuariosTab from "@/components/configuracion/UsuariosTab";
 import BancosTab from "@/components/configuracion/BancosTab";
 import TerminosTab from "@/components/configuracion/TerminosTab";
 import ConectividadTab from "@/components/configuracion/ConectividadTab";
+import PlantillasTab from "@/components/configuracion/PlantillasTab";
 import ConfiguracionHeader from "@/components/configuracion/ConfiguracionHeader";
 
 export default function ConfiguracionPage() {
@@ -23,6 +24,7 @@ export default function ConfiguracionPage() {
           {activeTab === "bancos" && <BancosTab />}
           {activeTab === "terminos" && <TerminosTab />}
           {activeTab === "conectividad" && <ConectividadTab />}
+          {activeTab === "plantillas" && <PlantillasTab />}
         </div>
       </div>
     </div>

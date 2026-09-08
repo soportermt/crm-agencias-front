@@ -49,8 +49,18 @@ export const mensajeriaService = {
     return data;
   },
 
+  async sendTemplate(payload) {
+    const { data } = await api.post("/messages/send-template", payload);
+    return data;
+  },
+
   async getClientEmails(clientId) {
     const { data } = await api.get(`/email/client/${clientId}`);
+    return data;
+  },
+
+  async syncEmails() {
+    const { data } = await api.post("/email/accounts/sync");
     return data;
   },
 

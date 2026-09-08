@@ -54,6 +54,7 @@ Todos los enlaces en las tablas y componentes que apuntaban a las antiguas rutas
 
 - En `ClientTable.js`: Se cambió ``href={`/clientes/${row.id}`}`` a ``href={`/clientes/detalle?id=${row.id}`}``.
 - En `ClientInfoPanel.js` y `ChatPanel.js`: Se cambió ``href={`/clientes/${clientInfo.id}`}`` a ``href={`/clientes/detalle?id=${clientInfo.id}`}``.
+- En `BookingPriceBreakdown.js`: Se cambió ``href={`/clientes/${vendedor?.value}`}`` a ``href={`/clientes/detalle?id=${vendedor?.value}`}``.
 - En `RightBar.js`: Se cambió ``href={`/clientes/${contact.id}`}`` a ``href={`/clientes/detalle?id=${contact.id}`}``.
 - En `IngresosTable.js` y `EgresosTable.js`: Se cambió ``href={`/pagos/${row.id}`}`` a ``href={`/pagos/detalle?id=${row.id}`}``.
 - En `VendedoresTable.js`: Se cambió ``href={`/vendedores/${row.id}`}`` a ``href={`/vendedores/detalle?id=${row.id}`}``.
@@ -73,8 +74,23 @@ Cuando se usa `output: 'export'` y `basePath: '/app'`:
    - Dado que React-PDF se ejecuta en el navegador/canvas fuera del pipeline de Next.js, se configuraron rutas absolutas con `/app/`:
      - En `src/components/pdf/fonts.js`: `/app/fonts/Inter-...ttf`.
      - En `src/components/pdf/BookingPdf.js`: `/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `map.png`, `location.png`, `email.png`, `phone-call.png`.
+     - Manejo de fallback para logotipo de agencia en `BookingPdf.js`: si la agencia no dispone de logotipo, se utiliza `/app/2bt2025.png` para prevenir errores de carga.
 
-## 5. Control de Versiones (`.gitignore`)
+3. **Logotipo en `Sidebar.js`**:
+   - Se configuró el logotipo por defecto hacia `/app/2bt2025.png`.
+   - Para logotipos remotos de agencias se utiliza protocolo seguro `https://` y un manejador `onError` que recurre automáticamente a `/app/2bt2025.png` si la imagen de la agencia falla o no existe.
+
+4. **Compatibilidad del Módulo de Proveedores**:
+   - La nueva ruta `/proveedores` (`src/app/(crm)/proveedores/page.js`) opera de forma totalmente estática y autónoma con modales en la misma vista, siendo 100% compatible con la exportación estática sin requerir rutas dinámicas adicionales.
+
+## 5. Configuración del Servidor Web (`public/.htaccess`)
+
+Se añadió un archivo `public/.htaccess` para servidores Apache / cPanel / Plesk que asegura:
+- Reescritura hacia `/app/` conservando los enlaces directos y evitando errores 404 al recargar páginas generadas con `trailingSlash: true`.
+- Definición de tipos MIME correctos para fuentes (`.ttf`, `.woff`, `.woff2`) y gráficos vectoriales (`.svg`).
+- Cabecera `Access-Control-Allow-Origin: *` para recursos tipográficos requeridos por el visor PDF.
+
+## 6. Control de Versiones (`.gitignore`)
 
 Se agregaron al `.gitignore` las exclusiones para la carpeta temporal `/tmp/` y archivos comprimidos `*.zip` generados durante el empaquetado.
 
@@ -82,17 +98,23 @@ Se agregaron al `.gitignore` las exclusiones para la carpeta temporal `/tmp/` y 
 
 ## Instrucciones de Compilación y Generación del Paquete ZIP
 
-### 1. Compilación del proyecto
-Para generar los archivos estáticos optimizados, ejecuta en la terminal dentro de la carpeta `crm_2bussiness`:
+### 1. Ejecución Automática con Script
+Dentro de la carpeta `crm_2bussiness`, puedes ejecutar el script en PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "tmp\package_static.ps1"
+```
+
+El script ejecuta automáticamente `pnpm build` y genera `crm_estatico.zip` en la raíz del proyecto.
+
+### 2. Ejecución Manual paso a paso
+Si prefieres realizar los pasos manualmente:
 
 ```bash
 pnpm build
 ```
 
-Esto generará la carpeta `out/` con todos los archivos HTML, JS, CSS y recursos estáticos.
-
-### 2. Compresión directa del contenido (ZIP)
-Para subir al servidor, se debe comprimir **el contenido directo** de la carpeta `out/` (sin incluir la carpeta contenedora `out/` en la raíz del zip).
+Luego comprime el **contenido directo** de la carpeta `out/`:
 
 #### En Windows (PowerShell):
 ```powershell
@@ -107,4 +129,4 @@ cd out && zip -r ../crm_estatico.zip . && cd ..
 ### 3. Despliegue en el Servidor Web
 1. Sube el archivo `crm_estatico.zip` al servidor web (cPanel, Plesk, Nginx, Apache, FTP, etc.).
 2. Descomprime el contenido directamente en la carpeta pública correspondiente a la ruta `/app` de tu dominio (ejemplo: `public_html/app/` o `/var/www/html/app/`).
-3. Al descomprimir, la raíz del directorio `/app` debe contener directamente archivos como `index.html`, `login/`, `dashboard/`, `_next/`, `2bt2025.png`, etc.
+3. Al descomprimir, la raíz del directorio `/app` debe contener directamente archivos como `index.html`, `login/`, `dashboard/`, `_next/`, `2bt2025.png`, `.htaccess`, etc.
