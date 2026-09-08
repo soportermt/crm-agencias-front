@@ -4,6 +4,7 @@ import ProviderSelect from '@/components/common/ProviderSelect';
 import PassengersInput from '@/components/common/PassengersInput';
 import DatePicker from 'react-datepicker';
 import { calcularTotalNeto } from '@/utils/pricing';
+import { cleanDecimalInput } from '@/utils/inputFormatters';
 
 export default function VueloForm() {
     const { draft, updateDraftField } = useBookingForm();
@@ -13,6 +14,22 @@ export default function VueloForm() {
     const isRedondo = !!data.redondo;
     const setIsRedondo = (checked) => updateDraftField("redondo", checked);
 
+    const toggleEquipaje = (tipo) => {
+        const nuevo = data.equipaje?.includes(tipo)
+            ? data.equipaje.filter((t) => t !== tipo)
+            : [...(data.equipaje ?? []), tipo];
+        updateDraftField("equipaje", nuevo);
+    };
+
+    const updatePassenger = (grupo, index, field, value) => {
+        const pasajeros = {
+            ...data.pasajeros,
+            [grupo]: data.pasajeros[grupo].map((p, i) =>
+                i === index ? { ...p, [field]: value } : p
+            ),
+        };
+        updateDraftField("pasajeros", pasajeros);
+    };
 
     const addEscala = (tipo) => {
         const nueva = { ciudad: "", fecha_llegada: null, hora_llegada: "", fecha_salida: null, hora_salida: "" };
@@ -191,7 +208,7 @@ export default function VueloForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Pickup de salida en origen *</label>
+                    <label className="form-label">Hora de salida en origen *</label>
                     <input
                         type="time"
                         className="form-control"
@@ -200,7 +217,7 @@ export default function VueloForm() {
                     />
                 </div>
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Pickup de llegada en destino *</label>
+                    <label className="form-label">Hora de llegada en destino *</label>
                     <input
                         type="time"
                         className="form-control"
@@ -212,7 +229,7 @@ export default function VueloForm() {
                 {isRedondo && (
                     <>
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Pickup de salida en destino *</label>
+                            <label className="form-label">Hora de salida en destino *</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -221,7 +238,7 @@ export default function VueloForm() {
                             />
                         </div>
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Pickup de llegada en origen *</label>
+                            <label className="form-label">Hora de llegada en origen *</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -450,15 +467,11 @@ export default function VueloForm() {
                                     />
                                 </div>
                                 <div className="col-md-2 mt-1 mb-0">
-                                    <DatePicker
-                                        id="fecha"
+                                    <input
+                                        type='date'
+                                        className="form-control"
                                         selected={pasajero.fecha_nacimiento}
-                                        onChange={(date) => updatePassenger("adultos", index, "fecha_nacimiento", date)}
-                                        locale="es"
-                                        dateFormat="dd/MM/yyyy"
-                                        className="form-control form-datepicker"
-                                        placeholderText="dd/mm/aaaa"
-                                        autoComplete='off'
+                                        onChange={(e) => updatePassenger("adultos", index, "fecha_nacimiento", e.target.value)}
                                     />
                                 </div>
                                 <div className="col-md-2 mt-1 mb-0">
@@ -562,15 +575,11 @@ export default function VueloForm() {
                                             />
                                         </div>
                                         <div className="col-md-2 mt-1 mb-0">
-                                            <DatePicker
-                                                id="fecha"
-                                                selected={pasajero.fecha_nacimiento}
-                                                onChange={(date) => updatePassenger("menores", index, "fecha_nacimiento", date)}
-                                                locale="es"
-                                                dateFormat="dd/MM/yyyy"
-                                                className="form-control form-datepicker"
-                                                placeholderText="dd/mm/aaaa"
-                                                autoComplete='off'
+                                            <input
+                                                type='date'
+                                                className="form-control"
+                                                value={pasajero.fecha_nacimiento ?? ""}
+                                                onChange={(e) => updatePassenger("menores", index, "fecha_nacimiento", e.target.value)}
                                             />
                                         </div>
                                         <div className="col-md-2 mt-0 mb-0">

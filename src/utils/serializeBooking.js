@@ -5,6 +5,7 @@ const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
   traslado: 2,
   tour: 5,
+  vuelos: 6,
 };
 
 const TIPOS_CON_MENORES = [2, 5, 6, 7, 8, 9, 10];
@@ -34,6 +35,25 @@ function buildSale(booking) {
     pertenece_a: booking.perteneceA ?? null,
 
     // fecha_limite: toISODateOnly(booking.limiteCancelacion),
+  };
+}
+
+function toDiaMesAnio(date) {
+  if (!date) return { dia: "", mes: "", año: "" };
+
+  if (typeof date === "string") {
+    const [año, mes, dia] = date.split("-");
+    if (!año || !mes || !dia) return { dia: "", mes: "", año: "" };
+    return { dia, mes, año };
+  }
+
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return { dia: "", mes: "", año: "" };
+
+  return {
+    dia: String(d.getDate()).padStart(2, "0"),
+    mes: String(d.getMonth() + 1).padStart(2, "0"),
+    año: String(d.getFullYear()),
   };
 }
 
@@ -116,6 +136,59 @@ function buildDesglose(tipoId, data, comisionPct) {
     }
   }
 
+  if (tipoId === TIPO_SERVICIO_MAP.vuelos) {
+    const mapPasajero = (p) => ({
+      nombre: p.nombre,
+      apellidos: p.apellidos,
+      ...(data.internacional
+        ? {
+          no_pasaporte: p.no_pasaporte,
+          no_visa: p.no_visa,
+          fecha_nacimiento: toDiaMesAnio(p.fecha_nacimiento),
+        }
+        : {}),
+    });
+
+    const mapEscala = (escala) => ({
+      ciudad: escala.ciudad,
+      fecha_llegada: toISODateOnly(escala.fecha_llegada),
+      hora_llegada: escala.hora_llegada,
+      fecha_salida: toISODateOnly(escala.fecha_salida),
+      hora_salida: escala.hora_salida,
+    });
+
+    return {
+      redondo: data.redondo ? 1 : 0,
+      adultos: data.adultos ?? 0,
+      menores: data.menores ?? 0,
+      ocupacion: `${data.adultos ?? 0} adulto(s), ${data.menores ?? 0} menor(es)`,
+      pasajeros: {
+        adultos: (data.pasajeros?.adultos ?? []).map(mapPasajero),
+        menores: (data.pasajeros?.menores ?? []).map((p) => ({
+          ...mapPasajero(p),
+          edad: p.edad,
+        })),
+      },
+      comision: "%",
+      origen: data.origen,
+      destino: data.destino,
+      salida_origen: data.salida_origen,
+      llegada_destino: data.llegada_destino,
+      salida_destino: data.salida_destino,
+      llegada_origen: data.llegada_origen,
+      equipaje: data.equipaje ?? [],
+      aerolinea: data.aerolinea,
+      internacional: data.internacional ? 1 : 0,
+      escala: data.escala ?? 0,
+      ...(data.escala === 1
+        ? {
+          escalas_origen: (data.escalas_origen ?? []).map(mapEscala),
+          escalas_destino: (data.escalas_destino ?? []).map(mapEscala),
+        }
+        : {}),
+    };
+  }
+
   return desglose;
 }
 
@@ -152,6 +225,8 @@ function buildService(item) {
     descripcion = item.data.descripcion;
   } else if (tipoId === TIPO_SERVICIO_MAP.traslado) {
     descripcion = item.data.redondo ? "Traslado Redondo" : "Traslado Sencillo";
+  } else if (tipoId === TIPO_SERVICIO_MAP.vuelos) {
+    descripcion = item.data.redondo ? "Vuelo Redondo" : "Vuelo Sencillo";
   } else {
     descripcion = "";
   }

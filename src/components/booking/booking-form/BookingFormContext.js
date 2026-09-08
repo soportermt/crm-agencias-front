@@ -53,7 +53,7 @@ export function BookingFormProvider({ children, initialData = null }) {
     if (!editingId && booking.servicios.length > 0) {
       const pool = getPassengersPool(booking.servicios);
     
-      if (tipo === "traslado" || tipo === "tour") {
+      if (tipo === "traslado" || tipo === "tour" || tipo === "vuelos") {
         const adultos = pool.adultos.length > 0 ? pool.adultos : baseData.pasajeros.adultos;
         const menores = pool.menores.length > 0 ? pool.menores : baseData.pasajeros.menores;
       

@@ -141,8 +141,8 @@ export const serviceCatalog = [
       checkOut: null,
       pasajeros: {
         adultos: [
-          { nombre: "", apellidos: "", no_pasaporte: "", no_visa: "", fecha_nacimiento: "" },
-          { nombre: "", apellidos: "", no_pasaporte: "", no_visa: "", fecha_nacimiento: "" },
+          { nombre: "", apellidos: "", fecha_nacimiento: null, no_pasaporte: "", no_visa: "" },
+          { nombre: "", apellidos: "", fecha_nacimiento: null, no_pasaporte: "", no_visa: "" },
         ],
         menores: [],
       },
@@ -151,6 +151,33 @@ export const serviceCatalog = [
       fee: "",
       total_publico: "",
       total_neto: "",
+      internacional: false,
+      origen: "",
+      destino: "",
+      equipaje: [],
+      aerolinea: "",
+      redondo: false,
+      salida_origen: "",
+      llegada_destino: "",
+      salida_destino: "",
+      llegada_origen: "",
+      escala: 0,
+      escalas_origen: [],
+      escalas_destino: [],
     },
+    validate: (data) => {
+      const errors = {};
+      if (!data.origen) errors.origen = "Requerido";
+      if (!data.destino) errors.destino = "Requerido";
+      return errors;
+    },
+
+    summary: (data) => ({
+      title: data.descripcion || "Vuelo sin nombre",
+      subtitle: "Vuelo",
+      dateStart: data.checkIn,
+      dateEnd: data.checkOut,
+      precio: data.total_publico
+    }),
   }
 ];
