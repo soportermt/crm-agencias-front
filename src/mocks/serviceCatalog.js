@@ -1,8 +1,9 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
+import OtrosForm from "@/components/booking/forms/OtrosForm";
 import TourForm from "@/components/booking/forms/TourForm";
 import TrasladoForm from "@/components/booking/forms/TrasladoForm";
 import VueloForm from "@/components/booking/forms/VueloForm";
-import { faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
   {
@@ -179,5 +180,43 @@ export const serviceCatalog = [
       dateEnd: data.checkOut,
       precio: data.total_publico
     }),
-  }
+  },
+  {
+    id: "otros",
+    nombre: "Otros",
+    icon: faCirclePlus,
+    Form: OtrosForm,
+    defaultData: {
+      provider: "",
+      providerName: "",
+      code: "",
+      descripcion: "",
+      checkIn: null,
+      checkOut: null,
+      pasajeros: {
+        adultos: [
+          { nombre: "", apellidos: "" },
+          { nombre: "", apellidos: "" },
+        ],
+        menores: [],
+      },
+      limitePago: null,
+      limiteCliente: null,
+      fee: "",
+      total_publico: "",
+      total_neto: "",
+    },
+    validate: (data) => {
+      const errors = {};
+      if (!data.descripcion) errors.descripcion = "Requerido";
+      return errors;
+    },
+    summary: (data) => ({
+      title: data.descripcion || "Otros",
+      subtitle: "Actividad sin especificar",
+      dateStart: data.checkIn,
+      dateEnd: data.checkOut,
+      precio: data.total_publico
+    }),
+  },
 ];

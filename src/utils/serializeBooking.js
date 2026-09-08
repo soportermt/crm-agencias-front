@@ -6,6 +6,7 @@ const TIPO_SERVICIO_MAP = {
   traslado: 2,
   tour: 5,
   vuelos: 6,
+  otros: 10,
 };
 
 const TIPOS_CON_MENORES = [2, 5, 6, 7, 8, 9, 10];
