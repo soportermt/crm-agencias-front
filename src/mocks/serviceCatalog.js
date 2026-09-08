@@ -1,7 +1,8 @@
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
 import TourForm from "@/components/booking/forms/TourForm";
 import TrasladoForm from "@/components/booking/forms/TrasladoForm";
-import { faHotel, faMap, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import VueloForm from "@/components/booking/forms/VueloForm";
+import { faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
   {
@@ -32,7 +33,7 @@ export const serviceCatalog = [
         (acc, hab) => acc + (parseFloat(hab.total_publico) || 0),
         0
       );
-  
+
       return {
         title: data.hotel || "Sin hotel",
         subtitle: data.destino || "Sin destino",
@@ -80,10 +81,10 @@ export const serviceCatalog = [
       if (!data.destino) errors.destino = "Requerido";
       return errors;
     },
-    summary: (data) => ({ 
-      title: (data.origen && data.destino) ? `${data.origen} a ${data.destino}` : "Ruta sin definir", 
-      subtitle: data.redondo ? "Traslado Redondo" : "Traslado Sencillo", 
-      dateStart: data.checkIn, 
+    summary: (data) => ({
+      title: (data.origen && data.destino) ? `${data.origen} a ${data.destino}` : "Ruta sin definir",
+      subtitle: data.redondo ? "Traslado Redondo" : "Traslado Sencillo",
+      dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
     }),
@@ -118,12 +119,38 @@ export const serviceCatalog = [
       if (!data.descripcion) errors.descripcion = "Requerido";
       return errors;
     },
-    summary: (data) => ({ 
-      title: data.descripcion || "Tour sin nombre", 
-      subtitle: "Actividad / Excursión", 
-      dateStart: data.checkIn, 
+    summary: (data) => ({
+      title: data.descripcion || "Tour sin nombre",
+      subtitle: "Actividad / Excursión",
+      dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
     }),
+  },
+  {
+    id: "vuelos",
+    nombre: "Vuelos",
+    icon: faPlaneDeparture,
+    Form: VueloForm,
+    defaultData: {
+      provider: "",
+      providerName: "",
+      code: "",
+      descripcion: "",
+      checkIn: null,
+      checkOut: null,
+      pasajeros: {
+        adultos: [
+          { nombre: "", apellidos: "", no_pasaporte: "", no_visa: "", fecha_nacimiento: "" },
+          { nombre: "", apellidos: "", no_pasaporte: "", no_visa: "", fecha_nacimiento: "" },
+        ],
+        menores: [],
+      },
+      limitePago: null,
+      limiteCliente: null,
+      fee: "",
+      total_publico: "",
+      total_neto: "",
+    },
   }
 ];
