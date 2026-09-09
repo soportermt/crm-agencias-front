@@ -663,7 +663,16 @@ function MensajeriaContent() {
       };
 
       const res = await mensajeriaService.sendTemplate(payload);
-      showToast("Conversación iniciada y plantilla enviada con éxito");
+      
+      if (res.delivered === false) {
+        const reason =
+          res.apiError === "no_credentials"
+            ? "No hay credenciales de WhatsApp configuradas; la plantilla se guardó pero no se envió."
+            : "La plantilla se guardó, pero WhatsApp no pudo enviarla.";
+        showToast(reason, "warning");
+      } else {
+        showToast("Conversación iniciada y plantilla enviada con éxito");
+      }
 
       await loadConversations();
 

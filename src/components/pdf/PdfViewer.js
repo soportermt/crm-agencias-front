@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { pdf } from "@react-pdf/renderer";
 import BookingPdf from "./BookingPdf";
 import { conectividadService } from "@/services/conectividad.service";
