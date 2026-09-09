@@ -470,7 +470,7 @@ export default function VueloForm() {
                                     <input
                                         type='date'
                                         className="form-control"
-                                        selected={pasajero.fecha_nacimiento}
+                                        value={pasajero.fecha_nacimiento ?? ""}
                                         onChange={(e) => updatePassenger("adultos", index, "fecha_nacimiento", e.target.value)}
                                     />
                                 </div>

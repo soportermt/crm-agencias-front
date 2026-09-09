@@ -175,7 +175,7 @@ export const serviceCatalog = [
 
     summary: (data) => ({
       title: data.descripcion || "Vuelo sin nombre",
-      subtitle: "Vuelo",
+      subtitle: `${data.origen} - ${data.destino}`,
       dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
@@ -213,7 +213,7 @@ export const serviceCatalog = [
     },
     summary: (data) => ({
       title: data.descripcion || "Otros",
-      subtitle: "Actividad sin especificar",
+      subtitle: "Otros",
       dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
