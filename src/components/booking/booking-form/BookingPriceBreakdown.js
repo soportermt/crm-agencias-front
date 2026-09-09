@@ -70,6 +70,9 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
   const activo = draft ?? serviciosParaTotal[serviciosParaTotal.length - 1];
   const provider = activo?.data?.providerData;
 
+  const porcentajeComision = Number(provider?.comision) || 0;
+  const totalComisionAgencia = (totalPublico * porcentajeComision) / 100;
+
   return (
     <div className="container-fluid py-2">
       <h5 style={{ fontSize: "18px", fontWeight: 600 }} className='mb-0'>Detalles del cliente</h5>
@@ -131,12 +134,16 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
           </div>
         </div>
         <div className='d-flex justify-content-between'>
-          <p className='mb-2'>Total Neto:</p>
-          <p className='mb-2'>{formatMoney(totalNeto)}</p>
-        </div>
-        <div className='d-flex justify-content-between'>
           <p className='mb-2'>Total Público:</p>
           <p className='mb-2'>{formatMoney(totalPublico)}</p>
+        </div>
+        <div className='d-flex justify-content-between'>
+          <p className='mb-2'>Total comisión agencia:</p>
+          <p className='mb-2'>- {formatMoney(totalComisionAgencia)}</p>
+        </div>
+        <div className='d-flex justify-content-between'>
+          <p className='mb-2'>Total Neto:</p>
+          <p className='mb-2'>{formatMoney(totalNeto)}</p>
         </div>
         <div className='d-flex justify-content-between'>
           <p className='mb-2'>Fee:</p>
