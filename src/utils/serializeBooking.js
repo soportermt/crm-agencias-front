@@ -137,6 +137,19 @@ function buildDesglose(tipoId, data, comisionPct) {
     }
   }
 
+  if (tipoId === TIPO_SERVICIO_MAP.otros) {
+    return {
+      adultos: data.adultos ?? 0,
+      menores: data.menores ?? 0,
+      ocupacion: `${data.adultos ?? 0} adulto(s), ${data.menores ?? 0} menor(es)`,
+      pasajeros: {
+        adultos: data.pasajeros?.adultos ?? [],
+        menores: data.pasajeros?.menores ?? [],
+      },
+      comision: "%",
+    }
+  }
+
   if (tipoId === TIPO_SERVICIO_MAP.vuelos) {
     const mapPasajero = (p) => ({
       nombre: p.nombre,
@@ -222,7 +235,7 @@ function buildService(item) {
 
   if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
     descripcion = item.data.hotel;
-  } else if (tipoId === TIPO_SERVICIO_MAP.tour) {
+  } else if (tipoId === TIPO_SERVICIO_MAP.tour || tipoId === TIPO_SERVICIO_MAP.otros) {
     descripcion = item.data.descripcion;
   } else if (tipoId === TIPO_SERVICIO_MAP.traslado) {
     descripcion = item.data.redondo ? "Traslado Redondo" : "Traslado Sencillo";
