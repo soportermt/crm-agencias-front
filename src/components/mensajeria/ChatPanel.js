@@ -444,19 +444,24 @@ export default function ChatPanel({
                       <div className={`d-flex align-items-end gap-2 ${isAgent ? "justify-content-end" : "justify-content-start"}`}>
                         <div className={`mensajeria-bubble ${isAgent ? "out" : "in"}`} style={{ display: "flex", flexDirection: "column", maxWidth: "80%" }}>
                           {(msg.media_url || msg.mediaUrl) && renderMedia(msg, isAgent)}
-                          {msg.text && msg.text.startsWith('[Comprobante WhatsApp:') ? (
-                            <div className="d-flex flex-column gap-1">
-                              <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
-                                <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "24px", color: isAgent ? "#fff" : "#dc3545" }}></i>
-                                <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
-                                  Documento PDF Enviado
+                          {msg.text && msg.text.startsWith('[Comprobante WhatsApp:') ? (() => {
+                            const match = msg.text.match(/^\[Comprobante WhatsApp:\s*(.*?)\]/);
+                            const docName = match ? match[1] : "Documento PDF Enviado";
+                            return (
+                              <div className="d-flex flex-column gap-1">
+                                <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
+                                  <i className="bi bi-file-earmark-pdf-fill" style={{ fontSize: "24px", color: isAgent ? "#fff" : "#dc3545" }}></i>
+                                  <span style={{ fontSize: "13px", fontWeight: "500", wordBreak: "break-word" }}>
+                                    {docName}
+                                  </span>
+                                </div>
+                                <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
+                                  {msg.text.replace(/\[Comprobante WhatsApp:.*?\]\s*/, '')}
                                 </span>
                               </div>
-                              <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: "12px", opacity: 0.9 }}>
-                                {msg.text.replace(/\[Comprobante WhatsApp:.*?\]\s*/, '')}
-                              </span>
-                            </div>
-                          ) : msg.text && msg.text.startsWith('[Plantilla:') ? (
+                            );
+                          })()
+                          : msg.text && msg.text.startsWith('[Plantilla:') ? (
                             <div className="d-flex flex-column gap-1">
                               <div className="d-flex align-items-center gap-2 p-2 rounded" style={{ backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)" }}>
                                 <i className="bi bi-layout-text-window" style={{ fontSize: "20px", color: isAgent ? "#fff" : "#0c5cc6" }}></i>
@@ -469,7 +474,43 @@ export default function ChatPanel({
                               </span>
                             </div>
                           ) : (
-                            msg.text && !['[Imagen]', '[Video]', '[Audio]', '[Sticker]'].includes(msg.text) && !msg.text.startsWith('[Documento] ') && <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.text}</span>
+                            msg.text && !['[Imagen]', '[Video]', '[Audio]', '[Sticker]'].includes(msg.text) && !msg.text.startsWith('[Documento] ') && (() => {
+                              let finalMsg = msg.text;
+                              let replyContext = null;
+                              if (finalMsg.startsWith('> [Responde a: ')) {
+                                const match = finalMsg.match(/^> \[Responde a: (.*?)\]\n([\s\S]*)$/);
+                                if (match) {
+                                  replyContext = match[1];
+                                  finalMsg = match[2];
+                                }
+                              }
+                              return (
+                                <div className="d-flex flex-column w-100">
+                                  {replyContext && (
+                                    <div 
+                                      className="p-2 mb-1 rounded" 
+                                      style={{ 
+                                        backgroundColor: isAgent ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)",
+                                        borderLeft: `4px solid ${isAgent ? "#fff" : "#0c5cc6"}`,
+                                        fontSize: "12px",
+                                        opacity: 0.9,
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 3,
+                                        WebkitBoxOrient: "vertical",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                      }}
+                                    >
+                                      <div className="fw-semibold mb-1" style={{ fontSize: "11px", color: isAgent ? "rgba(255,255,255,0.8)" : "#0c5cc6" }}>
+                                        Mensaje anterior
+                                      </div>
+                                      <span style={{ whiteSpace: "pre-wrap" }}>{replyContext}</span>
+                                    </div>
+                                  )}
+                                  <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{finalMsg}</span>
+                                </div>
+                              );
+                            })()
                           )}
                         <div
                           className="d-flex align-items-center justify-content-end gap-1 mt-1"
@@ -481,7 +522,25 @@ export default function ChatPanel({
                           }}
                         >
                           <span>{msg.time || formatMessageTime(msg.time, msg.date)}</span>
-                          {isAgent && <i className="bi bi-check-all" style={{ fontSize: "14px" }}></i>}
+                          {isAgent && (
+                            <i 
+                              className={`bi ${msg.status === 'failed' ? 'bi-exclamation-circle text-danger' : 
+                                            msg.status === 'read' ? 'bi-check-all text-info' : 
+                                            msg.status === 'delivered' ? 'bi-check-all' : 
+                                            'bi-check'}`} 
+                              style={{ 
+                                fontSize: "14px", 
+                                color: msg.status === 'read' ? (isAgent ? '#4dd0e1' : '#0dcaf0') : 
+                                       msg.status === 'failed' ? '#ff6b6b' : 'inherit'
+                              }}
+                              title={
+                                msg.status === 'read' ? 'Leído' :
+                                msg.status === 'delivered' ? 'Entregado' :
+                                msg.status === 'failed' ? 'Error al enviar' :
+                                'Enviado'
+                              }
+                            ></i>
+                          )}
                         </div>
                       </div>
                       </div>

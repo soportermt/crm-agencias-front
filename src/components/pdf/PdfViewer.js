@@ -1,15 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { pdf } from "@react-pdf/renderer";
 import BookingPdf from "./BookingPdf";
 import { conectividadService } from "@/services/conectividad.service";
+import { templatesService } from "@/services/templates.service";
 import AlertModal from "@/components/common/AlertModal";
 
 export default function PdfViewer({ venta, customer, terminos }) {
     const [downloading, setDownloading] = useState(false);
     const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
     const [alertData, setAlertData] = useState(null);
+    const [agencySettings, setAgencySettings] = useState(null);
+    const [templates, setTemplates] = useState([]);
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const [resSettings, resTemplates] = await Promise.all([
+                    templatesService.getAgencySettings(),
+                    templatesService.getTemplates()
+                ]);
+                if (resSettings) setAgencySettings(resSettings);
+                setTemplates(Array.isArray(resTemplates) ? resTemplates : (resTemplates.data || []));
+            } catch (e) {
+                console.error("Error loading template settings in PdfViewer", e);
+            }
+        };
+        loadSettings();
+    }, []);
 
     const handleDownload = async () => {
         if (!venta) {
@@ -76,15 +95,53 @@ export default function PdfViewer({ venta, customer, terminos }) {
             const blob = await pdf(<BookingPdf venta={venta} terminos={terminos}/>).toBlob();
             const fileName = `Reserva-${venta.folio || "comprobante"}.pdf`;
 
+            let templateName = "prueba_envio_docs";
+            let language = "es";
+            const parameters = [];
+
+            if (agencySettings?.default_reservation_template_id && templates.length > 0) {
+                const defaultTpl = templates.find(t => t.id === agencySettings.default_reservation_template_id);
+                if (defaultTpl) {
+                    templateName = defaultTpl.name;
+                    language = defaultTpl.language || "es_MX";
+                    
+                    if (defaultTpl.variables_mapping) {
+                        let mapping = defaultTpl.variables_mapping;
+                        if (typeof mapping === 'string') {
+                            try { mapping = JSON.parse(mapping); } catch { mapping = []; }
+                        }
+                        if (Array.isArray(mapping)) {
+                            mapping.forEach(m => {
+                                let value = '';
+                                if (m.source === 'client_name') value = clientName;
+                                else if (m.source === 'client_phone') value = phone;
+                                else if (m.source === 'client_email') value = customer?.email || customer?.mail || venta?.idCliente?.correo || '';
+                                parameters.push(value);
+                            });
+                        } else if (typeof mapping === 'object' && mapping !== null) {
+                            const sortedKeys = Object.keys(mapping).sort((a, b) => Number(a) - Number(b));
+                            sortedKeys.forEach(k => {
+                                const mVal = mapping[k];
+                                let value = '';
+                                if (mVal === 'CLIENT_NAME' || mVal === 'client_name') value = clientName;
+                                else if (mVal === 'CLIENT_PHONE' || mVal === 'client_phone') value = phone;
+                                else if (mVal === 'CLIENT_EMAIL' || mVal === 'client_email') value = customer?.email || customer?.mail || venta?.idCliente?.correo || '';
+                                parameters.push(value);
+                            });
+                        }
+                    }
+                }
+            }
+
             const formData = new FormData();
             formData.append("file", blob, fileName);
             formData.append("folio", String(venta.folio || ""));
             if (clientId) formData.append("clientId", String(clientId));
             if (phone) formData.append("toPhone", String(phone));
             formData.append("clientName", clientName);
-            formData.append("templateName", "prueba_envio_docs");
-            formData.append("language", "es");
-            formData.append("parameters", "[]");
+            formData.append("templateName", templateName);
+            formData.append("language", language);
+            formData.append("parameters", JSON.stringify(parameters));
 
             const res = await conectividadService.sendReceiptWhatsapp(formData);
 

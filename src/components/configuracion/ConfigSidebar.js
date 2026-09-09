@@ -8,6 +8,7 @@ const tabs = [
   { id: "bancos", label: "Cuentas de banco" },
   { id: "terminos", label: "Términos y condiciones" },
   { id: "conectividad", label: "Conectividad" },
+  { id: "plantillas", label: "Plantillas WhatsApp" },
 ];
 
 export default function ConfigSidebar({ activeTab, setActiveTab }) {
