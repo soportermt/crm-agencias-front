@@ -184,6 +184,9 @@ export default function BookingList() {
     const [servicios, setServicios] = useState([]);
     const [servicioFilter, setServicioFilter] = useState("");
 
+    const [clientes, setClientes] = useState([]);
+    const [clienteFilter, setClienteFilter] = useState("");
+
     function handleDateChange(dates) {
         const [start, end] = dates;
         setStartDate(start);
@@ -213,31 +216,46 @@ export default function BookingList() {
     }, []);
 
     useEffect(() => {
-    if (startDate && !endDate) return;
-    let cancelado = false;
-
-    async function cargarReservas() {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const data = await bookingService.reservas(
-                formatDateForApi(startDate),
-                formatDateForApi(endDate),
-                servicioFilter
-            );
-            const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
-            if (!cancelado) setBookings(filas);
-        } catch (err) {
-            console.error("Error al cargar reservas:", err);
-            if (!cancelado) setError("No se pudieron cargar las reservaciones.");
-        } finally {
-            if (!cancelado) setIsLoading(false);
+        let cancelado = false;
+        async function cargarClientes() {
+            try {
+                const data = await catalogosService.clientes();
+                if (!cancelado) setClientes(data || []);
+            } catch (err) {
+                console.error("Error al cargar catálogo de clientes:", err);
+            }
         }
-    }
+        cargarClientes();
+        return () => { cancelado = true; };
+    }, []);
 
-    cargarReservas();
-    return () => { cancelado = true; };
-}, [startDate, endDate, servicioFilter]);
+    useEffect(() => {
+        if (startDate && !endDate) return;
+        let cancelado = false;
+
+        async function cargarReservas() {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const data = await bookingService.reservas(
+                    formatDateForApi(startDate),
+                    formatDateForApi(endDate),
+                    servicioFilter,
+                    clienteFilter
+                );
+                const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
+                if (!cancelado) setBookings(filas);
+            } catch (err) {
+                console.error("Error al cargar reservas:", err);
+                if (!cancelado) setError("No se pudieron cargar las reservaciones.");
+            } finally {
+                if (!cancelado) setIsLoading(false);
+            }
+        }
+
+        cargarReservas();
+        return () => { cancelado = true; };
+    }, [startDate, endDate, servicioFilter, clienteFilter]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -308,6 +326,20 @@ export default function BookingList() {
                             {servicios.map((s) => (
                                 <option key={s.id_servicio} value={s.id_servicio}>
                                     {s.tipo_servicio}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            name="clientes"
+                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                            style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "fit-content" }}
+                            value={clienteFilter}
+                            onChange={(e) => setClienteFilter(e.target.value)}
+                        >
+                            <option value="">Todos los clientes</option>
+                            {clientes.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name}
                                 </option>
                             ))}
                         </select>

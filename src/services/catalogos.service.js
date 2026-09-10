@@ -65,4 +65,10 @@ export const catalogosService = {
 
         return data;
     },
+    async clientes() {
+        const { data } = await api.get("/clientes/clientes", {
+        });
+
+        return data;
+    },
 };
