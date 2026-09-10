@@ -7,9 +7,14 @@ import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
 import Link from "next/link";
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from "date-fns/locale";
+import { catalogosService } from "@/services/catalogos.service";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
+    { key: "fecha", label: "Fecha de creación", width: "225px", align: "start" },
     { key: "cliente", label: "Cliente", width: "225px", align: "start" },
     { key: "hotel", label: "Descripción", width: "155px", align: "start" },
     { key: "plan", label: "Servicio", width: "130px", align: "start" },
@@ -101,13 +106,14 @@ function mapVentaToRow(venta) {
         cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
         hotel: hoteles.join(", ") || "-",
         plan: tipos.join(", ") || "-",
+        // fecha: venta.fecha,
         estancia: primero.fin_servicio
             ? formatDateRange(primero.inicio_servicio, primero.fin_servicio)
             : "",
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
-        fecha: formatDate(venta.fecha),
+        fecha: formatDateRange(venta.fecha),
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
         _venta: venta,
         inicio_servicio: primero.inicio_servicio,
@@ -118,13 +124,14 @@ function mapVentaToRow(venta) {
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
 
     const rows = data.map((row) => [
         row.folio,
         row.cliente,
         row.hotel,
         row.plan,
+        row.fecha,
         row.inicio_servicio,
         row.fin_servicio,
         row.destino,
@@ -155,6 +162,12 @@ function exportToCSV(data) {
     URL.revokeObjectURL(url);
 }
 
+function getDefaultRange15Dias() {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 15);
+    return { start, end };
+}
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -166,14 +179,70 @@ export default function BookingList() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [startDate, setStartDate] = useState(() => getDefaultRange15Dias().start);
+    const [endDate, setEndDate] = useState(() => getDefaultRange15Dias().end);
+    const [servicios, setServicios] = useState([]);
+    const [servicioFilter, setServicioFilter] = useState("");
+
+    const [clientes, setClientes] = useState([]);
+    const [clienteFilter, setClienteFilter] = useState("");
+
+    function handleDateChange(dates) {
+        const [start, end] = dates;
+        setStartDate(start);
+        setEndDate(end);
+    }
+
+    function formatDateForApi(date) {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
     useEffect(() => {
+        let cancelado = false;
+        async function cargarServicios() {
+            try {
+                const data = await catalogosService.servicios();
+                if (!cancelado) setServicios(data || []);
+            } catch (err) {
+                console.error("Error al cargar catálogo de servicios:", err);
+            }
+        }
+        cargarServicios();
+        return () => { cancelado = true; };
+    }, []);
+
+    useEffect(() => {
+        let cancelado = false;
+        async function cargarClientes() {
+            try {
+                const data = await catalogosService.clientes();
+                if (!cancelado) setClientes(data || []);
+            } catch (err) {
+                console.error("Error al cargar catálogo de clientes:", err);
+            }
+        }
+        cargarClientes();
+        return () => { cancelado = true; };
+    }, []);
+
+    useEffect(() => {
+        if (startDate && !endDate) return;
         let cancelado = false;
 
         async function cargarReservas() {
             setIsLoading(true);
             setError(null);
             try {
-                const data = await bookingService.reservas();
+                const data = await bookingService.reservas(
+                    formatDateForApi(startDate),
+                    formatDateForApi(endDate),
+                    servicioFilter,
+                    clienteFilter
+                );
                 const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
                 if (!cancelado) setBookings(filas);
             } catch (err) {
@@ -186,7 +255,7 @@ export default function BookingList() {
 
         cargarReservas();
         return () => { cancelado = true; };
-    }, []);
+    }, [startDate, endDate, servicioFilter, clienteFilter]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -235,7 +304,8 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <select name="estado"
+                        <select
+                            name="categorias"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
                                 height: "30px",
@@ -247,36 +317,44 @@ export default function BookingList() {
                                 fontWeight: 400,
                                 appearance: "none",
                                 textAlign: "start",
-                                width: "fit-content"
+                                width: "fit-content",
                             }}
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
+                            value={servicioFilter}
+                            onChange={(e) => setServicioFilter(e.target.value)}
                         >
-                            <option value="">Todos los estados</option>
-                            <option value="venta">Venta</option>
-                        </select>
-                        <select name="destino"
-                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                            style={{
-                                height: "30px",
-                                borderRadius: "8px",
-                                borderColor: "#d0d5dd",
-                                backgroundColor: "#fff",
-                                fontSize: "13px",
-                                color: "#0f1901",
-                                fontWeight: 400,
-                                appearance: "none",
-                                textAlign: "start",
-                                width: "fit-content"
-                            }}
-                            value={destinationFilter}
-                            onChange={(e) => setDestinationFilter(e.target.value)}
-                        >
-                            <option value="">Todos los destinos</option>
-                            {[...new Set(bookings.map((b) => b.destino))].filter(Boolean).map((d) => (
-                                <option key={d} value={d}>{d}</option>
+                            <option value="">Todas las categorias</option>
+                            {servicios.map((s) => (
+                                <option key={s.id_servicio} value={s.id_servicio}>
+                                    {s.tipo_servicio}
+                                </option>
                             ))}
                         </select>
+                        <select
+                            name="clientes"
+                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                            style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "fit-content" }}
+                            value={clienteFilter}
+                            onChange={(e) => setClienteFilter(e.target.value)}
+                        >
+                            <option value="">Todos los clientes</option>
+                            {clientes.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                        <DatePicker
+                            selectsRange={true}
+                            startDate={startDate}
+                            endDate={endDate}
+                            onChange={handleDateChange}
+                            isClearable={true}
+                            placeholderText="Fecha de creación"
+                            locale="es"
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control form-control-sm"
+                            autoComplete="off"
+                        />
                     </div>
                     <div className="d-flex gap-2">
                         <SearchBar
