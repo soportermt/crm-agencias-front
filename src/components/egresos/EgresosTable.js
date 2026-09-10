@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
@@ -220,11 +220,7 @@ export default function EgresosTable({
   const renderCell = (key, row) => {
     switch (key) {
       case "folio":
-        return (
-          <span className="font-inter fw-semibold text-primary">
-            {row.folio}
-          </span>
-        );
+        return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
 
       case "registradoPor":
         return (

@@ -63,26 +63,6 @@ function formatDateRange(inicio, fin) {
   return `${dInicio} a ${dFin}`;
 }
 
-// export function getEstatusByFechaLimite(fechaLimiteStr) {
-//   const fechaLimite = parseLocalDate(fechaLimiteStr);
-//   if (!fechaLimite) return "Pendiente";
-
-//   const hoy = new Date();
-//   hoy.setHours(0, 0, 0, 0);
-//   fechaLimite.setHours(0, 0, 0, 0);
-
-//   const diffTime = fechaLimite.getTime() - hoy.getTime();
-//   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-//   if (diffDays < 0) {
-//     return "Vencido";
-//   } else if (diffDays <= 7) {
-//     return "Próximo a vencer";
-//   } else {
-//     return "Pendiente";
-//   }
-// }
-
 export function getEstatusByFechaLimite(fechaLimiteStr) {
   const fechaLimite = parseLocalDate(fechaLimiteStr);
   if (!fechaLimite) return { estado: "Pendiente", diasLabel: "-" };
@@ -188,17 +168,12 @@ export default function IngresosTable({
   };
 
   const renderCell = (key, row) => {
-    // const estatusCalculado = getEstatusByFechaLimite(row.fecha_limite);
 
     const { estado, diasLabel } = getEstatusByFechaLimite(row.fecha_limite);
 
     switch (key) {
       case "folio":
-        return (
-          <span className="font-inter fw-semibold text-brand-blue">
-            {row.folio}
-          </span>
-        );
+        return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
 
       case "fecha_limite":
         return (

@@ -42,7 +42,7 @@ export default function IngresosPage() {
   const [ventas, setVentas] = useState([]);
   const [loadingVentas, setLoadingVentas] = useState(false);
 
-  const ITEMS_PER_PAGE = 25;
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     try {

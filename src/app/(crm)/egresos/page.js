@@ -43,7 +43,7 @@ export default function EgresosPage() {
   const [porOperadorData, setPorOperadorData] = useState([]);
   const [estadoCuentasData, setEstadoCuentasData] = useState([]);
 
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     async function loadChartData() {
