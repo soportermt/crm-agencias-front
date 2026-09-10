@@ -112,15 +112,15 @@ export default function OtrosForm() {
                 </div>
 
                 {data.pasajeros?.adultos?.map((pasajero, index) => (
-                    <div key={`adulto-${index}`} className="row g-3 mb-1">
-                        <div className="col-md-4 mt-1 mb-0">
+                    <div key={`adulto-${index}`} className="row g-3 mb-1 mt-0">
+                        <div className="col-md-4 mt-0 mb-0">
                             <input
                                 className="form-control"
                                 value={pasajero.nombre}
                                 onChange={(e) => updatePassenger("adultos", index, "nombre", e.target.value)}
                             />
                         </div>
-                        <div className="col-md-4 mt-1 mb-0">
+                        <div className="col-md-4 mt-0 mb-0">
                             <input
                                 className="form-control"
                                 value={pasajero.apellidos}
@@ -132,7 +132,7 @@ export default function OtrosForm() {
 
 
                 {data.pasajeros?.menores?.length > 0 && (
-                    <div className="row g-3 mt-2 mb-1">
+                    <div className="row g-3 mt-1 mb-1">
                         <div className="col-md-4 mt-1 mb-0">
                             <label className="form-label">Nombre (Menor)</label>
                         </div>
@@ -146,7 +146,7 @@ export default function OtrosForm() {
                 )}
 
                 {data.pasajeros?.menores?.map((pasajero, index) => (
-                    <div key={`menor-${index}`} className="row g-3 mt-2 mb-1">
+                    <div key={`menor-${index}`} className="row g-3 mt-0 mb-1">
                         <div className="col-md-4 mt-0 mb-0">
                             <input
                                 className="form-control"

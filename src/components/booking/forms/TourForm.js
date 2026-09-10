@@ -108,18 +108,25 @@ export default function TourForm() {
             </div>
             <p className="mb-1" style={{ fontSize: "18px", fontWeight: 600 }}>Datos de los pasajeros</p>
 
+            <div className="row g-3 mt-1">
+                <div className="col-md-4 mt-1 mb-0">
+                    <label className="form-label">Nombre (Adulto)</label>
+                </div>
+                <div className="col-md-4 mt-1 mb-0">
+                    <label className="form-label">Apellidos (Adulto)</label>
+                </div>
+            </div>
+
             {data.pasajeros?.adultos?.map((pasajero, index) => (
-                <div key={`adulto-${index}`} className="row g-3 mb-1">
-                    <div className="col-md-4">
-                        <label className="form-label">Nombre (Adulto)</label>
+                <div key={`adulto-${index}`} className="row g-3 mb-1 mt-0">
+                    <div className="col-md-4 mt-0 mb-0">
                         <input
                             className="form-control"
                             value={pasajero.nombre}
                             onChange={(e) => updatePassenger("adultos", index, "nombre", e.target.value)}
                         />
                     </div>
-                    <div className="col-md-4">
-                        <label className="form-label">Apellidos (Adulto)</label>
+                    <div className="col-md-4 mt-0 mb-0">
                         <input
                             className="form-control"
                             value={pasajero.apellidos}
@@ -129,26 +136,37 @@ export default function TourForm() {
                 </div>
             ))}
 
-            {data.pasajeros?.menores?.map((pasajero, index) => (
-                <div key={`menor-${index}`} className="row g-3 mb-1">
-                    <div className="col-md-4">
+            {data.pasajeros?.menores?.length > 0 && (
+                <div className="row g-3 mt-1 mb-1">
+                    <div className="col-md-4 mt-1 mb-0">
                         <label className="form-label">Nombre (Menor)</label>
+                    </div>
+                    <div className="col-md-4 mt-1 mb-0">
+                        <label className="form-label">Apellidos (Menor)</label>
+                    </div>
+                    <div className="col-md-2 mt-1 mb-0">
+                        <label className="form-label">Edad</label>
+                    </div>
+                </div>
+            )}
+
+            {data.pasajeros?.menores?.map((pasajero, index) => (
+                <div key={`menor-${index}`} className="row g-3 mt-0 mb-1">
+                    <div className="col-md-4 mt-0 mb-0">
                         <input
                             className="form-control"
                             value={pasajero.nombre}
                             onChange={(e) => updatePassenger("menores", index, "nombre", e.target.value)}
                         />
                     </div>
-                    <div className="col-md-4">
-                        <label className="form-label">Apellidos (Menor)</label>
+                    <div className="col-md-4 mt-0 mb-0">
                         <input
                             className="form-control"
                             value={pasajero.apellidos}
                             onChange={(e) => updatePassenger("menores", index, "apellidos", e.target.value)}
                         />
                     </div>
-                    <div className="col-md-2">
-                        <label className="form-label">Edad</label>
+                    <div className="col-md-2 mt-0 mb-0">
                         <input
                             type="number"
                             className="form-control"

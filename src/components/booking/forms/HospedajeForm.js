@@ -29,12 +29,8 @@ export default function HospedajeForm() {
         tipo_habitacion: "",
         plan: "",
 
-        // limitePago: null,
-        // limiteCliente: null,
-
         total_publico: "",
         total_neto: "",
-        // fee: "",
 
         pasajeros: [
           {
@@ -141,7 +137,7 @@ export default function HospedajeForm() {
               updateDraftField("checkOut", end);
 
               if (start && end) {
-                setDatePickerOpen(false); 
+                setDatePickerOpen(false);
               }
             }}
             locale="es"
@@ -153,7 +149,7 @@ export default function HospedajeForm() {
             className="form-control form-datepicker"
             placeholderText="Selecciona una fecha"
             required
-            autoComplete='off' 
+            autoComplete='off'
           />
         </div>
         <div className="col-12 col-md-4">
@@ -261,35 +257,70 @@ export default function HospedajeForm() {
 
           </div>
           <p className="mb-1" style={{ fontSize: "18px", fontWeight: 600 }}>Datos de los pasajeros</p>
-          {p.pasajeros.map((pasajero, index) => (
-            <div key={index} className="row g-3 mb-1">
-              <div className="col-md-4">
-                <label className="form-label">
-                  Nombre ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
-                </label>
+          <div className="row g-3 mt-1">
+            <div className="col-md-4 mt-1 mb-0">
+              <label className="form-label">Nombre (Adulto)</label>
+            </div>
+            <div className="col-md-4 mt-1 mb-0">
+              <label className="form-label">Apellidos (Adulto)</label>
+            </div>
+          </div>
 
-                <input
-                  className="form-control"
-                  value={pasajero.nombre}
-                  onChange={(e) => updatePassenger(i, index, "nombre", e.target.value)}
-                />
+          {p.pasajeros.map((pasajero, index) => {
+            if (pasajero.tipo !== "adult") return null;
+            return (
+              <div key={`adulto-${index}`} className="row g-3 mb-1 mt-0">
+                <div className="col-md-4 mt-0 mb-0">
+                  <input
+                    className="form-control"
+                    value={pasajero.nombre}
+                    onChange={(e) => updatePassenger(i, index, "nombre", e.target.value)}
+                  />
+                </div>
+                <div className="col-md-4 mt-0 mb-0">
+                  <input
+                    className="form-control"
+                    value={pasajero.apellidos}
+                    onChange={(e) => updatePassenger(i, index, "apellidos", e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="col-md-4">
-                <label className="form-label">
-                  Apellidos ({pasajero.tipo === "adult" ? "Adulto" : "Menor"})
-                </label>
+            );
+          })}
 
-                <input
-                  className="form-control"
-                  value={pasajero.apellidos}
-                  onChange={(e) => updatePassenger(i, index, "apellidos", e.target.value)}
-                />
+          {p.pasajeros.some((pasajero) => pasajero.tipo === "child") && (
+            <div className="row g-3 mt-1 mb-1">
+              <div className="col-md-4 mt-1 mb-0">
+                <label className="form-label">Nombre (Menor)</label>
               </div>
+              <div className="col-md-4 mt-1 mb-0">
+                <label className="form-label">Apellidos (Menor)</label>
+              </div>
+              <div className="col-md-2 mt-1 mb-0">
+                <label className="form-label">Edad</label>
+              </div>
+            </div>
+          )}
 
-              {pasajero.tipo === "child" && (
-                <div className="col-md-2">
-                  <label className="form-label">Edad</label>
-
+          {p.pasajeros.map((pasajero, index) => {
+            if (pasajero.tipo !== "child") return null;
+            return (
+              <div key={`menor-${index}`} className="row g-3 mt-0 mb-1">
+                <div className="col-md-4 mt-0 mb-0">
+                  <input
+                    className="form-control"
+                    value={pasajero.nombre}
+                    onChange={(e) => updatePassenger(i, index, "nombre", e.target.value)}
+                  />
+                </div>
+                <div className="col-md-4 mt-0 mb-0">
+                  <input
+                    className="form-control"
+                    value={pasajero.apellidos}
+                    onChange={(e) => updatePassenger(i, index, "apellidos", e.target.value)}
+                  />
+                </div>
+                <div className="col-md-2 mt-0 mb-0">
                   <input
                     type="number"
                     className="form-control"
@@ -297,9 +328,10 @@ export default function HospedajeForm() {
                     onChange={(e) => updatePassenger(i, index, "edad", Number(e.target.value))}
                   />
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
+
           <div className="row mb-2 justify-content-end align-items-center">
             <div className="col-12 col-md-4 text-end m-0">
               <button type="button" className="btn btn-outline-danger" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>

@@ -449,24 +449,24 @@ export default function VueloForm() {
                     )}
                 </div>
                 {data.pasajeros?.adultos?.map((pasajero, index) => (
-                    <div key={`adulto-${index}`} className="row g-3 my-1">
+                    <div key={`adulto-${index}`} className="row g-3 mb-1 mt-0">
                         {isInternacional ? (
                             <>
-                                <div className="col-md-3 mt-1 mb-0">
+                                <div className="col-md-3 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.nombre}
                                         onChange={(e) => updatePassenger("adultos", index, "nombre", e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-3 mt-1 mb-0">
+                                <div className="col-md-3 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.apellidos}
                                         onChange={(e) => updatePassenger("adultos", index, "apellidos", e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-2 mt-1 mb-0">
+                                <div className="col-md-2 mt-0 mb-0">
                                     <input
                                         type='date'
                                         className="form-control"
@@ -474,14 +474,14 @@ export default function VueloForm() {
                                         onChange={(e) => updatePassenger("adultos", index, "fecha_nacimiento", e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-2 mt-1 mb-0">
+                                <div className="col-md-2 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.no_pasaporte}
                                         onChange={(e) => updatePassenger("adultos", index, "no_pasaporte", e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-2 mt-1 mb-0">
+                                <div className="col-md-2 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.no_visa}
@@ -491,14 +491,14 @@ export default function VueloForm() {
                             </>
                         ) : (
                             <>
-                                <div className="col-md-4 mt-1 mb-0">
+                                <div className="col-md-4 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.nombre}
                                         onChange={(e) => updatePassenger("adultos", index, "nombre", e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-4 mt-1 mb-0">
+                                <div className="col-md-4 mt-0 mb-0">
                                     <input
                                         className="form-control"
                                         value={pasajero.apellidos}
@@ -549,7 +549,7 @@ export default function VueloForm() {
                             )}
                         </div>
                         {data.pasajeros?.menores?.map((pasajero, index) => (
-                            <div key={`menor-${index}`} className="row g-3 mt-2 mb-1">
+                            <div key={`menor-${index}`} className="row g-3 mb-1 mt-0">
                                 {isInternacional ? (
                                     <>
                                         <div className="col-md-2 mt-0 mb-0">
