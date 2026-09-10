@@ -7,9 +7,13 @@ import SearchBar from "../common/SearchBar";
 import StatusBadge from "../common/StatusBadge";
 import { bookingService } from "@/services/booking.service";
 import Link from "next/link";
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from "date-fns/locale";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
+    { key: "fecha", label: "Fecha de creación", width: "225px", align: "start" },
     { key: "cliente", label: "Cliente", width: "225px", align: "start" },
     { key: "hotel", label: "Descripción", width: "155px", align: "start" },
     { key: "plan", label: "Servicio", width: "130px", align: "start" },
@@ -101,13 +105,14 @@ function mapVentaToRow(venta) {
         cliente: venta.idCliente?.nombre || venta.pasajero_titular || "-",
         hotel: hoteles.join(", ") || "-",
         plan: tipos.join(", ") || "-",
+        // fecha: venta.fecha,
         estancia: primero.fin_servicio
             ? formatDateRange(primero.inicio_servicio, primero.fin_servicio)
             : "",
         destino: destinos.join(", ") || "-",
         total,
         estatus: venta.estatus,
-        fecha: formatDate(venta.fecha),
+        fecha: formatDateRange(venta.fecha),
         desglose: JSON.parse(venta.ventasServicioses[0].desglose),
         _venta: venta,
         inicio_servicio: primero.inicio_servicio,
@@ -118,13 +123,14 @@ function mapVentaToRow(venta) {
 function exportToCSV(data) {
     if (!data.length) return;
 
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
+    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
 
     const rows = data.map((row) => [
         row.folio,
         row.cliente,
         row.hotel,
         row.plan,
+        row.fecha,
         row.inicio_servicio,
         row.fin_servicio,
         row.destino,
@@ -155,6 +161,12 @@ function exportToCSV(data) {
     URL.revokeObjectURL(url);
 }
 
+function getDefaultRange15Dias() {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 15);
+    return { start, end };
+}
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -166,14 +178,36 @@ export default function BookingList() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [startDate, setStartDate] = useState(() => getDefaultRange15Dias().start);
+    const [endDate, setEndDate] = useState(() => getDefaultRange15Dias().end);
+
+
+    function handleDateChange(dates) {
+        const [start, end] = dates;
+        setStartDate(start);
+        setEndDate(end);
+    }
+
+    function formatDateForApi(date) {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+    
     useEffect(() => {
+        if (startDate && !endDate) return;
         let cancelado = false;
 
         async function cargarReservas() {
             setIsLoading(true);
             setError(null);
             try {
-                const data = await bookingService.reservas();
+                const data = await bookingService.reservas(
+                    formatDateForApi(startDate),
+                    formatDateForApi(endDate)
+                );
                 const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
                 if (!cancelado) setBookings(filas);
             } catch (err) {
@@ -186,7 +220,7 @@ export default function BookingList() {
 
         cargarReservas();
         return () => { cancelado = true; };
-    }, []);
+    }, [startDate, endDate]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -277,6 +311,18 @@ export default function BookingList() {
                                 <option key={d} value={d}>{d}</option>
                             ))}
                         </select>
+                        <DatePicker
+                            selectsRange={true}
+                            startDate={startDate}
+                            endDate={endDate}
+                            onChange={handleDateChange}
+                            isClearable={true}
+                            placeholderText="Fecha de creación"
+                            locale="es"
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control form-control-sm"
+                            autoComplete="off"
+                        />
                     </div>
                     <div className="d-flex gap-2">
                         <SearchBar

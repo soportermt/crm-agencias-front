@@ -12,8 +12,12 @@ export const bookingService = {
         return data;
     },
 
-    async reservas() {
-        const { data } = await api.get("/reservas/getAgencySales");
+    async reservas(fechaInicio, fechaFin) {
+        const params = {};
+        if (fechaInicio) params.fecha_inicio = fechaInicio;
+        if (fechaFin) params.fecha_fin = fechaFin;
+    
+        const { data } = await api.get("/reservas/getAgencySales", { params });
         return data;
     },
 
