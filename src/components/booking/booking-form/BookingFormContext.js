@@ -36,16 +36,6 @@ export function BookingFormProvider({ children, initialData = null }) {
 
   const [draft, setDraft] = useState(null);
 
-  // const startDraft = (tipo, editingId = null, initialData = {}) => {
-  //   const catalogEntry = serviceCatalog.find((s) => s.id === tipo);
-  //   setDraft({
-  //     tipo,
-  //     editingId,
-  //     data: { ...catalogEntry.defaultData, ...initialData },
-  //     errors: {},
-  //   });
-  // };
-
   const startDraft = (tipo, editingId = null, initialData = {}) => {
     const catalogEntry = serviceCatalog.find((s) => s.id === tipo);
     let baseData = { ...catalogEntry.defaultData, ...initialData };
@@ -53,7 +43,7 @@ export function BookingFormProvider({ children, initialData = null }) {
     if (!editingId && booking.servicios.length > 0) {
       const pool = getPassengersPool(booking.servicios);
     
-      if (tipo === "traslado" || tipo === "tour") {
+      if (tipo !== "hospedaje") {
         const adultos = pool.adultos.length > 0 ? pool.adultos : baseData.pasajeros.adultos;
         const menores = pool.menores.length > 0 ? pool.menores : baseData.pasajeros.menores;
       
@@ -88,6 +78,19 @@ export function BookingFormProvider({ children, initialData = null }) {
           ],
         };
       }
+    }
+
+    if (tipo !== "hospedaje" && baseData.adultos === undefined) {
+      const adultosDefault = 2;
+      baseData = {
+        ...baseData,
+        adultos: adultosDefault,
+        menores: 0,
+        pasajeros: {
+          adultos: Array.from({ length: adultosDefault }, () => ({ nombre: "", apellidos: "" })),
+          menores: [],
+        },
+      };
     }
 
     setDraft({ tipo, editingId, data: baseData, errors: {} });

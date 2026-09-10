@@ -1,4 +1,4 @@
-const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "5": "tour" };
+const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "5": "tour", "6": "vuelos", "10": "otros" };
 
 function parseLocalDate(dateString) {
     if (!dateString || dateString === "0000-00-00") return null;
@@ -16,6 +16,12 @@ function normalizeHabitacion(hab) {
         ],
     };
 }
+
+function diaMesAnioToISODate({ dia, mes, año } = {}) {
+    if (!dia || !mes || !año) return "";
+    return `${año}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+}
+
 function mapVentaServicioToItem(vs) {
     const tipo = ID_TO_TIPO_SERVICIO[String(vs.id_tipo_servicio)];
     const desglose = vs.desglose || {};
@@ -49,7 +55,7 @@ function mapVentaServicioToItem(vs) {
         };
     }
 
-    if (tipo === "traslado") {
+    if (tipo === "traslado" || tipo === "vuelos") {
         data = {
             ...data,
             redondo: !!desglose.redondo,
@@ -62,10 +68,26 @@ function mapVentaServicioToItem(vs) {
             fee: vs.fee,
             providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
             provider: vs.id_proveedor,
+            descripcion: vs.descripcion,
         };
+
+
+        if (tipo === "vuelos") {
+            data.pasajeros = {
+                adultos: (desglose.pasajeros?.adultos || []).map((p) => ({
+                    ...p,
+                    fecha_nacimiento: diaMesAnioToISODate(p.fecha_nacimiento),
+                })),
+                menores: (desglose.pasajeros?.menores || []).map((p) => ({
+                    ...p,
+                    fecha_nacimiento: diaMesAnioToISODate(p.fecha_nacimiento),
+                })),
+            };
+        }
     }
 
-    if (tipo === "tour") {
+
+    if (tipo === "tour" || tipo === "otros") {
         data = {
             ...data,
             descripcion: vs.descripcion,

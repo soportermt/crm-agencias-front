@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
         padding: 0,
         position: "relative",
         fontFamily: "Inter",
+        paddingBottom: 120,
     },
     header: {
         width: 595,
@@ -194,6 +195,8 @@ const styles = StyleSheet.create({
 const TIPO_HOSPEDAJE = "1";
 const TIPO_TRASLADO = "2";
 const TIPO_TOUR = "5";
+const TIPO_VUELOS = "6";
+const TIPO_OTROS = "10";
 
 function parseDesglose(servicio) {
     if (!servicio?.desglose) return {};
@@ -220,6 +223,18 @@ function formatShortDate(date) {
             month: "short",
             year: "numeric",
         })
+        .replace(".", "");
+}
+
+function formatDiaMesAnio(fecha) {
+    const { dia, mes, año } = fecha || {};
+    if (!dia || !mes || !año) return "-";
+
+    const date = new Date(Number(año), Number(mes) - 1, Number(dia));
+    if (isNaN(date.getTime())) return "-";
+
+    return date
+        .toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })
         .replace(".", "");
 }
 
@@ -265,6 +280,8 @@ export default function BookingPdf({ venta, terminos }) {
                         const esHospedaje = String(servicio.id_tipo_servicio) === TIPO_HOSPEDAJE;
                         const esTraslado = String(servicio.id_tipo_servicio) === TIPO_TRASLADO;
                         const esTour = String(servicio.id_tipo_servicio) === TIPO_TOUR;
+                        const esVuelos = String(servicio.id_tipo_servicio) === TIPO_VUELOS;
+                        const esOtros = String(servicio.id_tipo_servicio) === TIPO_OTROS;
                         const d = servicio.desglose;
 
                         return (
@@ -308,32 +325,43 @@ export default function BookingPdf({ venta, terminos }) {
                                             </View>
                                         </View>
 
-                                        <Text style={styles.subtitle}>Habitaciones</Text>
+                                        <Text style={styles.subtitle} minPresenceAhead={60}>Habitaciones</Text>
+
+                                        {(d.habitaciones && d.habitaciones.length > 0) && (
+                                            <View style={styles.rowHab}>
+                                                <View style={{ width: "10%" }}>
+                                                    <Text style={styles.titleData}>No. Hab.</Text>
+                                                </View>
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Ocupación</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Tipo de cama</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Tipo de habitación</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Plan</Text>
+                                                </View>
+                                            </View>
+                                        )}
 
                                         {(d.habitaciones || []).map((habitacion, index) => (
                                             <View key={index} style={styles.rowHab}>
                                                 <View style={{ width: "10%" }}>
-                                                    <Text style={styles.titleData}>No. Hab.</Text>
                                                     <Text style={styles.data}>{index + 1}</Text>
                                                 </View>
-
                                                 <View style={{ width: "30%" }}>
-                                                    <Text style={styles.titleData}>Ocupación</Text>
                                                     <Text style={styles.data}>{habitacion.ocupacion}</Text>
                                                 </View>
-
                                                 <View style={{ width: "20%" }}>
-                                                    <Text style={styles.titleData}>Tipo de cama</Text>
                                                     <Text style={styles.data}>{habitacion.tipo_cama}</Text>
                                                 </View>
-
                                                 <View style={{ width: "20%" }}>
-                                                    <Text style={styles.titleData}>Tipo de habitación</Text>
                                                     <Text style={styles.data}>{habitacion.tipo_habitacion}</Text>
                                                 </View>
-
                                                 <View style={{ width: "20%" }}>
-                                                    <Text style={styles.titleData}>Plan</Text>
                                                     <Text style={styles.data}>{habitacion.plan?.toUpperCase()}</Text>
                                                 </View>
                                             </View>
@@ -341,24 +369,40 @@ export default function BookingPdf({ venta, terminos }) {
 
                                         <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
 
+                                        {(d.habitaciones && d.habitaciones.length > 0) && (
+                                            <View style={styles.rowHab}>
+                                                <View style={{ width: "35%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Edad</Text>
+                                                </View>
+                                                <View style={{ width: "25%" }}>
+                                                    <Text style={styles.titleData}>Habitación</Text>
+                                                </View>
+                                            </View>
+                                        )}
+
                                         {(d.habitaciones || []).map((hab, habIndex) => (
                                             <View key={habIndex}>
+
                                                 {hab.pasajeros?.adultos?.map((pasajero, pIndex) => (
                                                     <View key={`adulto-${habIndex}-${pIndex}`} style={styles.rowHab}>
                                                         <View style={{ width: "35%" }}>
-                                                            <Text style={styles.titleData}>Nombre Pasajero</Text>
                                                             <Text style={styles.data}>
                                                                 {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                             </Text>
                                                         </View>
-
                                                         <View style={{ width: "20%" }}>
-                                                            <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                             <Text style={styles.data}>Adulto</Text>
                                                         </View>
-
+                                                        <View style={{ width: "20%" }}>
+                                                            <Text style={styles.data}>-</Text>
+                                                        </View>
                                                         <View style={{ width: "25%" }}>
-                                                            <Text style={styles.titleData}>Habitación</Text>
                                                             <Text style={styles.data}>{hab.tipo_habitacion}</Text>
                                                         </View>
                                                     </View>
@@ -367,28 +411,22 @@ export default function BookingPdf({ venta, terminos }) {
                                                 {hab.pasajeros?.menores?.map((pasajero, pIndex) => (
                                                     <View key={`menor-${habIndex}-${pIndex}`} style={styles.rowHab}>
                                                         <View style={{ width: "35%" }}>
-                                                            <Text style={styles.titleData}>Nombre Pasajero</Text>
                                                             <Text style={styles.data}>
                                                                 {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                             </Text>
                                                         </View>
-
                                                         <View style={{ width: "20%" }}>
-                                                            <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                             <Text style={styles.data}>Menor</Text>
                                                         </View>
-
                                                         <View style={{ width: "20%" }}>
-                                                            <Text style={styles.titleData}>Edad</Text>
                                                             <Text style={styles.data}>{pasajero.edad}</Text>
                                                         </View>
-
                                                         <View style={{ width: "25%" }}>
-                                                            <Text style={styles.titleData}>Habitación</Text>
                                                             <Text style={styles.data}>{hab.tipo_habitacion}</Text>
                                                         </View>
                                                     </View>
                                                 ))}
+
                                             </View>
                                         ))}
                                     </>
@@ -470,18 +508,34 @@ export default function BookingPdf({ venta, terminos }) {
 
                                         <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
 
-                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
-                                            <View key={`adulto-${pIndex}`} style={styles.rowHab}>
+                                        {d.pasajeros && (d.pasajeros.adultos?.length > 0 || d.pasajeros.menores?.length > 0) && (
+                                            <View style={styles.rowHab}>
                                                 <View style={{ width: "50%" }}>
                                                     <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Edad</Text>
+                                                </View>
+                                            </View>
+                                        )}
+
+                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                            <View key={`adulto-${pIndex}`} style={styles.rowHab} wrap={false}>
+                                                <View style={{ width: "50%" }}>
                                                     <Text style={styles.data}>
                                                         {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                     </Text>
                                                 </View>
 
                                                 <View style={{ width: "30%" }}>
-                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                     <Text style={styles.data}>Adulto</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.data}>-</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -489,23 +543,258 @@ export default function BookingPdf({ venta, terminos }) {
                                         {d.pasajeros?.menores?.map((pasajero, pIndex) => (
                                             <View key={`menor-${pIndex}`} style={styles.rowHab}>
                                                 <View style={{ width: "50%" }}>
-                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
                                                     <Text style={styles.data}>
                                                         {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                     </Text>
                                                 </View>
 
                                                 <View style={{ width: "30%" }}>
-                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                     <Text style={styles.data}>Menor</Text>
                                                 </View>
 
                                                 <View style={{ width: "20%" }}>
-                                                    <Text style={styles.titleData}>Edad</Text>
                                                     <Text style={styles.data}>{pasajero.edad}</Text>
                                                 </View>
                                             </View>
                                         ))}
+                                    </>
+                                )}
+
+                                {esVuelos && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/plane.png"
+                                                style={[styles.serviceIcon, { backgroundColor: "rgba(117, 191, 6, 0.1)" }]}
+                                            />
+                                            <Text style={[styles.titleService, { color: "#75BF06" }]}>
+                                                Vuelos
+                                            </Text>
+                                        </View>
+
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Origen</Text>
+                                                <Text style={styles.data}>{d.origen}</Text>
+                                            </View>
+
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Destino</Text>
+                                                <Text style={styles.data}>{d.destino}</Text>
+                                            </View>
+
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Aerolínea</Text>
+                                                <Text style={styles.data}>{d.aerolinea || "-"}</Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                    {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Salida origen</Text>
+                                                <Text style={styles.data}>{d.salida_origen || "-"}</Text>
+                                            </View>
+
+                                            {!!Number(d.redondo) && (
+                                                <View style={{ width: "100%" }}>
+                                                    <Text style={styles.titleData}>Llegada destino</Text>
+                                                    <Text style={styles.data}>{d.llegada_destino || "-"}</Text>
+                                                </View>
+                                            )}
+                                        </View>
+
+                                        {!!Number(d.redondo) && (
+                                            <View style={styles.row}>
+                                                <View style={{ width: "100%" }}>
+                                                    <Text style={styles.titleData}>Salida destino</Text>
+                                                    <Text style={styles.data}>{d.salida_destino || "-"}</Text>
+                                                </View>
+                                                <View style={{ width: "100%" }}>
+                                                    <Text style={styles.titleData}>Llegada origen</Text>
+                                                    <Text style={styles.data}>{d.llegada_origen || "-"}</Text>
+                                                </View>
+                                                <View style={{ width: "100%" }} />
+                                            </View>
+                                        )}
+
+                                        {!!Number(d.escala) && (d.escalas_origen?.length > 0 || d.escalas_destino?.length > 0) && (
+                                            <>
+                                                {d.escalas_origen?.length > 0 && (
+                                                    <>
+                                                        <Text style={styles.subtitle} minPresenceAhead={60}>Escalas (ida)</Text>
+                                                        {d.escalas_origen.map((escala, eIndex) => (
+                                                            <View key={`escala-origen-${eIndex}`} style={styles.rowHab}>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Ciudad</Text>
+                                                                    <Text style={styles.data}>{escala.ciudad || "-"}</Text>
+                                                                </View>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Llegada</Text>
+                                                                    <Text style={styles.data}>
+                                                                        {formatShortDate(escala.fecha_llegada)} {escala.hora_llegada || ""}
+                                                                    </Text>
+                                                                </View>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Salida</Text>
+                                                                    <Text style={styles.data}>
+                                                                        {formatShortDate(escala.fecha_salida)} {escala.hora_salida || ""}
+                                                                    </Text>
+                                                                </View>
+                                                            </View>
+                                                        ))}
+                                                    </>
+                                                )}
+
+                                                {d.escalas_destino?.length > 0 && (
+                                                    <>
+                                                        <Text style={styles.subtitle} minPresenceAhead={60}>Escalas (regreso)</Text>
+                                                        {d.escalas_destino.map((escala, eIndex) => (
+                                                            <View key={`escala-destino-${eIndex}`} style={styles.rowHab}>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Ciudad</Text>
+                                                                    <Text style={styles.data}>{escala.ciudad || "-"}</Text>
+                                                                </View>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Llegada</Text>
+                                                                    <Text style={styles.data}>
+                                                                        {formatShortDate(escala.fecha_llegada)} {escala.hora_llegada || ""}
+                                                                    </Text>
+                                                                </View>
+                                                                <View style={{ width: "25%" }}>
+                                                                    <Text style={styles.titleData}>Salida</Text>
+                                                                    <Text style={styles.data}>
+                                                                        {formatShortDate(escala.fecha_salida)} {escala.hora_salida || ""}
+                                                                    </Text>
+                                                                </View>
+                                                            </View>
+                                                        ))}
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
+
+                                        <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
+
+                                        {d.pasajeros?.adultos?.length > 0 && (
+                                            <>
+                                                <View style={styles.rowHab} wrap={false}>
+                                                    <View style={{ width: d.internacional ? "30%" : "50%" }}>
+                                                        <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    </View>
+                                                    <View style={{ width: d.internacional ? "15%" : "30%" }}>
+                                                        <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    </View>
+                                                    {!!Number(d.internacional) && (
+                                                        <>
+                                                            <View style={{ width: "20%" }}>
+                                                                <Text style={styles.titleData}>Fecha nacimiento</Text>
+                                                            </View>
+                                                            <View style={{ width: "17%" }}>
+                                                                <Text style={styles.titleData}>No. Pasaporte</Text>
+                                                            </View>
+                                                            <View style={{ width: "17%" }}>
+                                                                <Text style={styles.titleData}>No. Visa</Text>
+                                                            </View>
+                                                        </>
+                                                    )}
+                                                </View>
+
+                                                {d.pasajeros.adultos.map((pasajero, pIndex) => (
+                                                    <View key={`adulto-${pIndex}`} style={styles.rowHab} wrap={false}>
+                                                        <View style={{ width: d.internacional ? "30%" : "50%" }}>
+                                                            <Text style={styles.data}>{`${pasajero.nombre} ${pasajero.apellidos}`}</Text>
+                                                        </View>
+                                                        <View style={{ width: d.internacional ? "15%" : "30%" }}>
+                                                            <Text style={styles.data}>Adulto</Text>
+                                                        </View>
+                                                        {!!Number(d.internacional) && (
+                                                            <>
+                                                                <View style={{ width: "20%" }}>
+                                                                    <Text style={styles.data}>{formatDiaMesAnio(pasajero.fecha_nacimiento)}</Text>
+                                                                </View>
+                                                                <View style={{ width: "17%" }}>
+                                                                    <Text style={styles.data}>{pasajero.no_pasaporte || "-"}</Text>
+                                                                </View>
+                                                                <View style={{ width: "17%" }}>
+                                                                    <Text style={styles.data}>{pasajero.no_visa || "-"}</Text>
+                                                                </View>
+                                                            </>
+                                                        )}
+                                                    </View>
+                                                ))}
+                                            </>
+                                        )}
+
+                                        {d.pasajeros?.menores?.length > 0 && (
+                                            <>
+                                                <View style={[styles.rowHab, { marginTop: 8 }]} wrap={false}>
+                                                    <View style={{ width: d.internacional ? "25%" : "50%" }}>
+                                                        <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                    </View>
+                                                    <View style={{ width: d.internacional ? "13%" : "30%" }}>
+                                                        <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    </View>
+                                                    <View style={{ width: d.internacional ? "12%" : "20%" }}>
+                                                        <Text style={styles.titleData}>Edad</Text>
+                                                    </View>
+                                                    {!!Number(d.internacional) && (
+                                                        <>
+                                                            <View style={{ width: "20%" }}>
+                                                                <Text style={styles.titleData}>Fecha nacimiento</Text>
+                                                            </View>
+                                                            <View style={{ width: "15%" }}>
+                                                                <Text style={styles.titleData}>No. Pasaporte</Text>
+                                                            </View>
+                                                            <View style={{ width: "15%" }}>
+                                                                <Text style={styles.titleData}>No. Visa</Text>
+                                                            </View>
+                                                        </>
+                                                    )}
+                                                </View>
+
+                                                {d.pasajeros.menores.map((pasajero, pIndex) => (
+                                                    <View key={`menor-${pIndex}`} style={styles.rowHab} wrap={false}>
+                                                        <View style={{ width: d.internacional ? "25%" : "50%" }}>
+                                                            <Text style={styles.data}>{`${pasajero.nombre} ${pasajero.apellidos}`}</Text>
+                                                        </View>
+                                                        <View style={{ width: d.internacional ? "13%" : "30%" }}>
+                                                            <Text style={styles.data}>Menor</Text>
+                                                        </View>
+                                                        <View style={{ width: d.internacional ? "12%" : "20%" }}>
+                                                            <Text style={styles.data}>{pasajero.edad}</Text>
+                                                        </View>
+                                                        {!!Number(d.internacional) && (
+                                                            <>
+                                                                <View style={{ width: "20%" }}>
+                                                                    <Text style={styles.data}>{formatDiaMesAnio(pasajero.fecha_nacimiento)}</Text>
+                                                                </View>
+                                                                <View style={{ width: "15%" }}>
+                                                                    <Text style={styles.data}>{pasajero.no_pasaporte || "-"}</Text>
+                                                                </View>
+                                                                <View style={{ width: "15%" }}>
+                                                                    <Text style={styles.data}>{pasajero.no_visa || "-"}</Text>
+                                                                </View>
+                                                            </>
+                                                        )}
+                                                    </View>
+                                                ))}
+                                            </>
+                                        )}
                                     </>
                                 )}
 
@@ -544,18 +833,34 @@ export default function BookingPdf({ venta, terminos }) {
 
                                         <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
 
-                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
-                                            <View key={`adulto-${pIndex}`} style={styles.rowHab}>
+                                        {d.pasajeros && (d.pasajeros.adultos?.length > 0 || d.pasajeros.menores?.length > 0) && (
+                                            <View style={styles.rowHab}>
                                                 <View style={{ width: "50%" }}>
                                                     <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.titleData}>Edad</Text>
+                                                </View>
+                                            </View>
+                                        )}
+
+                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                            <View key={`adulto-${pIndex}`} style={styles.rowHab} wrap={false}>
+                                                <View style={{ width: "50%" }}>
                                                     <Text style={styles.data}>
                                                         {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                     </Text>
                                                 </View>
 
                                                 <View style={{ width: "30%" }}>
-                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                     <Text style={styles.data}>Adulto</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.data}>-</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -563,19 +868,103 @@ export default function BookingPdf({ venta, terminos }) {
                                         {d.pasajeros?.menores?.map((pasajero, pIndex) => (
                                             <View key={`menor-${pIndex}`} style={styles.rowHab}>
                                                 <View style={{ width: "50%" }}>
-                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
                                                     <Text style={styles.data}>
                                                         {`${pasajero.nombre} ${pasajero.apellidos}`}
                                                     </Text>
                                                 </View>
 
                                                 <View style={{ width: "30%" }}>
-                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
                                                     <Text style={styles.data}>Menor</Text>
                                                 </View>
 
                                                 <View style={{ width: "20%" }}>
+                                                    <Text style={styles.data}>{pasajero.edad}</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+
+                                {esOtros && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/plus.png"
+                                                style={[styles.serviceIcon, { backgroundColor: "rgba(231, 241, 254, 0.6)" }]}
+                                            />
+                                            <Text style={[styles.titleService, { color: "#0C5CC6" }]}>
+                                                Otros
+                                            </Text>
+                                        </View>
+
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                    {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Descripción</Text>
+                                                <Text style={styles.data}>{servicio.descripcion}</Text>
+                                            </View>
+                                        </View>
+
+                                        <Text style={[styles.title, { marginVertical: 8 }]}>Datos de pasajeros</Text>
+
+                                        {d.pasajeros && (d.pasajeros.adultos?.length > 0 || d.pasajeros.menores?.length > 0) && (
+                                            <View style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.titleData}>Nombre Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                </View>
+                                                <View style={{ width: "20%" }}>
                                                     <Text style={styles.titleData}>Edad</Text>
+                                                </View>
+                                            </View>
+                                        )}
+
+                                        {d.pasajeros?.adultos?.map((pasajero, pIndex) => (
+                                            <View key={`adulto-${pIndex}`} style={styles.rowHab} wrap={false}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.data}>Adulto</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
+                                                    <Text style={styles.data}>-</Text>
+                                                </View>
+                                            </View>
+                                        ))}
+
+                                        {d.pasajeros?.menores?.map((pasajero, pIndex) => (
+                                            <View key={`menor-${pIndex}`} style={styles.rowHab}>
+                                                <View style={{ width: "50%" }}>
+                                                    <Text style={styles.data}>
+                                                        {`${pasajero.nombre} ${pasajero.apellidos}`}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={{ width: "30%" }}>
+                                                    <Text style={styles.data}>Menor</Text>
+                                                </View>
+
+                                                <View style={{ width: "20%" }}>
                                                     <Text style={styles.data}>{pasajero.edad}</Text>
                                                 </View>
                                             </View>

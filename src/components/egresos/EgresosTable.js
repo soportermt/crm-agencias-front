@@ -18,12 +18,12 @@ const CATEGORY_STYLES = {
   Traslado: { backgroundColor: "#f4faeb", color: "#0f1901" },
   // Grupo:                   { backgroundColor: "rgba(230,174,44,0.1)", color: "#0f1901" },
   // Boda:                    { backgroundColor: "rgba(175,35,58,0.1)", color: "#af233a" },
-  Circuitos: { backgroundColor: "rgba(64, 64, 64, 0.08)", color: "#0f1901" },
-  // Vuelos:                  { backgroundColor: "#e7f1fe", color: "#227cf2" },
+  Tour: { backgroundColor: "rgba(64, 64, 64, 0.08)", color: "#0f1901" },
+  Vuelos:                  { backgroundColor: "#e7f1fe", color: "#227cf2" },
   // "Renta de autos":        { backgroundColor: "rgba(185,134,31,0.15)", color: "#b9861f" },
   // "Actividades Turísticas": { backgroundColor: "#ecfdf3", color: "#037847" },
   // "Renta de Transporte":   { backgroundColor: "rgba(230,174,44,0.15)", color: "#b9861f" },
-  // Otros:                   { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" },
+  Otros:                   { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" },
 };
 
 const DIAS_STYLES = {
