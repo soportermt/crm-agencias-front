@@ -12,10 +12,11 @@ export const bookingService = {
         return data;
     },
 
-    async reservas(fechaInicio, fechaFin) {
+    async reservas(fechaInicio, fechaFin, idTipoServicio) {
         const params = {};
         if (fechaInicio) params.fecha_inicio = fechaInicio;
         if (fechaFin) params.fecha_fin = fechaFin;
+        if (idTipoServicio) params.id_tipo_servicio = idTipoServicio;
     
         const { data } = await api.get("/reservas/getAgencySales", { params });
         return data;

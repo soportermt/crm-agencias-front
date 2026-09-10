@@ -10,6 +10,7 @@ import Link from "next/link";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
+import { catalogosService } from "@/services/catalogos.service";
 
 const COLUMNS = [
     { key: "folio", label: "Folio", width: "140px", align: "start" },
@@ -180,7 +181,8 @@ export default function BookingList() {
 
     const [startDate, setStartDate] = useState(() => getDefaultRange15Dias().start);
     const [endDate, setEndDate] = useState(() => getDefaultRange15Dias().end);
-
+    const [servicios, setServicios] = useState([]);
+    const [servicioFilter, setServicioFilter] = useState("");
 
     function handleDateChange(dates) {
         const [start, end] = dates;
@@ -195,32 +197,47 @@ export default function BookingList() {
         const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
     }
-    
-    useEffect(() => {
-        if (startDate && !endDate) return;
-        let cancelado = false;
 
-        async function cargarReservas() {
-            setIsLoading(true);
-            setError(null);
+    useEffect(() => {
+        let cancelado = false;
+        async function cargarServicios() {
             try {
-                const data = await bookingService.reservas(
-                    formatDateForApi(startDate),
-                    formatDateForApi(endDate)
-                );
-                const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
-                if (!cancelado) setBookings(filas);
+                const data = await catalogosService.servicios();
+                if (!cancelado) setServicios(data || []);
             } catch (err) {
-                console.error("Error al cargar reservas:", err);
-                if (!cancelado) setError("No se pudieron cargar las reservaciones.");
-            } finally {
-                if (!cancelado) setIsLoading(false);
+                console.error("Error al cargar catálogo de servicios:", err);
             }
         }
-
-        cargarReservas();
+        cargarServicios();
         return () => { cancelado = true; };
-    }, [startDate, endDate]);
+    }, []);
+
+    useEffect(() => {
+    if (startDate && !endDate) return;
+    let cancelado = false;
+
+    async function cargarReservas() {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await bookingService.reservas(
+                formatDateForApi(startDate),
+                formatDateForApi(endDate),
+                servicioFilter
+            );
+            const filas = Array.isArray(data) ? data.map(mapVentaToRow) : [];
+            if (!cancelado) setBookings(filas);
+        } catch (err) {
+            console.error("Error al cargar reservas:", err);
+            if (!cancelado) setError("No se pudieron cargar las reservaciones.");
+        } finally {
+            if (!cancelado) setIsLoading(false);
+        }
+    }
+
+    cargarReservas();
+    return () => { cancelado = true; };
+}, [startDate, endDate, servicioFilter]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -269,7 +286,8 @@ export default function BookingList() {
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
                     <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <select name="estado"
+                        <select
+                            name="categorias"
                             className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
                             style={{
                                 height: "30px",
@@ -281,34 +299,16 @@ export default function BookingList() {
                                 fontWeight: 400,
                                 appearance: "none",
                                 textAlign: "start",
-                                width: "fit-content"
+                                width: "fit-content",
                             }}
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
+                            value={servicioFilter}
+                            onChange={(e) => setServicioFilter(e.target.value)}
                         >
-                            <option value="">Todos los estados</option>
-                            <option value="venta">Venta</option>
-                        </select>
-                        <select name="destino"
-                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                            style={{
-                                height: "30px",
-                                borderRadius: "8px",
-                                borderColor: "#d0d5dd",
-                                backgroundColor: "#fff",
-                                fontSize: "13px",
-                                color: "#0f1901",
-                                fontWeight: 400,
-                                appearance: "none",
-                                textAlign: "start",
-                                width: "fit-content"
-                            }}
-                            value={destinationFilter}
-                            onChange={(e) => setDestinationFilter(e.target.value)}
-                        >
-                            <option value="">Todos los destinos</option>
-                            {[...new Set(bookings.map((b) => b.destino))].filter(Boolean).map((d) => (
-                                <option key={d} value={d}>{d}</option>
+                            <option value="">Todas las categorias</option>
+                            {servicios.map((s) => (
+                                <option key={s.id_servicio} value={s.id_servicio}>
+                                    {s.tipo_servicio}
+                                </option>
                             ))}
                         </select>
                         <DatePicker
