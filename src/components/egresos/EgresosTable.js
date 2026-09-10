@@ -14,16 +14,11 @@ import { es } from "date-fns/locale";
 registerLocale("es", es);
 
 const CATEGORY_STYLES = {
-  Hospedaje: { backgroundColor: "#e7f1fe", color: "#0f1901" },
-  Traslado: { backgroundColor: "#f4faeb", color: "#0f1901" },
-  // Grupo:                   { backgroundColor: "rgba(230,174,44,0.1)", color: "#0f1901" },
-  // Boda:                    { backgroundColor: "rgba(175,35,58,0.1)", color: "#af233a" },
-  Tour: { backgroundColor: "rgba(64, 64, 64, 0.08)", color: "#0f1901" },
-  Vuelos:                  { backgroundColor: "#e7f1fe", color: "#227cf2" },
-  // "Renta de autos":        { backgroundColor: "rgba(185,134,31,0.15)", color: "#b9861f" },
-  // "Actividades Turísticas": { backgroundColor: "#ecfdf3", color: "#037847" },
-  // "Renta de Transporte":   { backgroundColor: "rgba(230,174,44,0.15)", color: "#b9861f" },
-  Otros:                   { backgroundColor: "rgba(64,64,64,0.1)", color: "#0f1901" },
+  Hospedaje: { backgroundColor: "#e0e7ff", color: "#3730a3" }, 
+  Traslado:  { backgroundColor: "#dcfce7", color: "#166534" }, 
+  Tour:      { backgroundColor: "#ffedd5", color: "#9a3412" }, 
+  Vuelos:    { backgroundColor: "#e0f2fe", color: "#0369a1" }, 
+  Otros:     { backgroundColor: "#f3f4f6", color: "#374151" }, 
 };
 
 const DIAS_STYLES = {
@@ -82,7 +77,10 @@ function getDiasEstadoInfo(fechaLimite) {
   const diffDias = Math.round((fecha - hoy) / (1000 * 60 * 60 * 24));
 
   if (diffDias < 0) {
-    return { estado: "Vencido", diasLabel: "Vencido" };
+    return { 
+      estado: "Vencido", 
+      diasLabel: diffDias === -1 ? "-1 día" : `${diffDias} días` 
+    };
   }
   if (diffDias <= 15) {
     return {

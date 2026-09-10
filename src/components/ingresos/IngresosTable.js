@@ -21,6 +21,7 @@ const COLUMNS = [
   { key: "tarifa_publica", label: "Total Publico", width: "100px", align: "end" },
   { key: "fee", label: "Fee", width: "100px", align: "end" },
   { key: "moneda", label: "Moneda", width: "130px", align: "end" },
+  { key: "diasRestantes", label: "Días restantes", width: "130px", align: "center" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
 ];
 
@@ -62,30 +63,59 @@ function formatDateRange(inicio, fin) {
   return `${dInicio} a ${dFin}`;
 }
 
+// export function getEstatusByFechaLimite(fechaLimiteStr) {
+//   const fechaLimite = parseLocalDate(fechaLimiteStr);
+//   if (!fechaLimite) return "Pendiente";
+
+//   const hoy = new Date();
+//   hoy.setHours(0, 0, 0, 0);
+//   fechaLimite.setHours(0, 0, 0, 0);
+
+//   const diffTime = fechaLimite.getTime() - hoy.getTime();
+//   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+//   if (diffDays < 0) {
+//     return "Vencido";
+//   } else if (diffDays <= 7) {
+//     return "Próximo a vencer";
+//   } else {
+//     return "Pendiente";
+//   }
+// }
+
 export function getEstatusByFechaLimite(fechaLimiteStr) {
   const fechaLimite = parseLocalDate(fechaLimiteStr);
-  if (!fechaLimite) return "Pendiente";
+  if (!fechaLimite) return { estado: "Pendiente", diasLabel: "-" };
 
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   fechaLimite.setHours(0, 0, 0, 0);
 
   const diffTime = fechaLimite.getTime() - hoy.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {
-    return "Vencido";
+    return {
+      estado: "Vencido",
+      diasLabel: diffDays === -1 ? "-1 día" : `${diffDays} días`,
+    };
   } else if (diffDays <= 7) {
-    return "Próximo a vencer";
+    return {
+      estado: "Próximo a vencer",
+      diasLabel: diffDays === 0 ? "Hoy" : `${diffDays} día${diffDays === 1 ? "" : "s"}`,
+    };
   } else {
-    return "Pendiente";
+    return {
+      estado: "Pendiente",
+      diasLabel: `${diffDays} días`,
+    };
   }
 }
 
 function exportToCSV(data) {
   if (!data.length) return;
 
-  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Fee", "Moneda", "Estatus"];
+  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Fee", "Moneda", "Días restantes", "Estatus"];
 
   const rows = data.map((row) => [
     row.folio,
@@ -97,6 +127,8 @@ function exportToCSV(data) {
     row.fee,
     row.moneda,
     getEstatusByFechaLimite(row.fecha_limite),
+    diasLabel,
+    estado
   ]);
 
   const escapeCsvValue = (value) => {
@@ -156,7 +188,9 @@ export default function IngresosTable({
   };
 
   const renderCell = (key, row) => {
-    const estatusCalculado = getEstatusByFechaLimite(row.fecha_limite);
+    // const estatusCalculado = getEstatusByFechaLimite(row.fecha_limite);
+
+    const { estado, diasLabel } = getEstatusByFechaLimite(row.fecha_limite);
 
     switch (key) {
       case "folio":
@@ -171,8 +205,8 @@ export default function IngresosTable({
           <span
             className="font-inter"
             style={{
-              color: estatusCalculado === "Vencido" ? "#dc2626" : estatusCalculado === "Próximo a vencer" ? "#EF6905" : "#0f1901",
-              fontWeight: estatusCalculado === "Vencido" ? 600 : 400,
+              color: estado === "Vencido" ? "#dc2626" : estado === "Próximo a vencer" ? "#EF6905" : "#0f1901",
+              fontWeight: estado === "Vencido" ? 600 : 400,
             }}
           >
             {formatDateRange(row.fecha_limite)}
@@ -200,8 +234,18 @@ export default function IngresosTable({
           </span>
         );
 
+      case "diasRestantes":
+        return (
+          <span
+            className="font-inter fw-medium"
+            style={{ color: estado === "Vencido" ? "#dc2626" : "#374151" }}
+          >
+            {diasLabel}
+          </span>
+        );
+
       case "estatus":
-        return <StatusBadge status={estatusCalculado} />;
+        return <StatusBadge status={estado} />;
 
       case "acciones":
         return (
