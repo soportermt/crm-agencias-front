@@ -74,7 +74,7 @@ export default function HospedajeForm() {
 
   return (
     <div className="form-booking">
-      <div className="row g-3 mb-2 justify-content-end align-items-end">
+      <div className="row g-3 mb-2 justify-content-start align-items-end">
         <div className="col-12 col-md-4">
           <ProviderSelect
             value={data.provider}
@@ -152,11 +152,11 @@ export default function HospedajeForm() {
             autoComplete='off'
           />
         </div>
-        <div className="col-12 col-md-4">
+        {/* <div className="col-12 col-md-4">
           <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#75BF06", borderColor: "#75BF06" }}>
             + Habitación
           </button>
-        </div>
+        </div> */}
       </div>
 
       {data.habitaciones.map((p, i) => (
@@ -332,15 +332,25 @@ export default function HospedajeForm() {
             );
           })}
 
-          <div className="row mb-2 justify-content-end align-items-center">
-            <div className="col-12 col-md-4 text-end m-0">
-              <button type="button" className="btn btn-outline-danger" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>
+          <div className="row mb-2 justify-content-start align-items-center">
+            <div className="col-12 col-md-4 text-start mt-2">
+              <button type="button" className="btn btn-outline-danger w-100" onClick={() => removePasajero(i)} style={{ fontSize: 14, fontWeight: 500 }}>
                 Eliminar habitación
               </button>
             </div>
           </div>
         </div>
       ))}
+      {/*       
+      {data.habitaciones.length > 0 && ( */}
+      <div className="row mb-2 justify-content-end align-items-center">
+        <div className="col-12 col-md-4">
+          <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#75BF06", borderColor: "#75BF06" }}>
+            + Habitación
+          </button>
+        </div>
+      </div>
+      {/* )} */}
 
       <div className="row">
         <div className="col-12 col-md-4">
