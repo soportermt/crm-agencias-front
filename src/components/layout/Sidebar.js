@@ -52,8 +52,8 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
   const isExpanded = isPinned || isHovered;
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     router.push("/login");
   };
 

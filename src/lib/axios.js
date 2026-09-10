@@ -13,7 +13,6 @@ if (process.env.NODE_ENV === 'development' && connectivityUrl.startsWith('http')
     try {
         const urlObj = new URL(connectivityUrl);
         connectivityBase = `/api-connectivity${urlObj.pathname}`;
-        // Remove trailing slash if it exists
         if (connectivityBase.endsWith('/')) {
             connectivityBase = connectivityBase.slice(0, -1);
         }
@@ -30,7 +29,6 @@ export const connectivityApi = axios.create({
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('auth_token');
-        
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -47,5 +45,75 @@ connectivityApi.interceptors.request.use((config) => {
     }
     return config;
 });
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+    failedQueue.forEach((prom) => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    failedQueue = [];
+};
+
+const setupResponseInterceptor = (instance) => {
+    instance.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+            const originalRequest = error.config;
+
+            if (error.response && error.response.status === 401 && originalRequest && !originalRequest._retry) {
+                const url = originalRequest.url || "";
+                if (url.includes("auth/login") || url.includes("auth/refresh")) {
+                    return Promise.reject(error);
+                }
+
+                if (isRefreshing) {
+                    return new Promise((resolve, reject) => {
+                        failedQueue.push({ resolve, reject });
+                    })
+                        .then((token) => {
+                            if (token) {
+                                originalRequest.headers.Authorization = `Bearer ${token}`;
+                            }
+                            return instance(originalRequest);
+                        })
+                        .catch((err) => Promise.reject(err));
+                }
+
+                originalRequest._retry = true;
+                isRefreshing = true;
+
+                try {
+                    const refreshData = await authService.refreshToken();
+                    if (refreshData && refreshData.token) {
+                        processQueue(null, refreshData.token);
+                        originalRequest.headers.Authorization = `Bearer ${refreshData.token}`;
+                        return instance(originalRequest);
+                    } else {
+                        processQueue(new Error("Refresh token invalido"), null);
+                        authService.logout();
+                        return Promise.reject(error);
+                    }
+                } catch (refreshError) {
+                    processQueue(refreshError, null);
+                    authService.logout();
+                    return Promise.reject(refreshError);
+                } finally {
+                    isRefreshing = false;
+                }
+            }
+
+            return Promise.reject(error);
+        }
+    );
+};
+
+setupResponseInterceptor(api);
+setupResponseInterceptor(connectivityApi);
 
 export default api;
