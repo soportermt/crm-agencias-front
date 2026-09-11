@@ -1,12 +1,50 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
 import ExportButton from "@/components/common/ExportButton";
 import FilterButton from "@/components/common/FilterButton";
 import { clientsService } from "@/services/clients.service";
+
+function exportToCSV(data) {
+  if (!data.length) return;
+
+  const headers = ["Folio", "Fecha de venta", "Destino", "Descripción", "Total", "Moneda"];
+
+  const rows = data.map((row) => [
+    row.folio,
+    row.date,
+    row.destination,
+    row.description,
+    row.total,
+    row.currency,
+  ]);
+
+  const escapeCsvValue = (value) => {
+    const str = String(value ?? "");
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvContent = [headers, ...rows]
+    .map((r) => r.map(escapeCsvValue).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `historial_compras_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 export default function ClientProfilePurchases({ clientId }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,10 +64,9 @@ export default function ClientProfilePurchases({ clientId }) {
         setLoading(true);
         if (clientId) {
           const data = await clientsService.getClientPurchases(clientId);
-          // For demo mapping, ensure we format them for the table
           const formattedData = data.map((d) => ({
             id: d.id,
-            code: d.title || `Folio ${d.id}`,
+            folio: d.title || `Folio ${d.id}`,
             date: d.date ? d.date.split("-").reverse().join("/") : "N/A",
             destination: d.destination || "No especificado",
             description: d.details || "Sin descripción",
@@ -62,7 +99,7 @@ export default function ClientProfilePurchases({ clientId }) {
     const matchesSearch =
       item.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase());
+      item.folio.toLowerCase().includes(searchTerm.toLowerCase());
 
     const itemDate = parseDate(item.date);
     const start = new Date(dateRange.startDate);
@@ -79,14 +116,30 @@ export default function ClientProfilePurchases({ clientId }) {
   const paginatedPurchases = filteredPurchases.slice(startIndex, startIndex + itemsPerPage);
 
   const columns = [
-    { key: "id", label: "ID", sortable: true, width: "80px" },
-    { key: "code", label: "Código de confirmación", sortable: true, width: "225px" },
+    { key: "folio", label: "Folio", sortable: true, width: "225px" },
     { key: "date", label: "Fecha de venta", sortable: true, width: "155px" },
     { key: "destination", label: "Destino", sortable: true, width: "155px" },
     { key: "description", label: "Descripción", sortable: true, width: "155px" },
     { key: "total", label: "Total", sortable: true, width: "155px", align: "end" },
     { key: "currency", label: "Moneda", sortable: true, width: "130px" },
   ];
+
+  const renderCell = (key, row) => {
+    if (key === "folio") {
+      return (
+        <Link
+          className="font-inter fw-semibold text-brand-blue"
+          style={{ textDecoration: "none" }}
+          href={`/reservaciones/editar/${row.id}`}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {row.folio}
+        </Link>
+      );
+    }
+    return row[key];
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -101,7 +154,10 @@ export default function ClientProfilePurchases({ clientId }) {
           Historial de compras
         </h3>
         
-        <ExportButton onExport={() => console.log("Exportar historial de compras")} />
+        <ExportButton
+          onExport={() => exportToCSV(filteredPurchases)}
+          disabled={filteredPurchases.length === 0}
+        />
       </div>
 
       {/* Filtros e Input de Búsqueda */}
@@ -124,6 +180,7 @@ export default function ClientProfilePurchases({ clientId }) {
         <DataTable
           columns={columns}
           data={paginatedPurchases}
+          renderCell={renderCell}
           minWidth="1000px"
           emptyMessage="No se encontraron compras."
           pagination={true}

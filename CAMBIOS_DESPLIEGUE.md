@@ -73,14 +73,17 @@ Cuando se usa `output: 'export'` y `basePath: '/app'`:
 2. **Fuentes e Imágenes de React-PDF (`@react-pdf/renderer`)**:
    - Dado que React-PDF se ejecuta en el navegador/canvas fuera del pipeline de Next.js, se configuraron rutas absolutas con `/app/`:
      - En `src/components/pdf/fonts.js`: `/app/fonts/Inter-...ttf`.
-     - En `src/components/pdf/BookingPdf.js`: `/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `map.png`, `location.png`, `email.png`, `phone-call.png`.
+     - En `src/components/pdf/BookingPdf.js`: `/app/pdf/header-pdf.png`, `bed.png`, `van.png`, `plane.png`, `map.png`, `plus.png`, `location.png`, `email.png`, `phone-call.png`.
      - Manejo de fallback para logotipo de agencia en `BookingPdf.js`: si la agencia no dispone de logotipo, se utiliza `/app/2bt2025.png` para prevenir errores de carga.
 
 3. **Logotipo en `Sidebar.js`**:
    - Se configuró el logotipo por defecto hacia `/app/2bt2025.png`.
    - Para logotipos remotos de agencias se utiliza protocolo seguro `https://` y un manejador `onError` que recurre automáticamente a `/app/2bt2025.png` si la imagen de la agencia falla o no existe.
 
-4. **Compatibilidad del Módulo de Proveedores**:
+4. **Avatares en `RightBar.js`**:
+   - Se configuró el prefijo explícito `/app/avatars/...` para los avatares generados.
+
+5. **Compatibilidad del Módulo de Proveedores**:
    - La nueva ruta `/proveedores` (`src/app/(crm)/proveedores/page.js`) opera de forma totalmente estática y autónoma con modales en la misma vista, siendo 100% compatible con la exportación estática sin requerir rutas dinámicas adicionales.
 
 ## 5. Configuración del Servidor Web (`public/.htaccess`)
