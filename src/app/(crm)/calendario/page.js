@@ -21,7 +21,9 @@ import Link from 'next/link';
 const TYPE_COLORS = {
     'Hospedaje': '#2563eb',
     'Traslado': '#ea580c',
-    'Circuitos': '#059669',
+    'Tours': '#059669',
+    'Vuelos': '#B331F1',
+    'Otros': '#FA6781',
 };
 
 function formatLimitDate(dateStr) {
