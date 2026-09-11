@@ -6,6 +6,8 @@ import PaymentsPromisesModal from '@/components/common/PaymentsPromisesModal';
 import { bookingService } from '@/services/booking.service';
 import Link from 'next/link';
 import { configService } from '@/services/config.service';
+import BookingPdf from '@/components/pdf/BookingPdf';
+import { pdf } from '@react-pdf/renderer';
 
 const PdfViewer = dynamic(
   () => import("@/components/pdf/PdfViewer"),
@@ -21,6 +23,32 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
   const [paymentsPromises, setPaymentsPromises] = useState([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
   const [term, setTerm] = useState(null);
+
+  const [sendingInvoice, setSendingInvoice] = useState(false);
+
+  const handleSendInvoice = async () => {
+    setSendingInvoice(true);
+    try {
+      const blob = await pdf(<BookingPdf venta={rawVenta} terminos={term} />).toBlob();
+
+      const formData = new FormData();
+      formData.append("id", rawVenta.id_venta);
+      formData.append("pdf", blob, `comprobante-${rawVenta.id_venta}.pdf`);
+
+      const result = await bookingService.sendInvoice(formData);
+
+      if (result.success) {
+        console.log("enviado---");
+
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Error al enviar comprobante:", error);
+    } finally {
+      setSendingInvoice(false);
+    }
+  };
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -178,8 +206,21 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
           Promesa de pago
         </button>
       )}
-      {isEditMode && (
+      {/* {isEditMode && (
         <PdfViewer venta={rawVenta} customer={booking?.customer} terminos={term} />
+      )} */}
+      {isEditMode && (
+        <>
+          <PdfViewer venta={rawVenta} customer={booking?.customer} terminos={term} />
+          <button
+            type="button"
+            className="btn btn-outline-primary w-100 mt-2"
+            disabled={sendingInvoice}
+            onClick={handleSendInvoice}
+          >
+            {sendingInvoice ? "Enviando..." : "Enviar comprobante por correo"}
+          </button>
+        </>
       )}
 
 

@@ -303,58 +303,64 @@ export default function BookingList() {
                     Lista de reservaciones
                 </h1>
                 <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
-                    <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-                        <select
-                            name="categorias"
-                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                            style={{
-                                height: "30px",
-                                borderRadius: "8px",
-                                borderColor: "#d0d5dd",
-                                backgroundColor: "#fff",
-                                fontSize: "13px",
-                                color: "#0f1901",
-                                fontWeight: 400,
-                                appearance: "none",
-                                textAlign: "start",
-                                width: "fit-content",
-                            }}
-                            value={servicioFilter}
-                            onChange={(e) => setServicioFilter(e.target.value)}
-                        >
-                            <option value="">Todas las categorias</option>
-                            {servicios.map((s) => (
-                                <option key={s.id_servicio} value={s.id_servicio}>
-                                    {s.tipo_servicio}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            name="clientes"
-                            className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                            style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "fit-content" }}
-                            value={clienteFilter}
-                            onChange={(e) => setClienteFilter(e.target.value)}
-                        >
-                            <option value="">Todos los clientes</option>
-                            {clientes.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.name}
-                                </option>
-                            ))}
-                        </select>
-                        <DatePicker
-                            selectsRange={true}
-                            startDate={startDate}
-                            endDate={endDate}
-                            onChange={handleDateChange}
-                            isClearable={true}
-                            placeholderText="Fecha de creación"
-                            locale="es"
-                            dateFormat="dd/MM/yyyy"
-                            className="form-control form-control-sm"
-                            autoComplete="off"
-                        />
+                    <div className="d-flex gap-2">
+                        <div className="col-md-4">
+                            <select
+                                name="categorias"
+                                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                                style={{
+                                    height: "30px",
+                                    borderRadius: "8px",
+                                    borderColor: "#d0d5dd",
+                                    backgroundColor: "#fff",
+                                    fontSize: "13px",
+                                    color: "#0f1901",
+                                    fontWeight: 400,
+                                    appearance: "none",
+                                    textAlign: "start",
+                                    width: "100%",
+                                }}
+                                value={servicioFilter}
+                                onChange={(e) => setServicioFilter(e.target.value)}
+                            >
+                                <option value="">Todas las categorias</option>
+                                {servicios.map((s) => (
+                                    <option key={s.id_servicio} value={s.id_servicio}>
+                                        {s.tipo_servicio}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-md-4">
+                            <select
+                                name="clientes"
+                                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                                style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
+                                value={clienteFilter}
+                                onChange={(e) => setClienteFilter(e.target.value)}
+                            >
+                                <option value="">Todos los clientes</option>
+                                {clientes.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-md-4">
+                            <DatePicker
+                                selectsRange={true}
+                                startDate={startDate}
+                                endDate={endDate}
+                                onChange={handleDateChange}
+                                isClearable={true}
+                                placeholderText="Fecha de creación"
+                                locale="es"
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control form-control-sm"
+                                autoComplete="off"
+                            />
+                        </div>
                     </div>
                     <div className="d-flex gap-2">
                         <SearchBar

@@ -89,4 +89,11 @@ export const bookingService = {
     async sendWhatsappReceipt(formData) {
         return conectividadService.sendReceiptWhatsapp(formData);
     },
+    async sendInvoice(formData) {
+        const { data } = await api.post("/reservas/sendInvoice", formData, {
+            withCredentials: true,
+        });
+    
+        return data;
+    },
 };
