@@ -8,6 +8,24 @@ import { useEffect, useState } from "react";
 import AlertModal from "@/components/common/AlertModal";
 import { bookingService } from "@/services/booking.service";
 import { useRouter } from "next/navigation";
+import { configService } from "@/services/config.service";
+import { enviarComprobantePorCorreo } from "@/utils/invoiceEmail";
+
+async function enviarComprobanteAutomatico(idVenta) {
+  try {
+    const [ventaCompleta, terminos] = await Promise.all([
+      bookingService.getSaleInfo(idVenta),
+      configService.term().then((data) => data?.terminos_general ?? ""),
+    ]);
+
+    const result = await enviarComprobantePorCorreo(ventaCompleta, terminos);
+    if (!result.success) {
+      console.error("No se pudo enviar el comprobante automático:", result.error);
+    }
+  } catch (error) {
+    console.error("Error al enviar comprobante automático:", error);
+  }
+}
 
 export default function BookingFormContainer({ mode }) {
   const { booking, setRawVenta } = useBookingForm();
@@ -23,8 +41,6 @@ export default function BookingFormContainer({ mode }) {
     try {
       const payload = serializeBookingToForm(booking);
 
-      // const result = await bookingService.create(payload);
-
       const result = mode === "edit"
         ? await bookingService.update(payload)
         : await bookingService.create(payload);
@@ -37,6 +53,8 @@ export default function BookingFormContainer({ mode }) {
       if (isEditMode) {
         const ventaActualizada = await bookingService.getSaleInfo(booking.idVenta);
         setRawVenta(ventaActualizada);
+      } else {
+        enviarComprobanteAutomatico(result.sale.id_venta);
       }
 
       setShowAlert(true);
