@@ -92,6 +92,9 @@ export const bookingService = {
     async sendInvoice(formData) {
         const { data } = await api.post("/reservas/sendInvoice", formData, {
             withCredentials: true,
+            headers: {
+                "Content-Type": undefined
+            }
         });
     
         return data;

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { configService } from '@/services/config.service';
 import BookingPdf from '@/components/pdf/BookingPdf';
 import { pdf } from '@react-pdf/renderer';
+import { enviarComprobantePorCorreo } from '@/utils/invoiceEmail';
 
 const PdfViewer = dynamic(
   () => import("@/components/pdf/PdfViewer"),
@@ -29,20 +30,8 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
   const handleSendInvoice = async () => {
     setSendingInvoice(true);
     try {
-      const blob = await pdf(<BookingPdf venta={rawVenta} terminos={term} />).toBlob();
-
-      const formData = new FormData();
-      formData.append("id", rawVenta.id_venta);
-      formData.append("pdf", blob, `comprobante-${rawVenta.id_venta}.pdf`);
-
-      const result = await bookingService.sendInvoice(formData);
-
-      if (result.success) {
-        console.log("enviado---");
-
-      } else {
-        console.error(result.error);
-      }
+      const result = await enviarComprobantePorCorreo(rawVenta, term);
+      if (!result.success) console.error(result.error);
     } catch (error) {
       console.error("Error al enviar comprobante:", error);
     } finally {
