@@ -86,7 +86,7 @@ export default function VueloForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Origen</label>
+                    <label className="form-label">Origen *</label>
                     <input
                         type="text"
                         className="form-control"
@@ -95,7 +95,7 @@ export default function VueloForm() {
                     />
                 </div>
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Destino</label>
+                    <label className="form-label">Destino *</label>
                     <input
                         type="text"
                         className="form-control"
@@ -154,7 +154,7 @@ export default function VueloForm() {
                     />
                 </div>
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Aerolínea *</label>
+                    <label className="form-label">Aerolínea</label>
                     <input
                         type="text"
                         className="form-control"
@@ -208,7 +208,7 @@ export default function VueloForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Hora de salida en origen *</label>
+                    <label className="form-label">Hora de salida en origen</label>
                     <input
                         type="time"
                         className="form-control"
@@ -217,7 +217,7 @@ export default function VueloForm() {
                     />
                 </div>
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Hora de llegada en destino *</label>
+                    <label className="form-label">Hora de llegada en destino</label>
                     <input
                         type="time"
                         className="form-control"
@@ -229,7 +229,7 @@ export default function VueloForm() {
                 {isRedondo && (
                     <>
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Hora de salida en destino *</label>
+                            <label className="form-label">Hora de salida en destino</label>
                             <input
                                 type="time"
                                 className="form-control"
@@ -238,7 +238,7 @@ export default function VueloForm() {
                             />
                         </div>
                         <div className="col-12 col-md-4">
-                            <label className="form-label">Hora de llegada en origen *</label>
+                            <label className="form-label">Hora de llegada en origen</label>
                             <input
                                 type="time"
                                 className="form-control"
