@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { mensajeriaService } from "@/services/mensajeria.service";
+import { quotesService } from "@/services/quotes.service";
 import { clientsService } from "@/services/clients.service";
 import { authService } from "@/services/auth.service";
 import ConversationList from "@/components/mensajeria/ConversationList";
@@ -583,10 +584,20 @@ function MensajeriaContent() {
     }
   };
 
-  // Enviar correo
-  const handleSendEmail = async ({ subject, body, html }) => {
-    if (!selectedContact?.clientId) return;
-    const targetEmail = clientInfo?.correo || clientInfo?.email || selectedContact.email;
+  // Enviar correo o cotización
+  const handleSendEmail = async ({
+    subject,
+    body,
+    html,
+    isQuote,
+    pdfFile,
+    fechaInicial,
+    fechaFinal,
+    cargoServicios,
+  }) => {
+    const targetClientId = selectedContact?.clientId || clientInfo?.id || clientInfo?.id_cliente;
+    if (!targetClientId) return;
+    const targetEmail = clientInfo?.correo || clientInfo?.email || selectedContact?.email;
     if (!targetEmail) {
       showToast("El cliente no tiene una dirección de correo válida.", "error");
       return;
@@ -599,22 +610,48 @@ function MensajeriaContent() {
     }
     try {
       setSending(true);
-      await mensajeriaService.sendEmail({
-        account_id: user?.id_cuenta_email || 0,
-        to: targetEmail,
-        subject,
-        body,
-        html: html || body,
-      });
+
+      if (isQuote && pdfFile) {
+        const formData = new FormData();
+        formData.append("file", pdfFile);
+        formData.append("clientId", targetClientId);
+        formData.append("to", targetEmail);
+        formData.append("subject", subject);
+        formData.append("body", body);
+        formData.append("html", html || body);
+        if (fechaInicial) formData.append("fecha_inicial", fechaInicial);
+        if (fechaFinal) formData.append("fecha_final", fechaFinal);
+        if (cargoServicios) formData.append("cargo_servicios", cargoServicios);
+        formData.append("observaciones", subject);
+
+        await quotesService.sendQuote(formData);
+        showToast("Cotización enviada y registrada con éxito");
+      } else {
+        await mensajeriaService.sendEmail({
+          account_id: user?.id_cuenta_email || 0,
+          to: targetEmail,
+          subject,
+          body,
+          html: html || body,
+        });
+        showToast("Correo enviado con éxito");
+      }
+
       setShowEmailModal(false);
       setInitialEmailSubject("");
-      showToast("Correo enviado con éxito");
-      const data = await mensajeriaService.getClientEmails(selectedContact.clientId);
-      setEmails(data || []);
-      loadEmailContacts();
+      if (selectedContact?.clientId) {
+        const data = await mensajeriaService.getClientEmails(selectedContact.clientId);
+        setEmails(data || []);
+        loadEmailContacts();
+      }
     } catch (err) {
-      console.error("Error al enviar correo:", err);
-      showToast("No se pudo enviar el correo. Revisa la configuración de SMTP.", "error");
+      console.error("Error al enviar correo/cotización:", err);
+      showToast(
+        isQuote
+          ? "No se pudo enviar la cotización. Revisa la configuración del servidor y SMTP."
+          : "No se pudo enviar el correo. Revisa la configuración de SMTP.",
+        "error"
+      );
     } finally {
       setEmailsLoading(false);
       setSending(false);

@@ -575,8 +575,8 @@ export default function PlantillasTab() {
 
       {modalOpen && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050, backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content" style={{ borderRadius: "12px", border: "none" }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: "1300px", width: "75%" }}>
+            <div className="modal-content" style={{ borderRadius: "12px", border: "none", maxWidth: "100%" }}>
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title font-poppins fw-semibold text-dark" style={{ fontSize: "16px" }}>
                   {editingTemplate ? "Editar Plantilla" : "Nueva Plantilla de WhatsApp"}

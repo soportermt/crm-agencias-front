@@ -80,7 +80,7 @@ export default function ClienteDetailPage({ params }) {
             
             {activeTab === "Conversaciones" && <ClientProfileChat clientId={id} />}
             {activeTab === "Historial de correos" && <ClientProfileEmails clientId={id} clientEmail={client.correo} />}
-            {activeTab === "Cotizaciones" && <ClientProfileQuotes clientId={id} />}
+            {activeTab === "Cotizaciones" && <ClientProfileQuotes clientId={id} client={client} />}
             {activeTab === "Historial de compras" && <ClientProfilePurchases clientId={id} />}
             {activeTab === "Documentos" && <ClientProfileDocuments clientId={id} />}
           </div>

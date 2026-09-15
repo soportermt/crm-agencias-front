@@ -1,15 +1,11 @@
 import api from "@/lib/axios";
+import { quotesService } from "./quotes.service";
 
 const purchasesMock = [
   { id: 1, date: "2024-02-20", title: "Cancún", details: "Traslado" },
   { id: 2, date: "2024-02-22", title: "Playa del Carmen", details: "Reserva de hotel" },
   { id: 3, date: "2024-02-24", title: "Tulum", details: "Excursión a las ruinas" },
   { id: 4, date: "2024-02-26", title: "Cozumel", details: "Buceo" },
-];
-
-const quotesMock = [
-  { id: 1, title: "Barcelo Maya Grand", details: "Rivera Maya/Playa del Carmen", dateRange: "09/06/2026 a 12/06/2026", type: "Hospedaje", icon: "hotel" },
-  { id: 2, title: "Redondo", details: "Hotel - Aeropuerto", dateRange: "15/06/2026 al 19/06/2026", type: "Traslado", icon: "shuttle" },
 ];
 
 
@@ -58,7 +54,7 @@ export const clientsService = {
   },
 
   async getClientQuotes(id) {
-    return quotesMock;
+    return quotesService.getClientQuotes(id);
   },
 
   async getClientPurchases(id) {
