@@ -339,7 +339,7 @@ export default function ConectividadTab() {
         <>
           <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered modal-xl" style={{ maxWidth: "1100px", width: "95%" }}>
-              <div className="modal-content shadow-lg" style={{ borderRadius: "16px", border: "none", backgroundColor: "#ffffff" }}>
+              <div className="modal-content shadow-lg" style={{ borderRadius: "16px", border: "none", backgroundColor: "#ffffff", maxWidth: "100%" }}>
                 <div className="modal-header border-0 pb-0 pt-4 px-4">
                   <div>
                     <h5 className="modal-title font-poppins fw-semibold" style={{ color: "#0f1901", fontSize: "18px" }}>

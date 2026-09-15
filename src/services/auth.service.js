@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://crm.2businesstravel.com/admin/";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://crmdev.2businesstravel.com/admin/";
 
 export const authService = {
   login: async (username, password, rememberMe = false) => {
@@ -62,6 +62,8 @@ export const authService = {
         }
         return response.data;
       }
+      
+      authService.logout();
       return null;
     } catch (error) {
       authService.logout();
@@ -85,12 +87,28 @@ export const authService = {
       } catch (e) {
         // Limpieza local continua si la peticion falla
       }
-      document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       localStorage.removeItem("user");
       localStorage.removeItem("auth_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("session_id");
+
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+  },
+
+  isTokenExpired: (token) => {
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp) {
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp < currentTime;
+      }
+      return false;
+    } catch (e) {
+      return true;
     }
   },
 
@@ -113,44 +131,60 @@ export const authService = {
   },
 
   checkSession: async () => {
-    if (typeof window !== 'undefined' && !authService.getUser()) {
+    if (typeof window !== 'undefined') {
+      const authToken = localStorage.getItem('auth_token');
       const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
+      const sessionId = localStorage.getItem('session_id');
+
+      if (!authToken || !refreshToken || !sessionId) {
+        authService.logout();
+        return null;
+      }
+
+      if (authService.isTokenExpired(authToken)) {
         try {
           const refreshData = await authService.refreshToken();
-          if (refreshData && refreshData.user) {
-            return refreshData.user;
+          if (!refreshData || !refreshData.user) {
+            authService.logout();
+            return null;
           }
         } catch (e) {
-          // Continuar con intento me si refresh falla
+          return null;
         }
       }
 
-      try {
-        const response = await axios.get(`${apiUrl}auth/me`, {
-          withCredentials: true,
-          headers: {
-            'Accept': 'application/json'
+      if (!authService.getUser()) {
+        try {
+          const response = await axios.get(`${apiUrl}auth/me`, {
+            withCredentials: true,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.data && response.data.success) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            if (response.data.token) {
+              localStorage.setItem('auth_token', response.data.token);
+            }
+            if (response.data.refresh_token) {
+              localStorage.setItem('refresh_token', response.data.refresh_token);
+            }
+            if (response.data.session_id) {
+              localStorage.setItem('session_id', response.data.session_id);
+            }
+            return response.data.user;
+          } else {
+            authService.logout();
+            return null;
           }
-        });
-        
-        if (response.data && response.data.success) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          if (response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
-          }
-          if (response.data.refresh_token) {
-            localStorage.setItem('refresh_token', response.data.refresh_token);
-          }
-          if (response.data.session_id) {
-            localStorage.setItem('session_id', response.data.session_id);
-          }
-          return response.data.user;
+        } catch (error) {
+          authService.logout();
+          return null;
         }
-      } catch (error) {
-        authService.logout();
       }
+      return authService.getUser();
     }
-    return authService.getUser();
+    return null;
   }
 };
