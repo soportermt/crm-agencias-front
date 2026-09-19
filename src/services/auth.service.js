@@ -92,8 +92,9 @@ export const authService = {
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("session_id");
 
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      const currentPath = window.location.pathname.replace(/\/$/, '');
+      if (!currentPath.endsWith('/login')) {
+        window.location.href = '/app/login';
       }
     }
   },
