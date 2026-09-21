@@ -3,28 +3,48 @@ import CajaTable from "@/components/caja/CajaTable";
 import { cajaService } from "@/services/caja.service";
 import React, { useEffect, useState } from "react";
 
+const toYMD = (d) =>
+  d
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    : null;
 export default function Caja() {
   const [caja, setCaja] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+    cliente: "",
+    vendedor: "",
+  });
 
   useEffect(() => {
+    if (filters.startDate && !filters.endDate) return;
+    let cancelado = false;
     async function cargarVentas() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await cajaService.caja();
-        setCaja(data);
+        const data = await cajaService.caja(
+          toYMD(filters.startDate),
+          toYMD(filters.endDate),
+          filters.cliente || null,
+          filters.vendedor || null
+        );
+        if (!cancelado) setCaja(data);
       } catch (err) {
         console.error("Error al cargar ventas:", err);
-        setError("No se pudieron cargar las ventas");
+        if (!cancelado) setError("No se pudieron cargar las ventas");
       } finally {
-        setIsLoading(false);
+        if (!cancelado) setIsLoading(false);
       }
     }
 
     cargarVentas();
-  }, []);
+    return () => {
+      cancelado = true;
+    };
+  }, [filters]);
 
   return (
     <div className="container-fluid p-0">
@@ -45,7 +65,11 @@ export default function Caja() {
             <p className="text-muted mt-2 font-poppins small">Cargando...</p>
           </div>
         ) : (
-          <CajaTable ventas={caja} />
+          <CajaTable
+          ventas={caja}
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
         )}
       </div>
     </div>

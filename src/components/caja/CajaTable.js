@@ -6,6 +6,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "../common/DataTable";
 import SearchBar from "../common/SearchBar";
 import ExportButton from "../common/ExportButton";
+import { catalogosService } from "@/services/catalogos.service";
+import { vendedoresService } from "@/services/vendedores.service";
 
 registerLocale("es", es);
 
@@ -19,7 +21,7 @@ const COLUMNS = [
   { key: "cliente", label: "Cliente", width: "225px" },
   { key: "usuario", label: "Usuario", width: "225px" },
   { key: "vendedor", label: "Vendedor", width: "180px" },
-  { key: "acciones", label: "Acciones", width: "80px" },
+  { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
 const SELECT_STYLE = {
@@ -99,19 +101,23 @@ function exportToCSV(data) {
   URL.revokeObjectURL(url);
 }
 
-export default function CajaTable({ ventas = [] }) {
+export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
+  const {
+    startDate,
+    endDate,
+    cliente: clienteFilter,
+    vendedor: vendedorFilter,
+  } = filters;
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const [clienteFilter, setClienteFilter] = useState("");
-  const [vendedorFilter, setVendedorFilter] = useState("");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [clientes, setClientes] = useState([]);
+  const [vendedores, setVendedores] = useState([]);
 
-  const handleDateChange = (dates) => {
-    const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
-  };
+
+  const setFilter = (patch) => onFiltersChange((prev) => ({ ...prev, ...patch }));
+
+  const handleDateChange = ([start, end]) => setFilter({ startDate: start, endDate: end });
 
   const rows = useMemo(
     () =>
@@ -130,44 +136,41 @@ export default function CajaTable({ ventas = [] }) {
     [ventas]
   );
 
-  const clientes = useMemo(() => {
-    const map = new Map();
-    rows.forEach((r) => map.set(r.id_cliente, r.cliente));
-    return [...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [rows]);
+  useEffect(() => {
+    let cancelado = false;
+    async function cargarClientes() {
+      try {
+        const data = await catalogosService.clientes();
+        if (!cancelado) setClientes(data || []);
+      } catch (err) {
+        console.error("Error al cargar catálogo de clientes:", err);
+      }
+    }
 
-  const vendedores = useMemo(() => {
-    const map = new Map();
-    rows.forEach((r) => map.set(r.id_vendedor, r.vendedor));
-    return [...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [rows]);
+    async function loadVendedores() {
+      try {
+        const vendedores = await vendedoresService.get();
+        setVendedores(vendedores);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadVendedores();
+    cargarClientes();
+    return () => { cancelado = true; };
+  }, []);
 
   const filteredData = useMemo(() => {
     const search = normalize(searchValue.trim());
-    const from = startDate ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()) : null;
-    const to = endDate ? new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59) : null;
-
-    return rows.filter((r) => {
-      if (clienteFilter && String(r.id_cliente) !== clienteFilter) return false;
-      if (vendedorFilter && String(r.id_vendedor) !== vendedorFilter) return false;
-
-      if (from || to) {
-        const fecha = parseFecha(r.fecha);
-        if (!fecha) return false;
-        if (from && fecha < from) return false;
-        if (to && fecha > to) return false;
-      }
-
-      if (search) {
-        const haystack = normalize(
-          [r.folio, r.cliente, r.pasajero_titular, r.descripcion, r.vendedor, r.usuario].join(" ")
-        );
-        if (!haystack.includes(search)) return false;
-      }
-
-      return true;
-    });
-  }, [rows, searchValue, clienteFilter, vendedorFilter, startDate, endDate]);
+    if (!search) return rows;
+  
+    return rows.filter((r) =>
+      normalize(
+        [r.folio, r.cliente, r.pasajero_titular, r.descripcion, r.vendedor, r.usuario].join(" ")
+      ).includes(search)
+    );
+  }, [rows, searchValue]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -221,9 +224,9 @@ export default function CajaTable({ ventas = [] }) {
             <select
               name="clientes"
               className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-              style={SELECT_STYLE}
+              style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
               value={clienteFilter}
-              onChange={(e) => setClienteFilter(e.target.value)}
+              onChange={(e) => setFilter({ cliente: e.target.value })}
             >
               <option value="">Todos los clientes</option>
               {clientes.map((c) => (
@@ -236,16 +239,16 @@ export default function CajaTable({ ventas = [] }) {
 
           <div className="col-md-4">
             <select
-              name="vendedores"
+              name="vendedor"
               className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-              style={SELECT_STYLE}
+              style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
               value={vendedorFilter}
-              onChange={(e) => setVendedorFilter(e.target.value)}
+              onChange={(e) => setFilter({ vendedor: e.target.value })}
             >
               <option value="">Todos los vendedores</option>
               {vendedores.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.name}
+                  {v.nombre}
                 </option>
               ))}
             </select>
