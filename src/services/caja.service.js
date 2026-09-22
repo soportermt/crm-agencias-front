@@ -20,4 +20,23 @@ export const cajaService = {
         });
         return data;
     },
+    async getWaysToPay() {
+        const { data } = await api.get('/caja/getWaysToPay', {
+            withCredentials: true,
+        });
+        return data;
+    },
+    async savePayment(formData) {
+        const { data } = await api.post('/caja/savePayment', formData, {
+            withCredentials: true,
+        });
+        return data;
+    },
+    async getSalePayments(id) {
+        const { data } = await api.get(`/caja/getSalePayments/${id}`, {
+            withCredentials: true,
+        });
+        return data;
+    },
+
 }
