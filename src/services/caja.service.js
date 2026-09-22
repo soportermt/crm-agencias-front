@@ -13,4 +13,11 @@ export const cajaService = {
         });
         return data;
     },
+
+    async getVenta(id) {
+        const { data } = await api.get(`/caja/getVenta/${id}`, {
+            withCredentials: true,
+        });
+        return data;
+    },
 }

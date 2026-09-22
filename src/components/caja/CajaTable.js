@@ -132,6 +132,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
         cliente: v.idCliente?.nombre ?? "—",
         vendedor: v.vendedor_nombre ?? `Vendedor #${v.id_vendedor}`,
         pasajero_titular: v.pasajero_titular ?? "—",
+        _raw: v,
       })),
     [ventas]
   );
@@ -203,7 +204,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
       case "acciones":
         return (
           <Link
-            href={`/pagos/${row.id_venta}`}
+            href={`caja/pagos/${row.id_venta}`}
             className="text-decoration-none fw-medium text-brand-blue"
             style={{ fontSize: "12px" }}
           >
