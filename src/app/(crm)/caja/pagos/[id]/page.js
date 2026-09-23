@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "@/components/common/DataTable";
+import { cleanDecimalInput } from "@/utils/inputFormatters";
 
 registerLocale("es", es);
 
@@ -89,13 +90,16 @@ export default function Pago() {
         cargarVenta();
     }, [cargarVenta]);
 
-    const handleMontoChange = (servicioKey, value) => {
-        // Solo permite números y un punto decimal
-        if (value !== "" && !/^\d*\.?\d{0,2}$/.test(value)) return;
+    const handleMontoChange = (servicioKey, rawValue) => {
+        const cleanedValue = cleanDecimalInput(rawValue);
+
+        if (cleanedValue !== "" && !/^\d*\.?\d{0,2}$/.test(cleanedValue)) {
+            return;
+        }
 
         setMontoPago((prev) => ({
             ...prev,
-            [servicioKey]: value,
+            [servicioKey]: cleanedValue,
         }));
     };
 
@@ -211,7 +215,7 @@ export default function Pago() {
 
     const granTotal = venta?.ventasServicioses?.reduce((acc, serv) => acc + Number(serv.tarifa_publica || 0), 0) || 0;
     const granPagado = venta?.ventasServicioses?.reduce((acc, serv) => acc + obtenerTotalPagadoServicio(serv.id_ventaservicio), 0) || 0;
-    const granSaldo = granTotal - granPagado;
+    const granSaldo = Math.max(0, Number((granTotal - granPagado).toFixed(2)));
 
     const renderCell = (colKey, row) => {
         if (colKey === "formaPago") {
@@ -255,6 +259,22 @@ export default function Pago() {
                     className="bg-white shadow-premium p-3"
                     style={{ borderRadius: "12px" }}
                 >
+                    <div className="row mb-3">
+                        <div className="col-6"
+                            style={{
+                                fontSize: 14,
+                                color: "#6E6B7B",
+                            }}>
+                            Folio: <strong style={{ fontSize: 18, color: "rgb(12, 92, 198)" }}>{venta?.folio}</strong>
+                        </div>
+                        <div className="col-6 text-end"
+                            style={{
+                                fontSize: 14,
+                                color: "#6E6B7B",
+                            }}>
+                            Fecha de creación: <strong style={{ fontSize: 18, color: "rgb(12, 92, 198)" }}>{formatDate(venta?.fecha)}</strong>
+                        </div>
+                    </div>
                     <div className="row mb-4">
                         <div className="col-12 col-md-6 pe-md-4">
                             <p className="mb-2" style={{ fontWeight: 600 }}>
@@ -480,10 +500,10 @@ export default function Pago() {
                                 const pagadoHistorico = obtenerTotalPagadoServicio(servicioKey);
 
                                 // 3. El saldo restante real que aún debe el cliente
-                                const saldoServicio = totalServicio - pagadoHistorico;
+                                const saldoServicio = Number((totalServicio - pagadoHistorico).toFixed(2));
 
                                 // 4. Lo que estás capturando actualmente en el input
-                                const montoCapturado = Number(montoPago[servicioKey] || 0);
+                                const montoCapturado = Number((Number(montoPago[servicioKey]) || 0).toFixed(2));
 
                                 // 5. Validacion
                                 const excedeSaldo = montoCapturado > saldoServicio;
