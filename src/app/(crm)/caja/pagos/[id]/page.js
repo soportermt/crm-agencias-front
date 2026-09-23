@@ -7,13 +7,35 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
+import DataTable from "@/components/common/DataTable";
 
 registerLocale("es", es);
+
+const columns = [
+    { key: "id_pago", label: "ID Pago", align: "center", width: "80px" },
+    { key: "descripcion", label: "Descripción", align: "left", width: "300px" },
+    { key: "fecha", label: "Fecha", align: "left", width: "100px" },
+    { key: "formaPago", label: "Forma de pago", align: "center", width: "100px" },
+    { key: "monto", label: "Monto", align: "right", width: "100px" },
+    { key: "acciones", label: "", align: "center", width: "80px" },
+];
+
+function formatDate(date) {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC"
+    });
+}
 
 export default function Pago() {
     const [agencia, setAgencia] = useState(null);
     const [venta, setVenta] = useState(null);
     const [pagos, setPagos] = useState(null);
+    const [detalles, setDetalles] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -23,7 +45,7 @@ export default function Pago() {
     const [saveError, setSaveError] = useState(null);
 
     const [descripcionPago, setDescripcionPago] = useState("");
-    const [fechaPago, setFechaPago] = useState(Date());
+    const [fechaPago, setFechaPago] = useState(new Date());
     const [idFormaPago, setIdFormaPago] = useState(1);
     const [idCuenta, setIdCuenta] = useState("");
 
@@ -38,9 +60,11 @@ export default function Pago() {
         try {
             const data = await cajaService.getVenta(id);
             const dataPagos = await cajaService.getWaysToPay();
+            const dataDetalles = await cajaService.getSalePayments(id);
 
             setVenta(data);
             setPagos(dataPagos);
+            setDetalles(dataDetalles);
         } catch (err) {
             console.error("Error al cargar la venta:", err);
             setError("No se pudo cargar la venta");
@@ -78,7 +102,7 @@ export default function Pago() {
     const resetFormularioPago = () => {
         setMontoPago({});
         setDescripcionPago("");
-        setFechaPago(null);
+        setFechaPago(Date());
         setIdFormaPago(1);
         setIdCuenta("");
         setSaveError(null);
@@ -98,6 +122,21 @@ export default function Pago() {
     const faltanDatosGenerales = !idFormaPago || !fechaPago;
     const puedeGuardar =
         hayMontosCapturados && !faltanDatosGenerales && !isSaving;
+
+    const obtenerTotalPagadoServicio = (idVentaServicio) => {
+        if (!detalles) return 0;
+
+        let totalPagado = 0;
+        detalles.forEach((pago) => {
+            pago.pagosDetalles?.forEach((detalle) => {
+                if (String(detalle.id_ventaservicio) === String(idVentaServicio)) {
+                    totalPagado += Number(detalle.monto || 0);
+                }
+            });
+        });
+
+        return totalPagado;
+    };
 
     const handleGuardarPagos = async () => {
         if (!hayMontosCapturados || isSaving) return;
@@ -168,6 +207,41 @@ export default function Pago() {
     const valueStyle = {
         fontSize: 14,
         color: "#1f1f1f",
+    };
+
+    const granTotal = venta?.ventasServicioses?.reduce((acc, serv) => acc + Number(serv.tarifa_publica || 0), 0) || 0;
+    const granPagado = venta?.ventasServicioses?.reduce((acc, serv) => acc + obtenerTotalPagadoServicio(serv.id_ventaservicio), 0) || 0;
+    const granSaldo = granTotal - granPagado;
+
+    const renderCell = (colKey, row) => {
+        if (colKey === "formaPago") {
+            return (
+                <span>{row.idFormaPago?.descripcion}</span>
+            );
+        }
+        if (colKey === "monto") {
+            const detallesDelPago = row.pagosDetalles || [];
+            const totalMontoPago = detallesDelPago.reduce(
+                (acc, detalle) => acc + Number(detalle.monto || 0),
+                0
+            );
+
+            return (
+                <span style={{ fontWeight: 600 }}>
+                    {formatMoney(totalMontoPago)}
+                </span>
+            );
+        }
+
+        if (colKey === "fecha") {
+            return <span>{formatDate(row.fecha)}</span>;
+        }
+
+        if (colKey === "acciones") {
+            return <button
+                className="d-flex align-items-center gap-2 px-2 py-0 transition-smooth btn-pdf">Descargar</button>;
+        }
+        return row[colKey];
     };
 
     return (
@@ -398,16 +472,21 @@ export default function Pago() {
                             </div>
 
                             {venta.ventasServicioses.map((servicio, index) => {
-                                const servicioKey =
-                                    servicio.id_ventaservicio ?? index;
-                                const saldoServicio = Number(
-                                    servicio.tarifa_publica || 0
-                                );
-                                const montoCapturado = Number(
-                                    montoPago[servicioKey] || 0
-                                );
-                                const excedeSaldo =
-                                    montoCapturado > saldoServicio;
+                                const servicioKey = servicio.id_ventaservicio ?? index;
+                                // 1. Tarifa total del servicio original
+                                const totalServicio = Number(servicio.tarifa_publica || 0);
+
+                                // 2. Lo que ya se pagó
+                                const pagadoHistorico = obtenerTotalPagadoServicio(servicioKey);
+
+                                // 3. El saldo restante real que aún debe el cliente
+                                const saldoServicio = totalServicio - pagadoHistorico;
+
+                                // 4. Lo que estás capturando actualmente en el input
+                                const montoCapturado = Number(montoPago[servicioKey] || 0);
+
+                                // 5. Validacion
+                                const excedeSaldo = montoCapturado > saldoServicio;
 
                                 return (
                                     <div
@@ -450,60 +529,64 @@ export default function Pago() {
 
                                         {pagoHabilitado && (
                                             <div className="mt-2 pt-2">
-                                                <div className="d-flex align-items-center justify-content-end gap-4 mt-0">
+                                                <div className="d-flex align-items-center justify-content-between">
                                                     <span
                                                         style={{
                                                             fontSize: 14,
                                                             color: "#6E6B7B",
                                                         }}
                                                     >
-                                                        Saldo a pagar:{" "}
+                                                        Tarifa publica:{" "}
                                                         <strong
                                                             style={{
-                                                                color: "#1f1f1f",
-                                                                fontSize: 16
+                                                                color: "#6E6B7B"
                                                             }}
                                                         >
-                                                            {formatMoney(
-                                                                servicio.tarifa_publica
-                                                            )}
+                                                            {formatMoney(servicio.tarifa_publica)}
                                                         </strong>
                                                     </span>
-
-                                                    <input
-                                                        type="text"
-                                                        inputMode="decimal"
-                                                        className="form-control"
-                                                        style={{
-                                                            maxWidth: 180,
-                                                            fontSize: 14
-                                                        }}
-                                                        placeholder="Monto a pagar"
-                                                        value={
-                                                            montoPago[
-                                                            servicioKey
-                                                            ] || ""
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleMontoChange(
-                                                                servicioKey,
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                    />
+                                                    <div className="d-flex align-items-center justify-content-end gap-4 mt-0">
+                                                        <span
+                                                            style={{
+                                                                fontSize: 14,
+                                                                color: "#6E6B7B",
+                                                            }}
+                                                        >
+                                                            Saldo a pagar:{" "}
+                                                            <strong
+                                                                className="text-success"
+                                                                style={{
+                                                                    fontSize: 16
+                                                                }}
+                                                            >
+                                                                {formatMoney(saldoServicio)}
+                                                            </strong>
+                                                        </span>
+                                                        <input
+                                                            type="text"
+                                                            inputMode="decimal"
+                                                            className="form-control"
+                                                            style={{ maxWidth: 180, fontSize: 14 }}
+                                                            placeholder="Monto a pagar"
+                                                            value={montoPago[servicioKey] || ""}
+                                                            onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
+                                                            disabled={saldoServicio <= 0}
+                                                        />
+                                                    </div>
                                                 </div>
 
                                                 {excedeSaldo && (
                                                     <div
                                                         className="text-end mt-1"
-                                                        style={{
-                                                            fontSize: 12,
-                                                            color: "#EA5455",
-                                                        }}
+                                                        style={{ fontSize: 12, color: "#EA5455" }}
                                                     >
-                                                        El monto excede el
-                                                        saldo a pagar de este
-                                                        servicio
+                                                        El monto excede el saldo a pagar de este servicio
+                                                    </div>
+                                                )}
+
+                                                {saldoServicio <= 0 && (
+                                                    <div className="text-end mt-1" style={{ fontSize: 12, color: "#28C76F" }}>
+                                                        Servicio liquidado
                                                     </div>
                                                 )}
                                             </div>
@@ -537,17 +620,17 @@ export default function Pago() {
                         Saldo de venta
                     </p>
                     <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
-                        <p className='mb-2'>Total:</p>
-                        <p className='mb-2' style={{ fontWeight: 700 }}>$121,852.00 MXN</p>
+                        <p className='mb-2'>Total público:</p>
+                        <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granTotal)}</p>
                     </div>
                     <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
-                        <p className='mb-2'>Pagos:</p>
-                        <p className='mb-2 text-success' style={{ fontWeight: 700 }}>$121,852.00 MXN</p>
+                        <p className='mb-2'>Total en pagos:</p>
+                        <p className='mb-2 text-success' style={{ fontWeight: 700 }}>{formatMoney(granPagado)}</p>
                     </div>
                     <hr className="my-1" />
                     <div className='d-flex justify-content-between mb-3' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
                         <p className='mb-2'>Saldo a pagar:</p>
-                        <p className='mb-2' style={{ fontWeight: 700 }}>$76,499.00 MXN</p>
+                        <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granSaldo)}</p>
                     </div>
 
                     {pagoHabilitado && (
@@ -627,13 +710,22 @@ export default function Pago() {
             </div>
 
             <div className="col-12 p-3">
-                <div
-                    className="bg-white shadow-premium p-3"
-                    style={{ borderRadius: "12px" }}
-                >
-                    <p className="mb-2" style={{ fontWeight: 600 }}>
-                        Detalle de pagos
-                    </p>
+                <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
+                    <p className="mb-2" style={{ fontWeight: 600 }}>Detalle de pagos</p>
+                    {isLoading ? (
+                        <div className="text-center py-4" style={{ color: "#6E6B7B" }}>
+                            Cargando historial de pagos...
+                        </div>
+                    ) : (
+                        <DataTable
+                            columns={columns}
+                            data={detalles || []}
+                            renderCell={renderCell}
+                            pagination={false}
+                            emptyMessage="No se encontraron pagos registrados."
+                            minWidth="100%"
+                        />
+                    )}
                 </div>
             </div>
         </div>

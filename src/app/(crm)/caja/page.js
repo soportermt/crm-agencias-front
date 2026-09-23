@@ -2,6 +2,7 @@
 import CajaTable from "@/components/caja/CajaTable";
 import { cajaService } from "@/services/caja.service";
 import React, { useEffect, useState } from "react";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 const toYMD = (d) =>
   d
@@ -12,8 +13,8 @@ export default function Caja() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    startDate: null,
-    endDate: null,
+    startDate: startOfMonth(new Date(), { weekStartsOn: 1 }), 
+    endDate: endOfMonth(new Date(), { weekStartsOn: 1 }),
     cliente: "",
     vendedor: "",
   });

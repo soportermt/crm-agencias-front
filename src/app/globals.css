@@ -550,3 +550,18 @@ body {
   color: #64748b;
   opacity: 0.9;
 }
+
+.btn-pdf {
+  background-color: #e7f1fe;
+  border: 1px solid #0c5cc6;
+  border-radius: 8px;
+  color: #0c5cc6;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+  height: 30px;
+}
+
+.btn-pdf:hover {
+  background-color: #b6d5fd;
+}

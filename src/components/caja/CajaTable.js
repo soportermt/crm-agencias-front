@@ -24,19 +24,6 @@ const COLUMNS = [
   { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
-const SELECT_STYLE = {
-  height: "30px",
-  borderRadius: "8px",
-  borderColor: "#d0d5dd",
-  backgroundColor: "#fff",
-  fontSize: "13px",
-  color: "#0f1901",
-  fontWeight: 400,
-  appearance: "none",
-  textAlign: "start",
-  width: "100%",
-};
-
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const [year, month, day] = dateStr.split("-");
@@ -205,10 +192,9 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
         return (
           <Link
             href={`caja/pagos/${row.id_venta}`}
-            className="text-decoration-none fw-medium text-brand-blue"
-            style={{ fontSize: "12px" }}
+            className="text-decoration-none fw-medium text-brand-blue gap-2 px-2 py-1 btn-pdf"
           >
-            Ver
+            Ir a pagos
           </Link>
         );
 
