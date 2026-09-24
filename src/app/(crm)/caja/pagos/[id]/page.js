@@ -220,6 +220,8 @@ export default function Pago() {
     const granPagado = venta?.ventasServicioses?.reduce((acc, serv) => acc + obtenerTotalPagadoServicio(serv.id_ventaservicio), 0) || 0;
     const granSaldo = Math.max(0, Number((granTotal - granPagado).toFixed(2)));
 
+    const ventaPagada = !isLoading && !error && granTotal > 0 && granSaldo <= 0;
+
     const handleDownloadPDF = async (row) => {
         setDownloadingId(row.id_pago);
         try {
@@ -738,6 +740,19 @@ export default function Pago() {
                                     "Guardar pagos"
                                 )}
                             </button>
+                        </div>
+                    ) : ventaPagada ? (
+                        <div
+                            className="text-center p-2"
+                            style={{
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: "#28C76F",
+                                backgroundColor: "#E8F9F0",
+                                borderRadius: 8,
+                            }}
+                        >
+                            Venta pagada completamente
                         </div>
                     ) : (
                         <button
