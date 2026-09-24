@@ -14,6 +14,19 @@ export const cajaService = {
         return data;
     },
 
+    async payment(startDate = null, endDate = null, cliente = null, vendedor = null) {
+        const { data } = await api.get("/caja/getAgencySalesPaid", {
+            params: {
+                fecha_inicio: startDate,
+                fecha_fin: endDate,
+                id_cliente: cliente,
+                id_vendedor: vendedor
+            },
+            withCredentials: true,
+        });
+        return data;
+    },
+
     async getVenta(id) {
         const { data } = await api.get(`/caja/getVenta/${id}`, {
             withCredentials: true,
