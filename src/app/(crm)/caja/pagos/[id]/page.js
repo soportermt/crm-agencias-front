@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "@/components/common/DataTable";
 import { cleanDecimalInput } from "@/utils/inputFormatters";
+import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
 
 registerLocale("es", es);
 
@@ -49,6 +50,8 @@ export default function Pago() {
     const [fechaPago, setFechaPago] = useState(new Date());
     const [idFormaPago, setIdFormaPago] = useState(1);
     const [idCuenta, setIdCuenta] = useState("");
+
+    const [downloadingId, setDownloadingId] = useState(null);
 
     const { id } = useParams();
 
@@ -106,7 +109,7 @@ export default function Pago() {
     const resetFormularioPago = () => {
         setMontoPago({});
         setDescripcionPago("");
-        setFechaPago(Date());
+        setFechaPago(new Date());
         setIdFormaPago(1);
         setIdCuenta("");
         setSaveError(null);
@@ -217,6 +220,17 @@ export default function Pago() {
     const granPagado = venta?.ventasServicioses?.reduce((acc, serv) => acc + obtenerTotalPagadoServicio(serv.id_ventaservicio), 0) || 0;
     const granSaldo = Math.max(0, Number((granTotal - granPagado).toFixed(2)));
 
+    const handleDownloadPDF = async (row) => {
+        setDownloadingId(row.id_pago);
+        try {
+            await downloadPagoPDF(row, agencia);
+        } catch (err) {
+            console.error("Error al generar el PDF:", err);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
+
     const renderCell = (colKey, row) => {
         if (colKey === "formaPago") {
             return (
@@ -242,8 +256,16 @@ export default function Pago() {
         }
 
         if (colKey === "acciones") {
-            return <button
-                className="d-flex align-items-center gap-2 px-2 py-0 transition-smooth btn-pdf">Descargar</button>;
+            const generando = downloadingId === row.id_pago;
+            return (
+                <button
+                    className="d-flex align-items-center gap-2 px-2 py-0 transition-smooth btn-pdf"
+                    onClick={() => handleDownloadPDF(row)}
+                    disabled={generando}
+                >
+                    {generando ? "Generando..." : "Descargar"}
+                </button>
+            );
         }
         return row[colKey];
     };
