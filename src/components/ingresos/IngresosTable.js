@@ -9,6 +9,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
+import PagosTable from "./PagosTable";
 
 registerLocale("es", es);
 
@@ -266,28 +267,28 @@ export default function IngresosTable({
       </div>
 
       <div className="bg-white" style={{ borderRadius: "12px" }}>
-        <div className="px-0 pt-1">
-          <div className="d-flex justify-content-between align-items-start mb-1">
-            <div className="d-flex align-items-end gap-2">
-              <h3
-                className="font-inter fw-medium mb-0"
-                style={{ fontSize: "18px", color: "#0f1901" }}
-              >
-                Gestión de pagos
-              </h3>
-              <p
-                className="font-inter mb-0"
-                style={{ fontSize: "13px", color: "#a1a1aa" }}
-              >
-                Consulta la información de tus pagos (filtra por límite de pago).
-              </p>
-            </div>
-            <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
-          </div>
-
-        </div>
         {isPendientes ?
           <div>
+            <div className="px-0 pt-1">
+              <div className="d-flex justify-content-between align-items-start mb-1">
+                <div className="d-flex align-items-end gap-2">
+                  <h3
+                    className="font-inter fw-medium mb-0"
+                    style={{ fontSize: "18px", color: "#0f1901" }}
+                  >
+                    Gestión de pagos
+                  </h3>
+                  <p
+                    className="font-inter mb-0"
+                    style={{ fontSize: "13px", color: "#a1a1aa" }}
+                  >
+                    Consulta la información de tus pagos (filtra por límite de pago).
+                  </p>
+                </div>
+                <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
+              </div>
+
+            </div>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <DatePicker
@@ -335,7 +336,7 @@ export default function IngresosTable({
             />
           </div>
           :
-          <div className="d-flex justify-content-center">En espera de caja</div>
+          <PagosTable />
         }
       </div>
     </div>

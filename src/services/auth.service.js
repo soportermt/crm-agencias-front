@@ -94,7 +94,7 @@ export const authService = {
 
       const currentPath = window.location.pathname.replace(/\/$/, '');
       if (!currentPath.endsWith('/login')) {
-        window.location.href = '/app/login';
+        window.location.href = '/login';
       }
     }
   },
