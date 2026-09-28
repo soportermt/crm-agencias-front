@@ -1033,7 +1033,7 @@ export default function BookingPdf({ venta, terminos }) {
                         <Image
                             src={
                                 venta.idAgencia.logotipo
-                                    ? `https://crm.2businesstravel.com/admin/images/agencia/${venta.idAgencia.logotipo}`
+                                    ? `${process.env.NEXT_PUBLIC_API_URL}images/agencia/${venta.idAgencia.logotipo}`
                                     : "/pdf/logo-placeholder.png"
                             }
                             style={styles.agencyFooter}

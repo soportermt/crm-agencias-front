@@ -141,7 +141,7 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
           <div className="d-flex justify-content-center">
             <img
-              src={`http://crm.2businesstravel.com/admin/images/agencia/${logoAgencia}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}images/agencia/${logoAgencia}`}
               alt={`${nombreAgencia} Logo`}
               width={110}
               height={20}

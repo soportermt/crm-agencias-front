@@ -92,10 +92,6 @@ export const authService = {
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("session_id");
 
-      const currentPath = window.location.pathname.replace(/\/$/, '');
-      if (!currentPath.endsWith('/login')) {
-        window.location.href = '/login';
-      }
     }
   },
 
