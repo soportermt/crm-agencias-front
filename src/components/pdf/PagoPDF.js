@@ -83,8 +83,12 @@ export default function PagoPDF({ pago, agencia }) {
                         <Text style={styles.title}>Comprobante de pago</Text>
                     </View>
                     <View style={{ textAlign: "right" }}>
+                        <Text style={{ color: "rgb(12, 92, 198)", fontWeight: "700" }}>
+                            <Text style={styles.label}>Folio de pago: </Text>
+                            {pago?.id_pago}
+                        </Text>
                         <Text>
-                            <Text style={styles.label}>Folio: </Text>
+                            <Text style={styles.label}>Folio de venta: </Text>
                             {venta?.folio}
                         </Text>
                         <Text>

@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "@/components/common/DataTable";
 import { cleanDecimalInput } from "@/utils/inputFormatters";
 import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
+import Link from "next/link";
 
 registerLocale("es", es);
 
@@ -289,14 +290,14 @@ export default function Pago() {
                                 fontSize: 14,
                                 color: "#6E6B7B",
                             }}>
-                            Folio: <strong style={{ fontSize: 18, color: "rgb(12, 92, 198)" }}>{venta?.folio}</strong>
+                            Folio: <Link className="font-inter fw-bold" href={`/reservaciones/editar/${venta?.id_venta}`} style={{ fontSize: 18, color: "rgb(12, 92, 198)" }} target="_blank">{venta?.folio}</Link>
                         </div>
                         <div className="col-6 text-end"
                             style={{
                                 fontSize: 14,
                                 color: "#6E6B7B",
                             }}>
-                            Fecha de creación: <strong style={{ fontSize: 18, color: "rgb(12, 92, 198)" }}>{formatDate(venta?.fecha)}</strong>
+                            Fecha de creación: <strong style={{ fontSize: 18, color: "#0d6efd" }}>{formatDate(venta?.fecha)}</strong>
                         </div>
                     </div>
                     <div className="row mb-4">
