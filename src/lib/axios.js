@@ -97,11 +97,19 @@ const setupResponseInterceptor = (instance) => {
                     } else {
                         processQueue(new Error("Refresh token invalido"), null);
                         authService.logout();
+                        if (typeof window !== 'undefined') {
+                            const basePath = window.location.pathname.match(/^\/app(\/|$)/) ? '/app' : '';
+                            window.location.href = `${basePath}/login`;
+                        }
                         return Promise.reject(error);
                     }
                 } catch (refreshError) {
                     processQueue(refreshError, null);
                     authService.logout();
+                    if (typeof window !== 'undefined') {
+                        const basePath = window.location.pathname.match(/^\/app(\/|$)/) ? '/app' : '';
+                        window.location.href = `${basePath}/login`;
+                    }
                     return Promise.reject(refreshError);
                 } finally {
                     isRefreshing = false;
