@@ -180,7 +180,7 @@ export default function GeneralTab() {
               <img src={preview} alt="Preview logotipo" style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }} />
             ) : agencia.logotipo ? (
               <img
-                src={`https://crm.2businesstravel.com/admin/images/agencia/${agencia.logotipo}`}
+                src={`${process.env.NEXT_PUBLIC_API_URL}images/agencia/${agencia.logotipo}`}
                 alt="Logotipo actual"
                 style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }}
               />
