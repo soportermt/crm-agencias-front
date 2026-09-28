@@ -11,6 +11,7 @@ import DataTable from "@/components/common/DataTable";
 import { cleanDecimalInput } from "@/utils/inputFormatters";
 import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 
 registerLocale("es", es);
 
@@ -53,6 +54,7 @@ export default function Pago() {
     const [idCuenta, setIdCuenta] = useState("");
 
     const [downloadingId, setDownloadingId] = useState(null);
+    const [pagoCreado, setPagoCreado] = useState(null);
 
     const { id } = useParams();
 
@@ -70,6 +72,8 @@ export default function Pago() {
             setVenta(data);
             setPagos(dataPagos);
             setDetalles(dataDetalles);
+
+            return dataDetalles;
         } catch (err) {
             console.error("Error al cargar la venta:", err);
             setError("No se pudo cargar la venta");
@@ -184,12 +188,18 @@ export default function Pago() {
                 }
             });
 
-            await cajaService.savePayment(formData);
+            const res = await cajaService.savePayment(formData);
+            const nuevoId = res?.id_pago ?? res?.data?.id_pago;
 
             setPagoHabilitado(false);
             resetFormularioPago();
 
-            cargarVenta();
+            const detallesActualizados = await cargarVenta();
+            const nuevoPago = detallesActualizados?.find(
+                (p) => String(p.id_pago) === String(nuevoId)
+            );
+
+            if (nuevoPago) setPagoCreado(nuevoPago);
         } catch (err) {
             console.error("Error al guardar los pagos:", err);
             setSaveError("No se pudieron guardar los pagos");
@@ -274,518 +284,583 @@ export default function Pago() {
     };
 
     return (
-        <div className="row g-0">
-            <div className="col-12">
-                <h4 className="mx-3 mb-0">Detalles de pagos</h4>
-            </div>
+        <>
+            <div className="row g-0">
+                <div className="col-12">
+                    <h4 className="mx-3 mb-0">Detalles de pagos</h4>
+                </div>
 
-            <div className="col-12 col-xl-8 p-3">
-                <div
-                    className="bg-white shadow-premium p-3"
-                    style={{ borderRadius: "12px" }}
-                >
-                    <div className="row mb-3">
-                        <div className="col-6"
-                            style={{
-                                fontSize: 14,
-                                color: "#6E6B7B",
-                            }}>
-                            Folio: <Link className="font-inter fw-bold" href={`/reservaciones/editar/${venta?.id_venta}`} style={{ fontSize: 18, color: "rgb(12, 92, 198)" }} target="_blank">{venta?.folio}</Link>
-                        </div>
-                        <div className="col-6 text-end"
-                            style={{
-                                fontSize: 14,
-                                color: "#6E6B7B",
-                            }}>
-                            Fecha de creación: <strong style={{ fontSize: 18, color: "#0d6efd" }}>{formatDate(venta?.fecha)}</strong>
-                        </div>
-                    </div>
-                    <div className="row mb-4">
-                        <div className="col-12 col-md-6 pe-md-4">
-                            <p className="mb-2" style={{ fontWeight: 600 }}>
-                                Información de la agencia
-                            </p>
-
-                            <ul
-                                className="d-flex flex-column gap-2"
+                <div className="col-12 col-xl-8 p-3">
+                    <div
+                        className="bg-white shadow-premium p-3"
+                        style={{ borderRadius: "12px" }}
+                    >
+                        <div className="row mb-3">
+                            <div className="col-6"
                                 style={{
                                     fontSize: 14,
-                                    listStyle: "none",
-                                    margin: 0,
-                                    padding: 0,
                                     color: "#6E6B7B",
-                                }}
-                            >
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Nombre:
-                                    </span>
-
-                                    {agencia?.nombre_comercial || "—"}
-                                </li>
-
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Dirección:
-                                    </span>
-
-                                    {agencia?.direccion || "—"}
-                                </li>
-
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Correo:
-                                    </span>
-
-                                    {agencia?.correo || "—"}
-                                </li>
-
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Teléfono:
-                                    </span>
-
-                                    {agencia?.telefono || "—"}
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div className="col-12 col-md-6 ps-md-4 mt-4 mt-md-0">
-                            <p className="mb-2" style={{ fontWeight: 600 }}>
-                                Información del cliente
-                            </p>
-
-                            <ul
-                                className="d-flex flex-column gap-2"
+                                }}>
+                                Folio: <Link className="font-inter fw-bold" href={`/reservaciones/editar/${venta?.id_venta}`} style={{ fontSize: 18, color: "rgb(12, 92, 198)" }} target="_blank">{venta?.folio}</Link>
+                            </div>
+                            <div className="col-6 text-end"
                                 style={{
                                     fontSize: 14,
-                                    listStyle: "none",
-                                    margin: 0,
-                                    padding: 0,
                                     color: "#6E6B7B",
-                                }}
-                            >
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Nombre:
-                                    </span>
-
-                                    {venta?.idCliente?.nombre || "—"}
-                                </li>
-
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Teléfono:
-                                    </span>
-
-                                    {venta?.idCliente?.telefono || "—"}
-                                </li>
-
-                                <li className="d-flex">
-                                    <span
-                                        style={{
-                                            minWidth: 90,
-                                            fontWeight: 500,
-                                            color: "#5E5873",
-                                        }}
-                                    >
-                                        Correo:
-                                    </span>
-
-                                    {venta?.idCliente?.correo || "—"}
-                                </li>
-                            </ul>
+                                }}>
+                                Fecha de creación: <strong style={{ fontSize: 18, color: "#0d6efd" }}>{formatDate(venta?.fecha)}</strong>
+                            </div>
                         </div>
-                    </div>
+                        <div className="row mb-4">
+                            <div className="col-12 col-md-6 pe-md-4">
+                                <p className="mb-2" style={{ fontWeight: 600 }}>
+                                    Información de la agencia
+                                </p>
 
-                    <p className="mb-1" style={{ fontWeight: 600 }}>
-                        {pagoHabilitado ? "Agregar nuevo pago" : "Descripción de los servicios"}
-                    </p>
-
-                    {isLoading ? (
-                        <div
-                            className="text-center py-4"
-                            style={{ color: "#6E6B7B" }}
-                        >
-                            Cargando servicios...
-                        </div>
-                    ) : error ? (
-                        <div
-                            className="text-center py-4"
-                            style={{ color: "#EA5455" }}
-                        >
-                            {error}
-                        </div>
-                    ) : venta?.ventasServicioses?.length ? (
-                        <>
-                            {pagoHabilitado && (
-                                <div className="row mb-2">
-                                    <div className="col-12 col-md-3">
-                                        <label style={labelStyle}>Forma de pago</label>
-                                        <select
-                                            className="form-control mb-3"
-                                            style={{ fontSize: 13 }}
-                                            value={idFormaPago}
-                                            onChange={(e) =>
-                                                setIdFormaPago(e.target.value)
-                                            }
+                                <ul
+                                    className="d-flex flex-column gap-2"
+                                    style={{
+                                        fontSize: 14,
+                                        listStyle: "none",
+                                        margin: 0,
+                                        padding: 0,
+                                        color: "#6E6B7B",
+                                    }}
+                                >
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
                                         >
-                                            {pagos?.map((p) => (
-                                                <option key={p.id_tipo} value={p.id_tipo}>
-                                                    {p.descripcion}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="col-12 col-md-3">
-                                        <label style={labelStyle}>Fecha pago</label>
-                                        <DatePicker
-                                            isClearable
-                                            selected={fechaPago}
-                                            onChange={(date) =>
-                                                setFechaPago(date)
-                                            }
-                                            placeholderText="Fecha de pago"
-                                            locale="es"
-                                            dateFormat="dd/MM/yyyy"
-                                            className="form-control form-control-sm"
-                                            autoComplete="off"
-                                        />
-                                    </div>
-                                    <div className="col-12 col-md-6">
-                                        <label style={labelStyle}>Observaciones</label>
-                                        <textarea
-                                            type="text"
-                                            className="form-control"
-                                            style={{ fontSize: 13 }}
-                                            value={descripcionPago}
-                                            onChange={(e) =>
-                                                setDescripcionPago(
-                                                    e.target.value
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            <div className="row pt-1 pb-0">
-                                <div className="col-12 col-md-4">
-                                    <div style={labelStyle}>Servicio</div>
-                                </div>
-                                <div className="col-12 col-md-4">
-                                    <div style={labelStyle}>Proveedor</div>
-                                </div>
-                                <div className="col-12 col-md-4">
-                                    <div style={labelStyle}>Descripción</div>
-                                </div>
+                                            Nombre:
+                                        </span>
+
+                                        {agencia?.nombre_comercial || "—"}
+                                    </li>
+
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Dirección:
+                                        </span>
+
+                                        {agencia?.direccion || "—"}
+                                    </li>
+
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Correo:
+                                        </span>
+
+                                        {agencia?.correo || "—"}
+                                    </li>
+
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Teléfono:
+                                        </span>
+
+                                        {agencia?.telefono || "—"}
+                                    </li>
+                                </ul>
                             </div>
 
-                            {venta.ventasServicioses.map((servicio, index) => {
-                                const servicioKey = servicio.id_ventaservicio ?? index;
-                                // 1. Tarifa total del servicio original
-                                const totalServicio = Number(servicio.tarifa_publica || 0);
+                            <div className="col-12 col-md-6 ps-md-4 mt-4 mt-md-0">
+                                <p className="mb-2" style={{ fontWeight: 600 }}>
+                                    Información del cliente
+                                </p>
 
-                                // 2. Lo que ya se pagó
-                                const pagadoHistorico = obtenerTotalPagadoServicio(servicioKey);
+                                <ul
+                                    className="d-flex flex-column gap-2"
+                                    style={{
+                                        fontSize: 14,
+                                        listStyle: "none",
+                                        margin: 0,
+                                        padding: 0,
+                                        color: "#6E6B7B",
+                                    }}
+                                >
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Nombre:
+                                        </span>
 
-                                // 3. El saldo restante real que aún debe el cliente
-                                const saldoServicio = Number((totalServicio - pagadoHistorico).toFixed(2));
+                                        {venta?.idCliente?.nombre || "—"}
+                                    </li>
 
-                                // 4. Lo que estás capturando actualmente en el input
-                                const montoCapturado = Number((Number(montoPago[servicioKey]) || 0).toFixed(2));
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Teléfono:
+                                        </span>
 
-                                // 5. Validacion
-                                const excedeSaldo = montoCapturado > saldoServicio;
+                                        {venta?.idCliente?.telefono || "—"}
+                                    </li>
 
-                                return (
-                                    <div
-                                        key={servicioKey}
-                                        className="py-2 px-2 border-bottom"
-                                        style={{
-                                            borderRadius: 8,
-                                            backgroundColor:
-                                                pagoHabilitado &&
-                                                    montoCapturado > 0
-                                                    ? "#F5F8FF"
-                                                    : "transparent",
-                                            transition:
-                                                "background-color .15s ease",
-                                        }}
-                                    >
-                                        <div className="row">
-                                            <div className="col-12 col-md-4">
-                                                <div style={valueStyle}>
-                                                    {servicio.idTipoServicio
-                                                        .tipo_servicio || "—"}
-                                                </div>
-                                            </div>
+                                    <li className="d-flex">
+                                        <span
+                                            style={{
+                                                minWidth: 90,
+                                                fontWeight: 500,
+                                                color: "#5E5873",
+                                            }}
+                                        >
+                                            Correo:
+                                        </span>
 
-                                            <div className="col-12 col-md-4 mt-2 mt-md-0">
-                                                <div style={valueStyle}>
-                                                    {servicio.idProveedor
-                                                        .nombre_comercial ||
-                                                        "—"}
-                                                </div>
-                                            </div>
+                                        {venta?.idCliente?.correo || "—"}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-                                            <div className="col-12 col-md-4 mt-2 mt-md-0">
-                                                <div style={valueStyle}>
-                                                    {servicio.descripcion ||
-                                                        "—"}
-                                                </div>
-                                            </div>
+                        <p className="mb-1" style={{ fontWeight: 600 }}>
+                            {pagoHabilitado ? "Agregar nuevo pago" : "Descripción de los servicios"}
+                        </p>
+
+                        {isLoading ? (
+                            <div
+                                className="text-center py-4"
+                                style={{ color: "#6E6B7B" }}
+                            >
+                                Cargando servicios...
+                            </div>
+                        ) : error ? (
+                            <div
+                                className="text-center py-4"
+                                style={{ color: "#EA5455" }}
+                            >
+                                {error}
+                            </div>
+                        ) : venta?.ventasServicioses?.length ? (
+                            <>
+                                {pagoHabilitado && (
+                                    <div className="row mb-2">
+                                        <div className="col-12 col-md-3">
+                                            <label style={labelStyle}>Forma de pago</label>
+                                            <select
+                                                className="form-control mb-3"
+                                                style={{ fontSize: 13 }}
+                                                value={idFormaPago}
+                                                onChange={(e) =>
+                                                    setIdFormaPago(e.target.value)
+                                                }
+                                            >
+                                                {pagos?.map((p) => (
+                                                    <option key={p.id_tipo} value={p.id_tipo}>
+                                                        {p.descripcion}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
+                                        <div className="col-12 col-md-3">
+                                            <label style={labelStyle}>Fecha pago</label>
+                                            <DatePicker
+                                                isClearable
+                                                selected={fechaPago}
+                                                onChange={(date) =>
+                                                    setFechaPago(date)
+                                                }
+                                                placeholderText="Fecha de pago"
+                                                locale="es"
+                                                dateFormat="dd/MM/yyyy"
+                                                className="form-control form-control-sm"
+                                                autoComplete="off"
+                                            />
+                                        </div>
+                                        <div className="col-12 col-md-6">
+                                            <label style={labelStyle}>Observaciones</label>
+                                            <textarea
+                                                type="text"
+                                                className="form-control"
+                                                style={{ fontSize: 13 }}
+                                                value={descripcionPago}
+                                                onChange={(e) =>
+                                                    setDescripcionPago(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="row pt-1 pb-0">
+                                    <div className="col-12 col-md-4">
+                                        <div style={labelStyle}>Servicio</div>
+                                    </div>
+                                    <div className="col-12 col-md-4">
+                                        <div style={labelStyle}>Proveedor</div>
+                                    </div>
+                                    <div className="col-12 col-md-4">
+                                        <div style={labelStyle}>Descripción</div>
+                                    </div>
+                                </div>
 
-                                        {pagoHabilitado && (
-                                            <div className="mt-2 pt-2">
-                                                <div className="d-flex align-items-center justify-content-between">
-                                                    <span
-                                                        style={{
-                                                            fontSize: 14,
-                                                            color: "#6E6B7B",
-                                                        }}
-                                                    >
-                                                        Tarifa publica:{" "}
-                                                        <strong
-                                                            style={{
-                                                                color: "#6E6B7B"
-                                                            }}
-                                                        >
-                                                            {formatMoney(servicio.tarifa_publica)}
-                                                        </strong>
-                                                    </span>
-                                                    <div className="d-flex align-items-center justify-content-end gap-4 mt-0">
+                                {venta.ventasServicioses.map((servicio, index) => {
+                                    const servicioKey = servicio.id_ventaservicio ?? index;
+                                    // 1. Tarifa total del servicio original
+                                    const totalServicio = Number(servicio.tarifa_publica || 0);
+
+                                    // 2. Lo que ya se pagó
+                                    const pagadoHistorico = obtenerTotalPagadoServicio(servicioKey);
+
+                                    // 3. El saldo restante real que aún debe el cliente
+                                    const saldoServicio = Number((totalServicio - pagadoHistorico).toFixed(2));
+
+                                    // 4. Lo que estás capturando actualmente en el input
+                                    const montoCapturado = Number((Number(montoPago[servicioKey]) || 0).toFixed(2));
+
+                                    // 5. Validacion
+                                    const excedeSaldo = montoCapturado > saldoServicio;
+
+                                    return (
+                                        <div
+                                            key={servicioKey}
+                                            className="py-2 px-2 border-bottom"
+                                            style={{
+                                                borderRadius: 8,
+                                                backgroundColor:
+                                                    pagoHabilitado &&
+                                                        montoCapturado > 0
+                                                        ? "#F5F8FF"
+                                                        : "transparent",
+                                                transition:
+                                                    "background-color .15s ease",
+                                            }}
+                                        >
+                                            <div className="row">
+                                                <div className="col-12 col-md-4">
+                                                    <div style={valueStyle}>
+                                                        {servicio.idTipoServicio
+                                                            .tipo_servicio || "—"}
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-md-4 mt-2 mt-md-0">
+                                                    <div style={valueStyle}>
+                                                        {servicio.idProveedor
+                                                            .nombre_comercial ||
+                                                            "—"}
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-md-4 mt-2 mt-md-0">
+                                                    <div style={valueStyle}>
+                                                        {servicio.descripcion ||
+                                                            "—"}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {pagoHabilitado && (
+                                                <div className="mt-2 pt-2">
+                                                    <div className="d-flex align-items-center justify-content-between">
                                                         <span
                                                             style={{
                                                                 fontSize: 14,
                                                                 color: "#6E6B7B",
                                                             }}
                                                         >
-                                                            Saldo a pagar:{" "}
+                                                            Tarifa publica:{" "}
                                                             <strong
-                                                                className="text-success"
                                                                 style={{
-                                                                    fontSize: 16
+                                                                    color: "#6E6B7B"
                                                                 }}
                                                             >
-                                                                {formatMoney(saldoServicio)}
+                                                                {formatMoney(servicio.tarifa_publica)}
                                                             </strong>
                                                         </span>
-                                                        <input
-                                                            type="text"
-                                                            inputMode="decimal"
-                                                            className="form-control"
-                                                            style={{ maxWidth: 180, fontSize: 14 }}
-                                                            placeholder="Monto a pagar"
-                                                            value={montoPago[servicioKey] || ""}
-                                                            onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
-                                                            disabled={saldoServicio <= 0}
-                                                        />
+                                                        <div className="d-flex align-items-center justify-content-end gap-4 mt-0">
+                                                            <span
+                                                                style={{
+                                                                    fontSize: 14,
+                                                                    color: "#6E6B7B",
+                                                                }}
+                                                            >
+                                                                Saldo a pagar:{" "}
+                                                                <strong
+                                                                    className="text-success"
+                                                                    style={{
+                                                                        fontSize: 16
+                                                                    }}
+                                                                >
+                                                                    {formatMoney(saldoServicio)}
+                                                                </strong>
+                                                            </span>
+                                                            <input
+                                                                type="text"
+                                                                inputMode="decimal"
+                                                                className="form-control"
+                                                                style={{ maxWidth: 180, fontSize: 14 }}
+                                                                placeholder="Monto a pagar"
+                                                                value={montoPago[servicioKey] || ""}
+                                                                onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
+                                                                disabled={saldoServicio <= 0}
+                                                            />
+                                                        </div>
                                                     </div>
+
+                                                    {excedeSaldo && (
+                                                        <div
+                                                            className="text-end mt-1"
+                                                            style={{ fontSize: 12, color: "#EA5455" }}
+                                                        >
+                                                            El monto excede el saldo a pagar de este servicio
+                                                        </div>
+                                                    )}
+
+                                                    {saldoServicio <= 0 && (
+                                                        <div className="text-end mt-1" style={{ fontSize: 12, color: "#28C76F" }}>
+                                                            Servicio liquidado
+                                                        </div>
+                                                    )}
                                                 </div>
-
-                                                {excedeSaldo && (
-                                                    <div
-                                                        className="text-end mt-1"
-                                                        style={{ fontSize: 12, color: "#EA5455" }}
-                                                    >
-                                                        El monto excede el saldo a pagar de este servicio
-                                                    </div>
-                                                )}
-
-                                                {saldoServicio <= 0 && (
-                                                    <div className="text-end mt-1" style={{ fontSize: 12, color: "#28C76F" }}>
-                                                        Servicio liquidado
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </>
-                    ) : (
-                        <div
-                            className="text-center py-4"
-                            style={{ color: "#6E6B7B" }}
-                        >
-                            No hay servicios registrados.
-                        </div>
-                    )}
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </>
+                        ) : (
+                            <div
+                                className="text-center py-4"
+                                style={{ color: "#6E6B7B" }}
+                            >
+                                No hay servicios registrados.
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            <div className="col-12 col-xl-4 p-3">
-                <div
-                    className="bg-white shadow-premium p-3 position-sticky"
-                    style={{
-                        borderRadius: "12px",
-                        top: "1rem",
-                        maxHeight: "calc(100vh - 2rem)",
-                        overflowY: "auto",
-                    }}
-                >
-                    <p className="mb-2" style={{ fontWeight: 600 }}>
-                        Saldo de venta
-                    </p>
-                    <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
-                        <p className='mb-2'>Total público:</p>
-                        <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granTotal)}</p>
-                    </div>
-                    <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
-                        <p className='mb-2'>Total en pagos:</p>
-                        <p className='mb-2 text-success' style={{ fontWeight: 700 }}>{formatMoney(granPagado)}</p>
-                    </div>
-                    <hr className="my-1" />
-                    <div className='d-flex justify-content-between mb-3' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
-                        <p className='mb-2'>Saldo a pagar:</p>
-                        <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granSaldo)}</p>
-                    </div>
+                <div className="col-12 col-xl-4 p-3">
+                    <div
+                        className="bg-white shadow-premium p-3 position-sticky"
+                        style={{
+                            borderRadius: "12px",
+                            top: "1rem",
+                            maxHeight: "calc(100vh - 2rem)",
+                            overflowY: "auto",
+                        }}
+                    >
+                        <p className="mb-2" style={{ fontWeight: 600 }}>
+                            Saldo de venta
+                        </p>
+                        <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
+                            <p className='mb-2'>Total público:</p>
+                            <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granTotal)}</p>
+                        </div>
+                        <div className='d-flex justify-content-between' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
+                            <p className='mb-2'>Total en pagos:</p>
+                            <p className='mb-2 text-success' style={{ fontWeight: 700 }}>{formatMoney(granPagado)}</p>
+                        </div>
+                        <hr className="my-1" />
+                        <div className='d-flex justify-content-between mb-3' style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)" }}>
+                            <p className='mb-2'>Saldo a pagar:</p>
+                            <p className='mb-2' style={{ fontWeight: 700 }}>{formatMoney(granSaldo)}</p>
+                        </div>
 
-                    {pagoHabilitado && (
-                        <div
-                            className="d-flex justify-content-between align-items-center mb-3 p-2"
-                            style={{
-                                fontSize: 14,
-                                backgroundColor: "#F5F8FF",
-                                borderRadius: 8,
-                            }}
-                        >
-                            <span style={{ color: "#5E5873" }}>
-                                Total a capturar:
-                            </span>
-                            <span
+                        {pagoHabilitado && (
+                            <div
+                                className="d-flex justify-content-between align-items-center mb-3 p-2"
                                 style={{
-                                    fontWeight: 700,
-                                    color: hayMontosCapturados
-                                        ? "#28C76F"
-                                        : "#5E5873",
+                                    fontSize: 14,
+                                    backgroundColor: "#F5F8FF",
+                                    borderRadius: 8,
                                 }}
                             >
-                                {formatMoney(totalCapturado)}
-                            </span>
-                        </div>
-                    )}
+                                <span style={{ color: "#5E5873" }}>
+                                    Total a capturar:
+                                </span>
+                                <span
+                                    style={{
+                                        fontWeight: 700,
+                                        color: hayMontosCapturados
+                                            ? "#28C76F"
+                                            : "#5E5873",
+                                    }}
+                                >
+                                    {formatMoney(totalCapturado)}
+                                </span>
+                            </div>
+                        )}
 
-                    {saveError && (
-                        <div
-                            className="mb-2 text-center"
-                            style={{ fontSize: 13, color: "#EA5455" }}
-                        >
-                            {saveError}
-                        </div>
-                    )}
+                        {saveError && (
+                            <div
+                                className="mb-2 text-center"
+                                style={{ fontSize: 13, color: "#EA5455" }}
+                            >
+                                {saveError}
+                            </div>
+                        )}
 
-                    {pagoHabilitado ? (
-                        <div className="d-flex gap-2">
+                        {pagoHabilitado ? (
+                            <div className="d-flex gap-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-danger w-50"
+                                    onClick={handleCancelarPago}
+                                    disabled={isSaving}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary w-50"
+                                    onClick={handleGuardarPagos}
+                                    disabled={!puedeGuardar}
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            />
+                                            Guardando...
+                                        </>
+                                    ) : (
+                                        "Guardar pagos"
+                                    )}
+                                </button>
+                            </div>
+                        ) : ventaPagada ? (
+                            <div
+                                className="text-center p-2"
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    color: "#28C76F",
+                                    backgroundColor: "#E8F9F0",
+                                    borderRadius: 8,
+                                }}
+                            >
+                                Venta pagada completamente
+                            </div>
+                        ) : (
                             <button
                                 type="button"
-                                className="btn btn-outline-danger w-50"
-                                onClick={handleCancelarPago}
-                                disabled={isSaving}
+                                className="btn btn-primary w-100"
+                                onClick={() => setPagoHabilitado(true)}
                             >
-                                Cancelar
+                                Agregar nuevo pago
                             </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary w-50"
-                                onClick={handleGuardarPagos}
-                                disabled={!puedeGuardar}
-                            >
-                                {isSaving ? (
-                                    <>
-                                        <span
-                                            className="spinner-border spinner-border-sm me-2"
-                                            role="status"
-                                            aria-hidden="true"
-                                        />
-                                        Guardando...
-                                    </>
-                                ) : (
-                                    "Guardar pagos"
-                                )}
-                            </button>
-                        </div>
-                    ) : ventaPagada ? (
-                        <div
-                            className="text-center p-2"
-                            style={{
-                                fontSize: 14,
-                                fontWeight: 600,
-                                color: "#28C76F",
-                                backgroundColor: "#E8F9F0",
-                                borderRadius: 8,
-                            }}
-                        >
-                            Venta pagada completamente
-                        </div>
-                    ) : (
-                        <button
-                            type="button"
-                            className="btn btn-primary w-100"
-                            onClick={() => setPagoHabilitado(true)}
-                        >
-                            Agregar nuevo pago
-                        </button>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            <div className="col-12 p-3">
-                <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
-                    <p className="mb-2" style={{ fontWeight: 600 }}>Detalle de pagos</p>
-                    {isLoading ? (
-                        <div className="text-center py-4" style={{ color: "#6E6B7B" }}>
-                            Cargando historial de pagos...
-                        </div>
-                    ) : (
-                        <DataTable
-                            columns={columns}
-                            data={detalles || []}
-                            renderCell={renderCell}
-                            pagination={false}
-                            emptyMessage="No se encontraron pagos registrados."
-                            minWidth="100%"
+                <div className="col-12 p-3">
+                    <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
+                        <p className="mb-2" style={{ fontWeight: 600 }}>Detalle de pagos</p>
+                        {isLoading ? (
+                            <div className="text-center py-4" style={{ color: "#6E6B7B" }}>
+                                Cargando historial de pagos...
+                            </div>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={detalles || []}
+                                renderCell={renderCell}
+                                pagination={false}
+                                emptyMessage="No se encontraron pagos registrados."
+                                minWidth="100%"
+                            />
+                        )}
+                    </div>
+                </div>
+
+            {pagoCreado &&
+                createPortal(
+                    <>
+                        <div
+                            className="modal-backdrop fade show"
+                            style={{ zIndex: 2000 }}
                         />
-                    )}
-                </div>
+                        <div
+                            className="modal fade show d-block"
+                            tabIndex={-1}
+                            role="dialog"
+                            aria-modal="true"
+                            style={{ zIndex: 2001 }}
+                        >
+                            <div className="modal-dialog modal-dialog-centered">
+                                <div className="modal-content" style={{ borderRadius: 12 }}>
+                                    <div className="modal-body text-center p-4">
+                                        <div
+                                            className="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                            style={{
+                                                width: 56,
+                                                height: 56,
+                                                borderRadius: "50%",
+                                                backgroundColor: "#E8F9F0",
+                                                color: "#28C76F",
+                                                fontSize: 28,
+                                            }}
+                                        >
+                                            ✓
+                                        </div>
+
+                                        <h5 className="mb-1">Pago registrado</h5>
+                                        <p className="mb-3" style={{ fontSize: 14, color: "#6E6B7B" }}>
+                                            El pago se guardó correctamente. ¿Deseas descargar el comprobante?
+                                        </p>
+
+                                        <div className="d-flex gap-2 flex-column">
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary"
+                                                onClick={() => handleDownloadPDF(pagoCreado)}
+                                                disabled={downloadingId === pagoCreado.id_pago}
+                                            >
+                                                {downloadingId === pagoCreado.id_pago
+                                                    ? "Generando..."
+                                                    : "Descargar PDF"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                onClick={() => setPagoCreado(null)}
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>,
+                document.body
+            )}
             </div>
-        </div>
+        </>
     );
 }
