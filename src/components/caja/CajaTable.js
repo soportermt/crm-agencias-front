@@ -13,6 +13,7 @@ import SearchBar from "../common/SearchBar";
 import ExportButton from "../common/ExportButton";
 import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
+import { EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 registerLocale("es", es);
 
@@ -240,12 +241,20 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
       case "acciones":
         return (
-          <Link
-            href={`caja/pagos/${row.id_venta}`}
-            className="text-decoration-none fw-medium text-brand-blue gap-2 px-2 py-1 btn-pdf"
-          >
-            Ir a pagos
-          </Link>
+          <div className="d-flex align-items-center gap-2">
+            <a
+              href={`caja/pagos/${row.id_venta}`}
+              className="btn btn-link p-1 text-primary"
+            >
+              <EyeIcon style={{ width: "20px", height: "20px" }} />
+            </a>
+            <button
+              type="button"
+              className="btn btn-link p-1 text-danger"
+            >
+              <TrashIcon style={{ width: "20px", height: "20px" }} />
+            </button>
+          </div>
         );
 
       default:

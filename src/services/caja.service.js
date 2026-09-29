@@ -52,4 +52,13 @@ export const cajaService = {
         return data;
     },
 
+    async sendInvoicePayment(formData) {
+        const { data } = await api.post("/reservas/sendInvoicePayment", formData, {
+            withCredentials: true,
+            headers: { "Content-Type": undefined },
+        });
+    
+        return data;
+    },
+
 }

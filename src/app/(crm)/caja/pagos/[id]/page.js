@@ -12,6 +12,7 @@ import { cleanDecimalInput } from "@/utils/inputFormatters";
 import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
 import Link from "next/link";
 import { createPortal } from "react-dom";
+import { enviarComprobantePagoPorCorreo } from "@/utils/invoiceEmailPayment";
 
 registerLocale("es", es);
 
@@ -55,6 +56,9 @@ export default function Pago() {
 
     const [downloadingId, setDownloadingId] = useState(null);
     const [pagoCreado, setPagoCreado] = useState(null);
+    const [destinatario, setDestinatario] = useState("");
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [sendResult, setSendResult] = useState(null)
 
     const { id } = useParams();
 
@@ -241,6 +245,25 @@ export default function Pago() {
             console.error("Error al generar el PDF:", err);
         } finally {
             setDownloadingId(null);
+        }
+    };
+
+    const handleEnviarCorreo = async () => {
+        if (!destinatario || !/\S+@\S+\.\S+/.test(destinatario)) {
+            setSendResult({ success: false, error: "Ingresa un correo válido" });
+            return;
+        }
+
+        setSendingEmail(true);
+        setSendResult(null);
+        try {
+            const res = await enviarComprobantePagoPorCorreo(pagoCreado, agencia, destinatario);
+            setSendResult(res);
+        } catch (err) {
+            console.error("Error al enviar el comprobante:", err);
+            setSendResult({ success: false, error: "No se pudo enviar el correo" });
+        } finally {
+            setSendingEmail(false);
         }
     };
 
@@ -798,57 +821,106 @@ export default function Pago() {
                     </div>
                 </div>
 
-            {pagoCreado &&
-                createPortal(
-                    <>
-                        <div
-                            className="modal-backdrop fade show"
-                            style={{ zIndex: 2000 }}
-                        />
-                        <div
-                            className="modal fade show d-block"
-                            tabIndex={-1}
-                            role="dialog"
-                            aria-modal="true"
-                            style={{ zIndex: 2001 }}
-                        >
-                            <div className="modal-dialog modal-dialog-centered">
-                                <div className="modal-content" style={{ borderRadius: 12 }}>
-                                    <div className="modal-body text-center p-4">
-                                        <div
-                                            className="mx-auto mb-3 d-flex align-items-center justify-content-center"
-                                            style={{
-                                                width: 56,
-                                                height: 56,
-                                                borderRadius: "50%",
-                                                backgroundColor: "#E8F9F0",
-                                                color: "#28C76F",
-                                                fontSize: 28,
-                                            }}
-                                        >
-                                            ✓
-                                        </div>
-
-                                        <h5 className="mb-1">Pago registrado</h5>
-                                        <p className="mb-3" style={{ fontSize: 14, color: "#6E6B7B" }}>
-                                            El pago se guardó correctamente. ¿Deseas descargar el comprobante?
-                                        </p>
-
-                                        <div className="d-flex gap-2 flex-column">
-                                            <button
-                                                type="button"
-                                                className="btn btn-primary"
-                                                onClick={() => handleDownloadPDF(pagoCreado)}
-                                                disabled={downloadingId === pagoCreado.id_pago}
+                {pagoCreado &&
+                    createPortal(
+                        <>
+                            <div
+                                className="modal-backdrop fade show"
+                                style={{ zIndex: 2000 }}
+                            />
+                            <div
+                                className="modal fade show d-block"
+                                tabIndex={-1}
+                                role="dialog"
+                                aria-modal="true"
+                                style={{ zIndex: 2001 }}
+                            >
+                                <div className="modal-dialog modal-dialog-centered">
+                                    <div className="modal-content" style={{ borderRadius: 12 }}>
+                                        <div className="modal-body text-center p-4">
+                                            <div
+                                                className="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: "50%",
+                                                    backgroundColor: "#E8F9F0",
+                                                    color: "#28C76F",
+                                                    fontSize: 28,
+                                                }}
                                             >
-                                                {downloadingId === pagoCreado.id_pago
-                                                    ? "Generando..."
-                                                    : "Descargar PDF"}
-                                            </button>
+                                                ✓
+                                            </div>
+
+                                            <h5 className="mb-1">Pago registrado</h5>
+                                            <p className="mb-3" style={{ fontSize: 14, color: "#6E6B7B" }}>
+                                                El pago se guardó correctamente.
+                                            </p>
+
+                                            <div className="d-flex gap-2 flex-column">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary"
+                                                    onClick={() => handleDownloadPDF(pagoCreado)}
+                                                    disabled={downloadingId === pagoCreado.id_pago}
+                                                >
+                                                    {downloadingId === pagoCreado.id_pago
+                                                        ? "Generando..."
+                                                        : "Descargar PDF"}
+                                                </button>
+                                            </div>
+
+                                            <hr className="my-3" />
+
+                                            <div className="text-start">
+                                                <label style={{ fontSize: 13, fontWeight: 500, color: "#5E5873" }}>
+                                                    Enviar comprobante a:
+                                                </label>
+                                                <div className="d-flex gap-2 mt-1">
+                                                    <input
+                                                        type="email"
+                                                        className="form-control form-control-sm"
+                                                        placeholder="correo@ejemplo.com"
+                                                        value={destinatario}
+                                                        onChange={(e) => {
+                                                            setDestinatario(e.target.value);
+                                                            setSendResult(null);
+                                                        }}
+                                                        disabled={sendingEmail}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-primary text-nowrap"
+                                                        onClick={handleEnviarCorreo}
+                                                        disabled={sendingEmail}
+                                                    >
+                                                        {sendingEmail ? "Enviando..." : "Enviar"}
+                                                    </button>
+                                                </div>
+
+                                                {sendResult && (
+                                                    <div
+                                                        className="mt-1"
+                                                        style={{
+                                                            fontSize: 12,
+                                                            color: sendResult.success ? "#28C76F" : "#EA5455",
+                                                        }}
+                                                    >
+                                                        {sendResult.success
+                                                            ? "Comprobante enviado correctamente."
+                                                            : sendResult.error || "Ocurrió un error al enviar."}
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <button
                                                 type="button"
-                                                className="btn btn-outline-secondary"
-                                                onClick={() => setPagoCreado(null)}
+                                                className="btn btn-outline-secondary w-100 mt-3"
+                                                onClick={() => {
+                                                    setPagoCreado(null);
+                                                    setDestinatario("");
+                                                    setSendResult(null);
+                                                }}
                                             >
                                                 Cerrar
                                             </button>
@@ -856,10 +928,9 @@ export default function Pago() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </>,
-                document.body
-            )}
+                        </>,
+                        document.body
+                    )}
             </div>
         </>
     );
