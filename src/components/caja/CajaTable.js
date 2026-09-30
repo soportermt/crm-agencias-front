@@ -241,19 +241,14 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
       case "acciones":
         return (
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center justify-content-center gap-2">
             <a
               href={`caja/pagos/${row.id_venta}`}
               className="btn btn-link p-1 text-primary"
             >
               <EyeIcon style={{ width: "20px", height: "20px" }} />
             </a>
-            <button
-              type="button"
-              className="btn btn-link p-1 text-danger"
-            >
-              <TrashIcon style={{ width: "20px", height: "20px" }} />
-            </button>
+            
           </div>
         );
 

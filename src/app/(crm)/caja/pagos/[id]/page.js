@@ -2,7 +2,7 @@
 
 import { cajaService } from "@/services/caja.service";
 import { useParams } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
 import { format } from "date-fns";
@@ -13,6 +13,8 @@ import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { enviarComprobantePagoPorCorreo } from "@/utils/invoiceEmailPayment";
+import { ArrowDownTrayIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import StatusBadge from "@/components/common/StatusBadge";
 
 registerLocale("es", es);
 
@@ -22,8 +24,11 @@ const columns = [
     { key: "fecha", label: "Fecha", align: "left", width: "100px" },
     { key: "formaPago", label: "Forma de pago", align: "center", width: "100px" },
     { key: "monto", label: "Monto", align: "right", width: "100px" },
-    { key: "acciones", label: "", align: "center", width: "80px" },
+    { key: "estatus", label: "Estatus", align: "center", width: "100px" },
+    { key: "acciones", label: "Acciones", align: "center", width: "50px" },
 ];
+
+const ITEMS_PER_PAGE = 5;
 
 function formatDate(date) {
     if (!date) return "-";
@@ -58,7 +63,22 @@ export default function Pago() {
     const [pagoCreado, setPagoCreado] = useState(null);
     const [destinatario, setDestinatario] = useState("");
     const [sendingEmail, setSendingEmail] = useState(false);
-    const [sendResult, setSendResult] = useState(null)
+    const [sendResult, setSendResult] = useState(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const dataSegura = detalles || [];
+
+    const totalPages = Math.ceil(dataSegura.length / ITEMS_PER_PAGE);
+
+    const paginatedData = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return dataSegura.slice(startIndex, endIndex);
+    }, [currentPage, dataSegura]);
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
 
     const { id } = useParams();
 
@@ -291,16 +311,29 @@ export default function Pago() {
             return <span>{formatDate(row.fecha)}</span>;
         }
 
+        if (colKey === "estatus") {
+            return <StatusBadge status={row.estatus === '1' ? 'Activo' : 'Cancelado'}/>;
+        }
+
         if (colKey === "acciones") {
             const generando = downloadingId === row.id_pago;
             return (
-                <button
-                    className="d-flex align-items-center gap-2 px-2 py-0 transition-smooth btn-pdf"
-                    onClick={() => handleDownloadPDF(row)}
-                    disabled={generando}
-                >
-                    {generando ? "Generando..." : "Descargar"}
-                </button>
+                <div className="d-flex align-items-center justify-content-center gap-1">
+                    <button
+                        className="btn"
+                        style={{color: "rgb(12, 92, 198)"}}
+                        onClick={() => handleDownloadPDF(row)}
+                        disabled={generando}
+                    >
+                        <ArrowDownTrayIcon style={{ width: "20px", height: "20px" }}/>
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-link p-1 text-danger"
+                    >
+                        <XCircleIcon style={{ width: "20px", height: "20px" }} />
+                    </button>
+                </div>
             );
         }
         return row[colKey];
@@ -475,7 +508,7 @@ export default function Pago() {
                         {isLoading ? (
                             <div
                                 className="text-center py-4"
-                                style={{ color: "#6E6B7B" }}
+                                style={{ color: "#6E6B7B", fontSize: 13 }}
                             >
                                 Cargando servicios...
                             </div>
@@ -805,15 +838,18 @@ export default function Pago() {
                     <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
                         <p className="mb-2" style={{ fontWeight: 600 }}>Detalle de pagos</p>
                         {isLoading ? (
-                            <div className="text-center py-4" style={{ color: "#6E6B7B" }}>
+                            <div className="text-center py-4" style={{ color: "#6E6B7B", fontSize: 13 }}>
                                 Cargando historial de pagos...
                             </div>
                         ) : (
                             <DataTable
                                 columns={columns}
-                                data={detalles || []}
+                                data={paginatedData}
                                 renderCell={renderCell}
-                                pagination={false}
+                                pagination={true}
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
                                 emptyMessage="No se encontraron pagos registrados."
                                 minWidth="100%"
                             />
