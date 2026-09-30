@@ -648,107 +648,146 @@ export default function Pago() {
                                     // 5. Validacion
                                     const excedeSaldo = montoCapturado > saldoServicio;
 
+                                    const isActivo = pagoHabilitado && montoCapturado > 0;
+
                                     return (
                                         <div
                                             key={servicioKey}
-                                            className="py-2 px-2 border-bottom"
+                                            className="mb-3 p-2" // Cambiamos el padding y agregamos margen inferior
                                             style={{
-                                                borderRadius: 8,
-                                                backgroundColor:
-                                                    pagoHabilitado &&
-                                                        montoCapturado > 0
-                                                        ? "#F5F8FF"
-                                                        : "transparent",
-                                                transition:
-                                                    "background-color .15s ease",
+                                                borderRadius: "12px",
+                                                // Si está activo: fondo blanco puro. Si no: transparente
+                                                backgroundColor: isActivo ? "#FFFFFF" : "transparent",
+                                                // Si está activo: borde de color primario (ej. morado/azul). Si no: solo línea inferior sutil
+                                                border: isActivo ? "2px solid #0d6efd" : "1px solid transparent",
+                                                borderBottom: isActivo ? "2px solid #0d6efd" : "1px solid #EBE9F1",
+                                                // Si está activo: sombra flotante. Si no: sin sombra
+                                                boxShadow: isActivo ? "0 8px 20px rgba(115, 103, 240, 0.15)" : "none",
+                                                // Efecto lupa: Si está activo, crece un 2%
+                                                transform: isActivo ? "scale(1.02)" : "scale(1)",
+                                                // Animación suave de 0.3 segundos para que no brinque de golpe
+                                                transition: "all 0.3s ease-in-out",
+                                                // Opcional: Si está activo, lo ponemos por encima de los demás elementos
+                                                zIndex: isActivo ? 10 : 1,
+                                                position: "relative"
                                             }}
                                         >
-                                            <div className="row">
+                                            <div className="row align-items-center">
                                                 <div className="col-12 col-md-4">
-                                                    <div style={valueStyle}>
-                                                        {servicio.idTipoServicio
-                                                            .tipo_servicio || "—"}
+                                                    <div
+                                                        style={{
+                                                            ...valueStyle,
+                                                            fontWeight: isActivo ? 700 : 400, // Se hace negrita si está activo
+                                                            color: isActivo ? "#0d6efd" : "inherit", // Toma el color principal si está activo
+                                                            transition: "all 0.3s ease"
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-tag me-2" style={{ opacity: isActivo ? 1 : 0.5 }}></i>
+                                                        {servicio.idTipoServicio?.tipo_servicio || "—"}
                                                     </div>
                                                 </div>
 
                                                 <div className="col-12 col-md-4 mt-2 mt-md-0">
-                                                    <div style={valueStyle}>
-                                                        {servicio.idProveedor
-                                                            .nombre_comercial ||
-                                                            "—"}
+                                                    <div
+                                                        style={{
+                                                            ...valueStyle,
+                                                            fontWeight: isActivo ? 600 : 400,
+                                                            color: isActivo ? "#4B4B4B" : "inherit",
+                                                            transition: "all 0.3s ease"
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-building me-2" style={{ opacity: isActivo ? 1 : 0.5 }}></i>
+                                                        {servicio.idProveedor?.nombre_comercial || "—"}
                                                     </div>
                                                 </div>
 
                                                 <div className="col-12 col-md-4 mt-2 mt-md-0">
-                                                    <div style={valueStyle}>
-                                                        {servicio.descripcion ||
-                                                            "—"}
+                                                    <div
+                                                        style={{
+                                                            ...valueStyle,
+                                                            fontWeight: isActivo ? 600 : 400,
+                                                            color: isActivo ? "#4B4B4B" : "inherit",
+                                                            transition: "all 0.3s ease"
+                                                        }}
+                                                    >
+                                                        {servicio.descripcion || "—"}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {pagoHabilitado && (
-                                                <div className="mt-2 pt-2">
-                                                    <div className="d-flex align-items-center justify-content-between">
-                                                        <span
-                                                            style={{
-                                                                fontSize: 14,
-                                                                color: "#6E6B7B",
-                                                            }}
-                                                        >
-                                                            Tarifa publica:{" "}
-                                                            <strong
-                                                                style={{
-                                                                    color: "#6E6B7B"
-                                                                }}
-                                                            >
-                                                                {formatMoney(servicio.tarifa_publica)}
-                                                            </strong>
-                                                        </span>
-                                                        <div className="d-flex align-items-center justify-content-end gap-4 mt-0">
-                                                            <span
-                                                                style={{
-                                                                    fontSize: 14,
-                                                                    color: "#6E6B7B",
-                                                                }}
-                                                            >
-                                                                Saldo a pagar:{" "}
-                                                                <strong
-                                                                    className="text-success"
-                                                                    style={{
-                                                                        fontSize: 16
-                                                                    }}
-                                                                >
+                                                <div
+                                                    className="mt-3 p-3"
+                                                    style={{
+                                                        backgroundColor: "#F8F9FA", // Fondo gris claro para separarlo de la info del servicio
+                                                        borderRadius: "10px",
+                                                        border: "1px solid #EBE9F1"
+                                                    }}
+                                                >
+                                                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                                                        {/* Información de saldos (Izquierda) */}
+                                                        <div>
+                                                            <div style={{ fontSize: 13, color: "#6E6B7B", marginBottom: 4 }}>
+                                                                Tarifa pública: <strong>{formatMoney(servicio.tarifa_publica)}</strong>
+                                                            </div>
+                                                            <div style={{ fontSize: 15, color: "#4B4B4B" }}>
+                                                                Saldo pendiente:{" "}
+                                                                <strong style={{ color: saldoServicio > 0 ? "#EA5455" : "#28C76F" }}>
                                                                     {formatMoney(saldoServicio)}
                                                                 </strong>
-                                                            </span>
-                                                            <input
-                                                                type="text"
-                                                                inputMode="decimal"
-                                                                className="form-control"
-                                                                style={{ maxWidth: 180, fontSize: 14 }}
-                                                                placeholder="Monto a pagar"
-                                                                value={montoPago[servicioKey] || ""}
-                                                                onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
-                                                                disabled={saldoServicio <= 0}
-                                                            />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Visor TPV para el Input (Derecha) */}
+                                                        <div className="d-flex flex-column align-items-end">
+                                                            <div
+                                                                className="d-flex align-items-center px-3 py-1"
+                                                                style={{
+                                                                    backgroundColor: "#FFFFFF",
+                                                                    borderRadius: "8px",
+                                                                    border: excedeSaldo
+                                                                        ? "2px solid #EA5455" // Borde rojo si se pasa
+                                                                        : "2px solid #28C76F", // Borde verde tipo terminal
+                                                                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                                                                    width: "220px"
+                                                                }}
+                                                            >
+                                                                <span style={{ fontSize: 24, fontWeight: "bold", color: "#28C76F", marginRight: 8 }}>$</span>
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    className="form-control shadow-none p-0"
+                                                                    style={{
+                                                                        fontSize: 20,
+                                                                        fontWeight: "bold",
+                                                                        textAlign: "right",
+                                                                        border: "none",
+                                                                        backgroundColor: "transparent",
+                                                                        color: excedeSaldo ? "#EA5455" : "#4B4B4B",
+                                                                        width: "100%"
+                                                                    }}
+                                                                    placeholder="0.00"
+                                                                    value={montoPago[servicioKey] || ""}
+                                                                    onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
+                                                                    disabled={saldoServicio <= 0}
+                                                                />
+                                                            </div>
+
+                                                            {/* Mensajes de validación bajo el TPV */}
+                                                            {excedeSaldo && (
+                                                                <div className="mt-1" style={{ fontSize: 12, color: "#EA5455", fontWeight: 600 }}>
+                                                                    El monto excede el saldo pendiente
+                                                                </div>
+                                                            )}
+
+                                                            {saldoServicio <= 0 && (
+                                                                <div className="mt-1" style={{ fontSize: 12, color: "#28C76F", fontWeight: 600 }}>
+                                                                    <i className="fas fa-check-circle me-1"></i> Servicio liquidado
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
-
-                                                    {excedeSaldo && (
-                                                        <div
-                                                            className="text-end mt-1"
-                                                            style={{ fontSize: 12, color: "#EA5455" }}
-                                                        >
-                                                            El monto excede el saldo a pagar de este servicio
-                                                        </div>
-                                                    )}
-
-                                                    {saldoServicio <= 0 && (
-                                                        <div className="text-end mt-1" style={{ fontSize: 12, color: "#28C76F" }}>
-                                                            Servicio liquidado
-                                                        </div>
-                                                    )}
                                                 </div>
                                             )}
                                         </div>
