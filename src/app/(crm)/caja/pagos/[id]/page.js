@@ -387,6 +387,17 @@ export default function Pago() {
         return row[colKey];
     };
 
+    const serviciosPendientes = venta?.ventasServicioses?.filter((servicio, index) => {
+        const key = servicio.id_ventaservicio ?? index;
+        const total = Number(servicio.tarifa_publica || 0);
+        const pagado = obtenerTotalPagadoServicio(key);
+        return (total - pagado) > 0;
+    }) || [];
+
+    const idUnicoServicioPendiente = serviciosPendientes.length === 1
+        ? (serviciosPendientes[0].id_ventaservicio ?? venta.ventasServicioses.indexOf(serviciosPendientes[0]))
+        : null;
+
     return (
         <>
             <div className="row g-0">
@@ -648,7 +659,7 @@ export default function Pago() {
                                     // 5. Validacion
                                     const excedeSaldo = montoCapturado > saldoServicio;
 
-                                    const isActivo = pagoHabilitado && montoCapturado > 0;
+                                    const isActivo = pagoHabilitado && (montoCapturado > 0 || servicioKey === idUnicoServicioPendiente);
 
                                     return (
                                         <div
@@ -746,28 +757,32 @@ export default function Pago() {
                                                                 style={{
                                                                     backgroundColor: "#FFFFFF",
                                                                     borderRadius: "8px",
-                                                                    border: excedeSaldo
-                                                                        ? "2px solid #EA5455" // Borde rojo si se pasa
-                                                                        : "2px solid #28C76F", // Borde verde tipo terminal
+                                                                    border: saldoServicio <= 0 ? "1px solid rgba(40, 199, 111, 0.29)"
+                                                                    : excedeSaldo
+                                                                        ? "1px solid #EA5455" // Borde rojo si se pasa
+                                                                        : "1px solid #28C76F", // Borde verde tipo terminal
                                                                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                                                                     width: "220px"
                                                                 }}
                                                             >
-                                                                <span style={{ fontSize: 24, fontWeight: "bold", color: "#28C76F", marginRight: 8 }}>$</span>
+                                                                <span style={{ fontSize: 18, fontWeight: "bold", color: saldoServicio <= 0 ? "rgba(40, 199, 111, 0.29)" : "#28C76F", marginRight: 8 }}>$</span>
                                                                 <input
                                                                     type="text"
                                                                     inputMode="decimal"
                                                                     className="form-control shadow-none p-0"
                                                                     style={{
-                                                                        fontSize: 20,
+                                                                        fontSize: 18,
                                                                         fontWeight: "bold",
                                                                         textAlign: "right",
                                                                         border: "none",
                                                                         backgroundColor: "transparent",
-                                                                        color: excedeSaldo ? "#EA5455" : "#4B4B4B",
-                                                                        width: "100%"
+                                                                        color: excedeSaldo
+                                                                                ? "#EA5455" 
+                                                                                : "#4B4B4B",
+                                                                        width: "100%",
+                                                                        cursor: saldoServicio <= 0 ? "not-allowed" : "text"
                                                                     }}
-                                                                    placeholder="0.00"
+                                                                    placeholder={saldoServicio <= 0 ? "Liquidado" : "0.00"}
                                                                     value={montoPago[servicioKey] || ""}
                                                                     onChange={(e) => handleMontoChange(servicioKey, e.target.value)}
                                                                     disabled={saldoServicio <= 0}
