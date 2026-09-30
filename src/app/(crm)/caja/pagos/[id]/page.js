@@ -65,6 +65,10 @@ export default function Pago() {
     const [sendingEmail, setSendingEmail] = useState(false);
     const [sendResult, setSendResult] = useState(null);
 
+    const [pagoACancelar, setPagoACancelar] = useState(null);
+    const [cancelando, setCancelando] = useState(false);
+    const [cancelError, setCancelError] = useState(null);
+
     const [currentPage, setCurrentPage] = useState(1);
     const dataSegura = detalles || [];
 
@@ -164,6 +168,8 @@ export default function Pago() {
 
         let totalPagado = 0;
         detalles.forEach((pago) => {
+            if (String(pago.estatus) !== '1') return;
+
             pago.pagosDetalles?.forEach((detalle) => {
                 if (String(detalle.id_ventaservicio) === String(idVentaServicio)) {
                     totalPagado += Number(detalle.monto || 0);
@@ -287,6 +293,38 @@ export default function Pago() {
         }
     };
 
+    const cerrarModalCancelar = () => {
+        if (cancelando) return;
+        setPagoACancelar(null);
+        setCancelError(null);
+    };
+
+    const handleConfirmarCancelacion = async () => {
+        if (!pagoACancelar || cancelando) return;
+
+        setCancelando(true);
+        setCancelError(null);
+
+        try {
+            const res = await cajaService.cancelPayment(pagoACancelar.id_pago);
+
+            if (res?.error) {
+                setCancelError(res.error);
+                return;
+            }
+
+            setPagoACancelar(null);
+            await cargarVenta();
+        } catch (err) {
+            console.error("Error al cancelar el pago:", err);
+            setCancelError(
+                err?.response?.data?.error || "No se pudo cancelar el pago"
+            );
+        } finally {
+            setCancelando(false);
+        }
+    };
+
     const renderCell = (colKey, row) => {
         if (colKey === "formaPago") {
             return (
@@ -312,7 +350,7 @@ export default function Pago() {
         }
 
         if (colKey === "estatus") {
-            return <StatusBadge status={row.estatus === '1' ? 'Activo' : 'Cancelado'}/>;
+            return <StatusBadge status={row.estatus === '1' ? 'Activo' : 'Cancelado'} />;
         }
 
         if (colKey === "acciones") {
@@ -320,16 +358,26 @@ export default function Pago() {
             return (
                 <div className="d-flex align-items-center justify-content-center gap-1">
                     <button
-                        className="btn"
-                        style={{color: "rgb(12, 92, 198)"}}
+                        style={{
+                            color: (generando || row.estatus !== '1') ? "#a0a0a0" : "rgb(12, 92, 198)",
+                            background: "none",
+                            border: "none",
+                            cursor: (generando || row.estatus !== '1') ? "not-allowed" : "pointer"
+                        }}
                         onClick={() => handleDownloadPDF(row)}
-                        disabled={generando}
+                        disabled={generando || row.estatus !== '1'}
                     >
-                        <ArrowDownTrayIcon style={{ width: "20px", height: "20px" }}/>
+                        <ArrowDownTrayIcon style={{ width: "20px", height: "20px" }} />
                     </button>
                     <button
                         type="button"
                         className="btn btn-link p-1 text-danger"
+                        title="Cancelar pago"
+                        onClick={() => setPagoACancelar(row)}
+                        disabled={row.estatus !== '1'}
+                        style={{
+                            cursor: (row.estatus !== '1') ? "not-allowed" : "pointer"
+                        }}
                     >
                         <XCircleIcon style={{ width: "20px", height: "20px" }} />
                     </button>
@@ -960,6 +1008,97 @@ export default function Pago() {
                                             >
                                                 Cerrar
                                             </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>,
+                        document.body
+                    )}
+
+
+                {pagoACancelar &&
+                    createPortal(
+                        <>
+                            <div
+                                className="modal-backdrop fade show"
+                                style={{ zIndex: 2000 }}
+                            />
+                            <div
+                                className="modal fade show d-block"
+                                tabIndex={-1}
+                                role="dialog"
+                                aria-modal="true"
+                                style={{ zIndex: 2001 }}
+                            >
+                                <div className="modal-dialog modal-dialog-centered">
+                                    <div className="modal-content" style={{ borderRadius: 12 }}>
+                                        <div className="modal-body text-center p-4">
+                                            <div
+                                                className="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                                style={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: "50%",
+                                                    backgroundColor: "#FDECEC",
+                                                    color: "#EA5455",
+                                                    fontSize: 28,
+                                                }}
+                                            >
+                                                !
+                                            </div>
+
+                                            <h5 className="mb-1">¿Cancelar este pago?</h5>
+                                            <p className="mb-1" style={{ fontSize: 14, color: "#6E6B7B" }}>
+                                                Pago #{pagoACancelar.id_pago} por{" "}
+                                                <strong>
+                                                    {formatMoney(
+                                                        (pagoACancelar.pagosDetalles || []).reduce(
+                                                            (acc, d) => acc + Number(d.monto || 0),
+                                                            0
+                                                        )
+                                                    )}
+                                                </strong>
+                                            </p>
+                                            <p className="mb-3" style={{ fontSize: 13, color: "#6E6B7B" }}>
+                                                El monto dejará de contar en el saldo de la venta. Esta acción no se puede deshacer.
+                                            </p>
+
+                                            {cancelError && (
+                                                <div className="mb-3" style={{ fontSize: 13, color: "#EA5455" }}>
+                                                    {cancelError}
+                                                </div>
+                                            )}
+
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-secondary w-50"
+                                                    onClick={cerrarModalCancelar}
+                                                    disabled={cancelando}
+                                                >
+                                                    Volver
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger w-50"
+                                                    onClick={handleConfirmarCancelacion}
+                                                    disabled={cancelando}
+                                                >
+                                                    {cancelando ? (
+                                                        <>
+                                                            <span
+                                                                className="spinner-border spinner-border-sm me-2"
+                                                                role="status"
+                                                                aria-hidden="true"
+                                                            />
+                                                            Cancelando...
+                                                        </>
+                                                    ) : (
+                                                        "Sí, cancelar pago"
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

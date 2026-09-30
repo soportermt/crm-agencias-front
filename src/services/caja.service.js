@@ -61,4 +61,11 @@ export const cajaService = {
         return data;
     },
 
+    async cancelPayment(id) {
+        const { data } = await api.get(`/caja/cancelPayment/${id}`, {
+            withCredentials: true,
+        });
+        return data;
+    },
+
 }
