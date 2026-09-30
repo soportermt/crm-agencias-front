@@ -1,15 +1,61 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
+import {
+  startOfDay, endOfDay, subDays,
+  startOfWeek, endOfWeek, subWeeks,
+  startOfMonth, endOfMonth, subMonths,
+} from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "../common/DataTable";
 import SearchBar from "../common/SearchBar";
 import ExportButton from "../common/ExportButton";
 import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
+import { EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 registerLocale("es", es);
+
+const WEEK = { weekStartsOn: 1 };
+
+const PRESETS = [
+  { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
+  {
+    label: "Ayer",
+    range: () => {
+      const d = subDays(new Date(), 1);
+      return [startOfDay(d), endOfDay(d)];
+    },
+  },
+  {
+    label: "Últimos 7 días",
+    range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
+  },
+  {
+    label: "Esta semana",
+    range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
+  },
+  {
+    label: "Semana pasada",
+    range: () => {
+      const d = subWeeks(new Date(), 1);
+      return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+    },
+  },
+  {
+    label: "Este mes",
+    range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
+  },
+  {
+    label: "Mes pasado",
+    range: () => {
+      const d = subMonths(new Date(), 1);
+      return [startOfMonth(d), endOfMonth(d)];
+    },
+  },
+];
+
 
 const ITEMS_PER_PAGE = 10;
 
@@ -101,6 +147,11 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const [clientes, setClientes] = useState([]);
   const [vendedores, setVendedores] = useState([]);
 
+  const pickerRef = useRef(null);
+  const applyPreset = (preset) => {
+    handleDateChange(preset.range());
+    pickerRef.current?.setOpen(false);
+  };
 
   const setFilter = (patch) => onFiltersChange((prev) => ({ ...prev, ...patch }));
 
@@ -152,7 +203,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const filteredData = useMemo(() => {
     const search = normalize(searchValue.trim());
     if (!search) return rows;
-  
+
     return rows.filter((r) =>
       normalize(
         [r.folio, r.cliente, r.pasajero_titular, r.descripcion, r.vendedor, r.usuario].join(" ")
@@ -190,12 +241,15 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
       case "acciones":
         return (
-          <Link
-            href={`caja/pagos/${row.id_venta}`}
-            className="text-decoration-none fw-medium text-brand-blue gap-2 px-2 py-1 btn-pdf"
-          >
-            Ir a pagos
-          </Link>
+          <div className="d-flex align-items-center justify-content-center gap-2">
+            <a
+              href={`caja/pagos/${row.id_venta}`}
+              className="btn btn-link p-1 text-primary"
+            >
+              <EyeIcon style={{ width: "20px", height: "20px" }} />
+            </a>
+            
+          </div>
         );
 
       default:
@@ -243,6 +297,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
           <div className="col-md-4">
             <DatePicker
+              ref={pickerRef}
               selectsRange
               startDate={startDate}
               endDate={endDate}
@@ -253,7 +308,20 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
               dateFormat="dd/MM/yyyy"
               className="form-control form-control-sm"
               autoComplete="off"
-            />
+            >
+              <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => applyPreset(p)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </DatePicker>
           </div>
         </div>
 
