@@ -631,7 +631,7 @@ export default function Pago() {
                                     </div>
                                 )}
                                 <div className="row pt-1 pb-0">
-                                    <div className="col-12 col-md-4">
+                                    <div className="col-12 col-md-4 mb-2">
                                         <div style={labelStyle}>Servicio</div>
                                     </div>
                                     <div className="col-12 col-md-4">
@@ -758,9 +758,9 @@ export default function Pago() {
                                                                     backgroundColor: "#FFFFFF",
                                                                     borderRadius: "8px",
                                                                     border: saldoServicio <= 0 ? "1px solid rgba(40, 199, 111, 0.29)"
-                                                                    : excedeSaldo
-                                                                        ? "1px solid #EA5455" // Borde rojo si se pasa
-                                                                        : "1px solid #28C76F", // Borde verde tipo terminal
+                                                                        : excedeSaldo
+                                                                            ? "1px solid #EA5455" // Borde rojo si se pasa
+                                                                            : "1px solid #28C76F", // Borde verde tipo terminal
                                                                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                                                                     width: "220px"
                                                                 }}
@@ -777,8 +777,8 @@ export default function Pago() {
                                                                         border: "none",
                                                                         backgroundColor: "transparent",
                                                                         color: excedeSaldo
-                                                                                ? "#EA5455" 
-                                                                                : "#4B4B4B",
+                                                                            ? "#EA5455"
+                                                                            : "#4B4B4B",
                                                                         width: "100%",
                                                                         cursor: saldoServicio <= 0 ? "not-allowed" : "text"
                                                                     }}
@@ -808,6 +808,40 @@ export default function Pago() {
                                         </div>
                                     );
                                 })}
+
+                                {pagoHabilitado && (
+                                    <div className="row justify-content-end ">
+                                        <div className="col-6 d-flex gap-2">
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-danger w-50"
+                                                onClick={handleCancelarPago}
+                                                disabled={isSaving}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary w-50"
+                                                onClick={handleGuardarPagos}
+                                                disabled={!puedeGuardar}
+                                            >
+                                                {isSaving ? (
+                                                    <>
+                                                        <span
+                                                            className="spinner-border spinner-border-sm me-2"
+                                                            role="status"
+                                                            aria-hidden="true"
+                                                        />
+                                                        Guardando...
+                                                    </>
+                                                ) : (
+                                                    "Guardar pagos"
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         ) : (
                             <div
@@ -849,7 +883,7 @@ export default function Pago() {
 
                         {pagoHabilitado && (
                             <div
-                                className="d-flex justify-content-between align-items-center mb-3 p-2"
+                                className="d-flex justify-content-between align-items-center mb-1 p-2"
                                 style={{
                                     fontSize: 14,
                                     backgroundColor: "#F5F8FF",
@@ -882,35 +916,7 @@ export default function Pago() {
                         )}
 
                         {pagoHabilitado ? (
-                            <div className="d-flex gap-2">
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-danger w-50"
-                                    onClick={handleCancelarPago}
-                                    disabled={isSaving}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary w-50"
-                                    onClick={handleGuardarPagos}
-                                    disabled={!puedeGuardar}
-                                >
-                                    {isSaving ? (
-                                        <>
-                                            <span
-                                                className="spinner-border spinner-border-sm me-2"
-                                                role="status"
-                                                aria-hidden="true"
-                                            />
-                                            Guardando...
-                                        </>
-                                    ) : (
-                                        "Guardar pagos"
-                                    )}
-                                </button>
-                            </div>
+                            <></>
                         ) : ventaPagada ? (
                             <div
                                 className="text-center p-2"
