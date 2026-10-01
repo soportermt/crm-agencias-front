@@ -13,7 +13,9 @@ import SearchBar from "../common/SearchBar";
 import ExportButton from "../common/ExportButton";
 import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
-import { EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 registerLocale("es", es);
 
@@ -60,13 +62,14 @@ const PRESETS = [
 const ITEMS_PER_PAGE = 10;
 
 const COLUMNS = [
-  { key: "folio", label: "Folio", width: "180px" },
-  { key: "fecha", label: "Fecha de venta", width: "180px" },
-  { key: "pasajero_titular", label: "Pasajero titular", width: "225px" },
-  { key: "descripcion", label: "Descripción", width: "225px" },
-  { key: "cliente", label: "Cliente", width: "225px" },
-  { key: "usuario", label: "Usuario", width: "225px" },
+  { key: "folio", label: "Folio", width: "100px" },
+  { key: "servicios", label: "Servicios", width: "130px" },
+  { key: "fecha", label: "Fecha de venta", width: "130px" },
+  // { key: "pasajero_titular", label: "Pasajero titular", width: "225px" },
+  { key: "cliente", label: "Cliente", width: "180px" },
+  // { key: "usuario", label: "Usuario", width: "225px" },
   { key: "vendedor", label: "Vendedor", width: "180px" },
+  { key: "saldo", label: "Saldo a pagar", align: "end", width: "120px" },
   { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
@@ -133,6 +136,14 @@ function exportToCSV(data) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+const ICONOS_SERVICIOS = {
+  1: faHotel,
+  2: faVanShuttle,
+  5: faMap,
+  6: faPlaneDeparture,
+  10: faCirclePlus,
+};
+const ICONO_DEFAULT = faCirclePlus;
 
 export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const {
@@ -159,19 +170,36 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
   const rows = useMemo(
     () =>
-      ventas.map((v) => ({
-        id_venta: v.id_venta,
-        id_cliente: v.id_cliente,
-        id_vendedor: v.id_vendedor,
-        folio: v.folio,
-        fecha: v.fecha,
-        descripcion: v.descripcion || "—",
-        usuario: v.usuario_nombre ?? "—",
-        cliente: v.idCliente?.nombre ?? "—",
-        vendedor: v.vendedor_nombre ?? `Vendedor #${v.id_vendedor}`,
-        pasajero_titular: v.pasajero_titular ?? "—",
-        _raw: v,
-      })),
+      ventas.map((v) => {
+        const servicios = Array.from(
+          new Map(
+            (v.ventasServicioses ?? []).map((s) => [
+              String(s.id_tipo_servicio),
+              {
+                id: s.id_tipo_servicio,
+                nombre: s.idTipoServicio?.tipo_servicio ?? "Servicio",
+              },
+            ])
+          ).values()
+        );
+
+        return {
+          id_venta: v.id_venta,
+          id_cliente: v.id_cliente,
+          id_vendedor: v.id_vendedor,
+          folio: v.folio,
+          fecha: v.fecha,
+          descripcion: v.descripcion || "—",
+          usuario: v.usuario_nombre ?? "—",
+          cliente: v.idCliente?.nombre ?? "—",
+          vendedor: v.vendedor_nombre ?? `Vendedor #${v.id_vendedor}`,
+          pasajero_titular: v.pasajero_titular ?? "—",
+          servicios,
+          saldo: v.saldo,
+          moneda: v.moneda ?? "MXN",
+          _raw: v,
+        };
+      }),
     [ventas]
   );
 
@@ -222,6 +250,14 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const formatMoney = (value) => {
+    const num = Number(value || 0);
+    return num.toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+    });
+};
+
   const renderCell = (key, row) => {
     switch (key) {
       case "folio":
@@ -239,6 +275,22 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
       case "fecha":
         return <span className="font-inter fw-semibold">{formatDate(row.fecha)}</span>;
 
+      case "servicios":
+        return <div className="d-flex align-items-center gap-2">
+          {row.servicios.length === 0 ? (
+            <span>—</span>
+          ) : (
+            row.servicios.map((s) => (
+              <span key={s.id} title={s.nombre} className="text-brand-blue" style={{ fontSize: 18 }}>
+                <FontAwesomeIcon icon={ICONOS_SERVICIOS[s.id] ?? ICONO_DEFAULT} />
+              </span>
+            ))
+          )}
+        </div>;
+
+      case "saldo":
+        return <span className="font-inter fw-semibold text-danger" style={{ fontSize: 15 }}>{formatMoney(row.saldo)}</span>;
+
       case "acciones":
         return (
           <div className="d-flex align-items-center justify-content-center gap-2">
@@ -248,7 +300,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
             >
               <EyeIcon style={{ width: "20px", height: "20px" }} />
             </a>
-            
+
           </div>
         );
 
