@@ -1,26 +1,75 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { es } from "date-fns/locale";
+import {
+  startOfDay, endOfDay, subDays,
+  startOfWeek, endOfWeek, subWeeks,
+  startOfMonth, endOfMonth, subMonths,
+} from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "../common/DataTable";
 import SearchBar from "../common/SearchBar";
 import ExportButton from "../common/ExportButton";
 import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 registerLocale("es", es);
+
+const WEEK = { weekStartsOn: 1 };
+
+const PRESETS = [
+  { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
+  {
+    label: "Ayer",
+    range: () => {
+      const d = subDays(new Date(), 1);
+      return [startOfDay(d), endOfDay(d)];
+    },
+  },
+  {
+    label: "Últimos 7 días",
+    range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
+  },
+  {
+    label: "Esta semana",
+    range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
+  },
+  {
+    label: "Semana pasada",
+    range: () => {
+      const d = subWeeks(new Date(), 1);
+      return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+    },
+  },
+  {
+    label: "Este mes",
+    range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
+  },
+  {
+    label: "Mes pasado",
+    range: () => {
+      const d = subMonths(new Date(), 1);
+      return [startOfMonth(d), endOfMonth(d)];
+    },
+  },
+];
+
 
 const ITEMS_PER_PAGE = 10;
 
 const COLUMNS = [
-  { key: "folio", label: "Folio", width: "180px" },
-  { key: "fecha", label: "Fecha de venta", width: "180px" },
-  { key: "pasajero_titular", label: "Pasajero titular", width: "225px" },
-  { key: "descripcion", label: "Descripción", width: "225px" },
-  { key: "cliente", label: "Cliente", width: "225px" },
-  { key: "usuario", label: "Usuario", width: "225px" },
+  { key: "folio", label: "Folio", width: "100px" },
+  { key: "servicios", label: "Servicios", width: "130px" },
+  { key: "fecha", label: "Fecha de venta", width: "130px" },
+  // { key: "pasajero_titular", label: "Pasajero titular", width: "225px" },
+  { key: "cliente", label: "Cliente", width: "180px" },
+  // { key: "usuario", label: "Usuario", width: "225px" },
   { key: "vendedor", label: "Vendedor", width: "180px" },
+  { key: "saldo", label: "Saldo a pagar", align: "end", width: "120px" },
   { key: "acciones", label: "Acciones", width: "80px", align: "center" },
 ];
 
@@ -87,6 +136,14 @@ function exportToCSV(data) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+const ICONOS_SERVICIOS = {
+  1: faHotel,
+  2: faVanShuttle,
+  5: faMap,
+  6: faPlaneDeparture,
+  10: faCirclePlus,
+};
+const ICONO_DEFAULT = faCirclePlus;
 
 export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const {
@@ -101,6 +158,11 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const [clientes, setClientes] = useState([]);
   const [vendedores, setVendedores] = useState([]);
 
+  const pickerRef = useRef(null);
+  const applyPreset = (preset) => {
+    handleDateChange(preset.range());
+    pickerRef.current?.setOpen(false);
+  };
 
   const setFilter = (patch) => onFiltersChange((prev) => ({ ...prev, ...patch }));
 
@@ -108,19 +170,36 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
   const rows = useMemo(
     () =>
-      ventas.map((v) => ({
-        id_venta: v.id_venta,
-        id_cliente: v.id_cliente,
-        id_vendedor: v.id_vendedor,
-        folio: v.folio,
-        fecha: v.fecha,
-        descripcion: v.descripcion || "—",
-        usuario: v.usuario_nombre ?? "—",
-        cliente: v.idCliente?.nombre ?? "—",
-        vendedor: v.vendedor_nombre ?? `Vendedor #${v.id_vendedor}`,
-        pasajero_titular: v.pasajero_titular ?? "—",
-        _raw: v,
-      })),
+      ventas.map((v) => {
+        const servicios = Array.from(
+          new Map(
+            (v.ventasServicioses ?? []).map((s) => [
+              String(s.id_tipo_servicio),
+              {
+                id: s.id_tipo_servicio,
+                nombre: s.idTipoServicio?.tipo_servicio ?? "Servicio",
+              },
+            ])
+          ).values()
+        );
+
+        return {
+          id_venta: v.id_venta,
+          id_cliente: v.id_cliente,
+          id_vendedor: v.id_vendedor,
+          folio: v.folio,
+          fecha: v.fecha,
+          descripcion: v.descripcion || "—",
+          usuario: v.usuario_nombre ?? "—",
+          cliente: v.idCliente?.nombre ?? "—",
+          vendedor: v.vendedor_nombre ?? `Vendedor #${v.id_vendedor}`,
+          pasajero_titular: v.pasajero_titular ?? "—",
+          servicios,
+          saldo: v.saldo,
+          moneda: v.moneda ?? "MXN",
+          _raw: v,
+        };
+      }),
     [ventas]
   );
 
@@ -152,7 +231,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
   const filteredData = useMemo(() => {
     const search = normalize(searchValue.trim());
     if (!search) return rows;
-  
+
     return rows.filter((r) =>
       normalize(
         [r.folio, r.cliente, r.pasajero_titular, r.descripcion, r.vendedor, r.usuario].join(" ")
@@ -171,6 +250,14 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const formatMoney = (value) => {
+    const num = Number(value || 0);
+    return num.toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+    });
+};
+
   const renderCell = (key, row) => {
     switch (key) {
       case "folio":
@@ -188,14 +275,33 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
       case "fecha":
         return <span className="font-inter fw-semibold">{formatDate(row.fecha)}</span>;
 
+      case "servicios":
+        return <div className="d-flex align-items-center gap-2">
+          {row.servicios.length === 0 ? (
+            <span>—</span>
+          ) : (
+            row.servicios.map((s) => (
+              <span key={s.id} title={s.nombre} className="text-brand-blue" style={{ fontSize: 18 }}>
+                <FontAwesomeIcon icon={ICONOS_SERVICIOS[s.id] ?? ICONO_DEFAULT} />
+              </span>
+            ))
+          )}
+        </div>;
+
+      case "saldo":
+        return <span className="font-inter fw-semibold text-danger" style={{ fontSize: 15 }}>{formatMoney(row.saldo)}</span>;
+
       case "acciones":
         return (
-          <Link
-            href={`caja/pagos/${row.id_venta}`}
-            className="text-decoration-none fw-medium text-brand-blue gap-2 px-2 py-1 btn-pdf"
-          >
-            Ir a pagos
-          </Link>
+          <div className="d-flex align-items-center justify-content-center gap-2">
+            <a
+              href={`caja/pagos/${row.id_venta}`}
+              className="btn btn-link p-1 text-primary"
+            >
+              <EyeIcon style={{ width: "20px", height: "20px" }} />
+            </a>
+
+          </div>
         );
 
       default:
@@ -243,6 +349,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
 
           <div className="col-md-4">
             <DatePicker
+              ref={pickerRef}
               selectsRange
               startDate={startDate}
               endDate={endDate}
@@ -253,7 +360,20 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
               dateFormat="dd/MM/yyyy"
               className="form-control form-control-sm"
               autoComplete="off"
-            />
+            >
+              <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => applyPreset(p)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </DatePicker>
           </div>
         </div>
 

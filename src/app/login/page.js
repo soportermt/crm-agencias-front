@@ -100,10 +100,10 @@ export default function LoginPage() {
         <div className="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
           <div className="p-card-login border border-light">
             {/* Logo Image */}
-            <div className="text-center mb-4 mb-md-5">
+            <div className="text-center mb-3 mb-md-4">
               <Image
-                src="/2bt2025.png"
-                alt="2Business Travel Logo"
+                src="/vjnexuswa.jpg"
+                alt="vjnexuswa logo"
                 width={300}
                 height={60}
                 priority
