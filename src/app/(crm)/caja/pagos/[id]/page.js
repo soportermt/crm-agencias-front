@@ -297,7 +297,12 @@ export default function Pago() {
         setSendingEmail(true);
         setSendResult(null);
         try {
-            const res = await enviarComprobantePagoPorCorreo(pagoCreado, agencia, destinatario);
+            const res = await enviarComprobantePagoPorCorreo({
+                pagos: detalles,
+                venta,
+                agencia,
+                destinatario,
+            });
             setSendResult(res);
         } catch (err) {
             console.error("Error al enviar el comprobante:", err);
