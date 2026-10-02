@@ -24,6 +24,8 @@ function formatDateGroup(dateStr) {
   return dt.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
 }
 
+import EmojiPicker from 'emoji-picker-react';
+
 export default function ChatPanel({
   conversation,
   clientInfo,
@@ -43,6 +45,8 @@ export default function ChatPanel({
   const [selectedFile, setSelectedFile] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [unreadToDisplay, setUnreadToDisplay] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [replyToMsg, setReplyToMsg] = useState(null);
   const bodyRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -165,14 +169,20 @@ export default function ChatPanel({
   const handleSend = () => {
     const trimmed = text.trim();
     if ((!trimmed && !selectedFile) || sending || !isWindowOpen) return;
-    onSendMessage(trimmed, selectedFile);
+    onSendMessage(trimmed, selectedFile, replyToMsg?.externalId);
     setText("");
     setSelectedFile(null);
+    setReplyToMsg(null);
+    setShowEmojiPicker(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (textareaRef.current) {
       textareaRef.current.style.height = "43px";
     }
     setUnreadToDisplay(0);
+  };
+
+  const handleEmojiClick = (emojiObj) => {
+    setText(prev => prev + emojiObj.emoji);
   };
 
   const handleFileSelect = (e) => {
@@ -255,8 +265,14 @@ export default function ChatPanel({
           </audio>
         </div>
       );
+    } else if (mediaType === 'sticker') {
+      return (
+        <div className="mb-2">
+          <img src={fullUrl} alt="Sticker" style={{ maxWidth: '150px', maxHeight: '150px', objectFit: 'contain', background: 'transparent' }} />
+        </div>
+      );
     } else {
-      let docName = "Descargar Archivo Adjunto";
+      let docName = msg.fileName || msg.file_name || "Descargar Archivo Adjunto";
       if (msg.text && msg.text.startsWith('[Documento] ')) {
         docName = msg.text.replace('[Documento] ', '').trim();
       } else if (mediaUrl) {
@@ -543,6 +559,14 @@ export default function ChatPanel({
                           )}
                         </div>
                       </div>
+                      
+                      {/* Botón flotante para responder (visible al hover de la burbuja) */}
+                      {isWindowOpen && msg.externalId && (
+                        <div className="d-flex flex-column justify-content-center opacity-50 hover-opacity-100" style={{ cursor: 'pointer' }} onClick={() => setReplyToMsg(msg)}>
+                          <i className="bi bi-reply-fill text-secondary" style={{ fontSize: '18px' }} title="Responder"></i>
+                        </div>
+                      )}
+
                       </div>
                     </React.Fragment>
                   );
@@ -570,6 +594,21 @@ export default function ChatPanel({
           </div>
         )}
         
+        {replyToMsg && (
+          <div className="mx-3 mb-2 p-2 rounded d-flex align-items-start justify-content-between" style={{ backgroundColor: '#e7f1fe', borderLeft: '4px solid #0c5cc6' }}>
+            <div className="d-flex flex-column overflow-hidden">
+              <span className="fw-semibold text-primary" style={{ fontSize: "11px" }}>Respondiendo a {replyToMsg.sender === 'client' ? clientName : 'Ti mismo'}</span>
+              <span className="text-truncate" style={{ fontSize: "13px", color: "#54656f" }}>{replyToMsg.text || 'Archivo multimedia'}</span>
+            </div>
+            <button 
+              type="button" 
+              className="btn-close shadow-none ms-2" 
+              style={{ fontSize: "10px" }} 
+              onClick={() => setReplyToMsg(null)}
+            ></button>
+          </div>
+        )}
+
         {selectedFile && (
           <div className="mx-3 mb-2 p-2 rounded bg-light d-flex align-items-center justify-content-between border">
             <div className="d-flex align-items-center gap-2 overflow-hidden">
@@ -585,6 +624,12 @@ export default function ChatPanel({
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             ></button>
+          </div>
+        )}
+
+        {showEmojiPicker && isWindowOpen && (
+          <div className="position-absolute" style={{ bottom: "75px", left: "20px", zIndex: 1000 }}>
+            <EmojiPicker onEmojiClick={handleEmojiClick} width={300} height={400} />
           </div>
         )}
 
@@ -613,7 +658,7 @@ export default function ChatPanel({
             ref={fileInputRef} 
             onChange={handleFileSelect} 
             className="d-none" 
-            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx" 
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,image/webp" 
           />
           <button 
             type="button" 
@@ -625,6 +670,18 @@ export default function ChatPanel({
           >
             <i className="bi bi-paperclip" style={{ fontSize: "20px" }}></i>
           </button>
+          
+          <button 
+            type="button" 
+            className={`btn d-flex align-items-center justify-content-center flex-shrink-0 border ${showEmojiPicker ? 'btn-light' : 'btn-white'}`}
+            style={{ width: "43px", height: "43px", borderRadius: "12px", color: "var(--grey-text)" }}
+            title="Emojis"
+            disabled={!isWindowOpen || sending}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            <i className="bi bi-emoji-smile" style={{ fontSize: "20px" }}></i>
+          </button>
+
           <textarea
             ref={textareaRef}
             className="form-control input-custom flex-grow-1"

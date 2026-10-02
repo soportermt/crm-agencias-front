@@ -504,7 +504,7 @@ function MensajeriaContent() {
   };
 
   // Enviar mensaje WhatsApp
-  const handleSendMessage = async (text, file) => {
+  const handleSendMessage = async (text, file, replyToMessageId) => {
     if (!selectedConv || !waWindow.open) {
       if (selectedConv && !waWindow.open) {
         showToast("La ventana de 24 horas está cerrada. Usa una plantilla para abrir la conversación.", "warning");
@@ -524,6 +524,7 @@ function MensajeriaContent() {
       agenciaId: user?.id_agencia || undefined,
       userId: user?.id || undefined,
       channel: "whatsapp",
+      replyToMessageId
     };
 
     try {
@@ -537,7 +538,8 @@ function MensajeriaContent() {
         if (uploadRes && uploadRes.file && uploadRes.file.path) {
            uploadedMediaUrl = uploadRes.file.path;
            
-           if (file.type.startsWith('image/')) uploadedMediaType = 'image';
+           if (file.type === 'image/webp') uploadedMediaType = 'sticker';
+           else if (file.type.startsWith('image/')) uploadedMediaType = 'image';
            else if (file.type.startsWith('video/')) uploadedMediaType = 'video';
            else if (file.type.startsWith('audio/')) uploadedMediaType = 'audio';
            else uploadedMediaType = 'document';
@@ -587,10 +589,13 @@ function MensajeriaContent() {
   // Enviar correo o cotización
   const handleSendEmail = async ({
     subject,
+    cc,
+    bcc,
     body,
     html,
     isQuote,
     pdfFile,
+    attachments,
     fechaInicial,
     fechaFinal,
     cargoServicios,
@@ -611,14 +616,18 @@ function MensajeriaContent() {
     try {
       setSending(true);
 
+      const formData = new FormData();
+      formData.append("account_id", user?.id_cuenta_email || 0);
+      formData.append("to", targetEmail);
+      formData.append("subject", subject);
+      if (cc) formData.append("cc", cc);
+      if (bcc) formData.append("bcc", bcc);
+      formData.append("body", body);
+      formData.append("html", html || body);
+
       if (isQuote && pdfFile) {
-        const formData = new FormData();
-        formData.append("file", pdfFile);
+        formData.append("file", pdfFile); // quotesService expects "file"
         formData.append("clientId", targetClientId);
-        formData.append("to", targetEmail);
-        formData.append("subject", subject);
-        formData.append("body", body);
-        formData.append("html", html || body);
         if (fechaInicial) formData.append("fecha_inicial", fechaInicial);
         if (fechaFinal) formData.append("fecha_final", fechaFinal);
         if (cargoServicios) formData.append("cargo_servicios", cargoServicios);
@@ -627,13 +636,12 @@ function MensajeriaContent() {
         await quotesService.sendQuote(formData);
         showToast("Cotización enviada y registrada con éxito");
       } else {
-        await mensajeriaService.sendEmail({
-          account_id: user?.id_cuenta_email || 0,
-          to: targetEmail,
-          subject,
-          body,
-          html: html || body,
-        });
+        if (attachments && attachments.length > 0) {
+          attachments.forEach(file => {
+            formData.append("attachments", file); // email controller expects "attachments" array
+          });
+        }
+        await mensajeriaService.sendEmail(formData);
         showToast("Correo enviado con éxito");
       }
 

@@ -224,9 +224,36 @@ export default function EmailPanel({
                         <div>
                           <strong className="text-secondary">Para:</strong> {emailItem.to || (isOutbound ? email : "Nosotros")}
                         </div>
+                        {emailItem.cc && (
+                          <div>
+                            <strong className="text-secondary">CC:</strong> {emailItem.cc}
+                          </div>
+                        )}
+                        {emailItem.bcc && (
+                          <div>
+                            <strong className="text-secondary">BCC:</strong> {emailItem.bcc}
+                          </div>
+                        )}
                         <div>
                           <strong className="text-secondary">Fecha:</strong> {emailItem.date || emailItem.created_at}
                         </div>
+                        {emailItem.has_attachments === 1 && emailItem.attachments_urls && (
+                          <div className="mt-2 d-flex flex-wrap gap-2">
+                            <strong className="text-secondary d-block w-100 mb-1"><i className="bi bi-paperclip"></i> Adjuntos:</strong>
+                            {(() => {
+                               try {
+                                 const urls = typeof emailItem.attachments_urls === 'string' ? JSON.parse(emailItem.attachments_urls) : emailItem.attachments_urls;
+                                 return urls.map((url, i) => (
+                                   <span key={i} className="badge bg-light text-secondary border border-secondary">
+                                      <i className="bi bi-file-earmark me-1"></i> {url.split('/').pop()}
+                                   </span>
+                                 ));
+                               } catch(e) {
+                                 return null;
+                               }
+                            })()}
+                          </div>
+                        )}
                       </div>
 
                       {/* Contenido del correo */}
