@@ -2,7 +2,11 @@
 import CajaTable from "@/components/caja/CajaTable";
 import { cajaService } from "@/services/caja.service";
 import React, { useEffect, useState } from "react";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { subDays } from "date-fns";
+import { registerLocale } from "react-datepicker";
+import { es } from "date-fns/locale";
+
+registerLocale("es", es);
 
 const toYMD = (d) =>
     d
@@ -13,8 +17,8 @@ export default function PagosTable() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filters, setFilters] = useState({
-        startDate: startOfMonth(new Date(), { weekStartsOn: 1 }),
-        endDate: endOfMonth(new Date(), { weekStartsOn: 1 }),
+        startDate: subDays(new Date(), 30),
+        endDate: new Date(),
         cliente: "",
         vendedor: "",
     });

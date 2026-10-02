@@ -244,7 +244,8 @@ export default function IngresosTable({
       <div className="d-flex align-items-center gap-2 mb-1">
         {[
           { key: "pendientes", label: "Pendientes" },
-          { key: "lista", label: "Lista de pagos" },
+          { key: "lista", label: "Lista de ventas pagadas" },
+          { key: "pagos", label: "Lista de pagos" },
         ].map((tab) => {
           const isActive = activeTab === tab.key;
           return (
