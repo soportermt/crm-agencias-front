@@ -71,6 +71,20 @@ export default function Pago() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const dataSegura = detalles || [];
+    const [downloadingRecibo, setDownloadingRecibo] = useState(false);
+
+    const hayPagosActivos = (detalles || []).some((p) => String(p.estatus) === "1");
+
+    const handleDownloadRecibo = async () => {
+        setDownloadingRecibo(true);
+        try {
+            await downloadPagoPDF({ pagos: detalles, venta, agencia });
+        } catch (err) {
+            console.error("Error al generar el PDF:", err);
+        } finally {
+            setDownloadingRecibo(false);
+        }
+    };
 
     const totalPages = Math.ceil(dataSegura.length / ITEMS_PER_PAGE);
 
@@ -266,7 +280,7 @@ export default function Pago() {
     const handleDownloadPDF = async (row) => {
         setDownloadingId(row.id_pago);
         try {
-            await downloadPagoPDF(row, agencia);
+            await downloadPagoPDF({ pagos: detalles, venta, agencia });
         } catch (err) {
             console.error("Error al generar el PDF:", err);
         } finally {
@@ -358,26 +372,12 @@ export default function Pago() {
             return (
                 <div className="d-flex align-items-center justify-content-center gap-1">
                     <button
-                        style={{
-                            color: (generando || row.estatus !== '1') ? "#a0a0a0" : "rgb(12, 92, 198)",
-                            background: "none",
-                            border: "none",
-                            cursor: (generando || row.estatus !== '1') ? "not-allowed" : "pointer"
-                        }}
-                        onClick={() => handleDownloadPDF(row)}
-                        disabled={generando || row.estatus !== '1'}
-                    >
-                        <ArrowDownTrayIcon style={{ width: "20px", height: "20px" }} />
-                    </button>
-                    <button
                         type="button"
                         className="btn btn-link p-1 text-danger"
                         title="Cancelar pago"
                         onClick={() => setPagoACancelar(row)}
                         disabled={row.estatus !== '1'}
-                        style={{
-                            cursor: (row.estatus !== '1') ? "not-allowed" : "pointer"
-                        }}
+                        style={{ cursor: row.estatus !== '1' ? "not-allowed" : "pointer" }}
                     >
                         <XCircleIcon style={{ width: "20px", height: "20px" }} />
                     </button>
@@ -944,7 +944,18 @@ export default function Pago() {
 
                 <div className="col-12 p-3">
                     <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
-                        <p className="mb-2" style={{ fontWeight: 600 }}>Detalle de pagos</p>
+                        <div className="d-flex justify-content-between aling-items-end mb-3">
+                            <p className="mb-0" style={{ fontWeight: 600, fontSize: 18 }}>Desglose de pagos</p>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={handleDownloadRecibo}
+                                disabled={downloadingRecibo}
+                            >
+                                {downloadingRecibo ? "Generando..." : "Descargar recibo"}
+                            </button>
+                        </div>
+
                         {isLoading ? (
                             <div className="text-center py-4" style={{ color: "#6E6B7B", fontSize: 13 }}>
                                 Cargando historial de pagos...

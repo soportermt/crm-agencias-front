@@ -1,168 +1,230 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
 
-const styles = StyleSheet.create({
-    page: { padding: 32, fontSize: 10, fontFamily: "Helvetica", color: "#1f1f1f" },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        // borderBottomWidth: 2,
-        // borderBottomColor: "#0C5CC6",
-        paddingBottom: 10,
-        marginBottom: 8,
-    },
-    title: { fontSize: 18, fontWeight: 700, color: "#0C5CC6" },
-    muted: { color: "#6E6B7B" },
-    label: { color: "#5E5873", fontWeight: 700 },
-    row: { flexDirection: "row", marginBottom: 3 },
-    labelCol: { width: 90, color: "#5E5873" },
-    value: { flex: 1 },
-    section: { marginBottom: 16 },
-    sectionTitle: { fontSize: 11, fontWeight: 700, marginBottom: 6 },
-    twoCols: { flexDirection: "row", gap: 24 },
-    col: { flex: 1, minWidth: 0 },
-    table: { borderWidth: 1, borderColor: "#E0E0E0", borderRadius: 4 },
-    thead: { flexDirection: "row", backgroundColor: "#F5F8FF", padding: 6 },
-    tr: { flexDirection: "row", padding: 6, borderTopWidth: 1, borderTopColor: "#EEE" },
-    cServicio: { width: "30%" },
-    cProveedor: { width: "25%" },
-    cDesc: { width: "25%" },
-    cMonto: { width: "20%", textAlign: "right" },
-    totalBox: {
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        marginTop: 10,
-        paddingTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: "#0C5CC6",
-    },
-    totalLabel: { fontSize: 12, fontWeight: 700, marginRight: 12 },
-    totalValue: { fontSize: 12, fontWeight: 700, color: "#28C76F" },
-    footer: {
-        position: "absolute",
-        bottom: 20,
-        left: 32,
-        right: 32,
-        textAlign: "center",
-        fontSize: 8,
-        color: "#999",
-    },
+Font.register({
+    family: "Inter",
+    fonts: [
+        { src: "/fonts/Inter-Regular.ttf", fontWeight: 400 },
+        { src: "/fonts/Inter-SemiBold.ttf", fontWeight: 700 },
+    ],
 });
 
 const money = (v) =>
     Number(v || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
 
-const fecha = (d) =>
-    d
-        ? new Date(d).toLocaleDateString("es-MX", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-        })
-        : "-";
+const fecha = (d, vacio = "-") => {
+    if (!d || String(d).startsWith("0000-00-00")) return vacio;
 
-const Field = ({ label, value }) => (
-    <View style={styles.row}>
-        <Text style={styles.labelCol}>{label}</Text>
-        <Text style={styles.value}>{value || "—"}</Text>
-    </View>
-);
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return vacio;
 
-export default function PagoPDF({ pago, agencia }) {
-    const detalles = pago?.pagosDetalles || [];
-    const venta = detalles[0]?.idVentaservicio?.idVenta;
+    return date.toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+    });
+};
+
+const conceptoVenta = (venta) =>
+    (venta?.ventasServicioses || [])
+        .map((s) => (s.descripcion || "").trim() || s.idTipoServicio?.tipo_servicio || "")
+        .filter(Boolean)
+        .join(", ");
+
+const styles = StyleSheet.create({
+    page: { padding: "32", fontSize: 9, fontFamily: "Inter", color: "#1f1f1f" },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    agencyImage: { width: 75, height: 75 },
+    table: { borderWidth: 1, borderColor: "#fff", borderRadius: 6, },
+    thead: { flexDirection: "row", backgroundColor: "rgb(12, 92, 198)", padding: 2, color: "#fff", fontWeight: 700 },
+    tr: { flexDirection: "row", padding: 4, borderBottomWidth: 0.5, borderBottomColor: "#EBE9F1" },
+    trTotal: { flexDirection: "row", padding: 4, marginTop: 4, borderTopWidth: 1, borderTopColor: "rgb(12, 92, 198)" },
+    cNum: { width: "8%", textAlign: "center" },
+    cFecha: { width: "17%" },
+    cForma: { width: "20%" },
+    cDesc: { width: "35%" },
+    cMonto: { width: "20%", textAlign: "right" },
+    resumenWrap: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginTop: 10
+    },
+    resumen: {
+        width: "40%",
+        marginLeft: "auto",
+    },
+    resumenRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingVertical: 3,
+        padding: 4,
+    },
+    resumenRowSaldo: {
+        marginTop: 2,
+        paddingTop: 5,
+        borderTopWidth: 1,
+        borderTopColor: "rgb(12, 92, 198)",
+    },
+    resumenLabel: { fontWeight: 700 },
+    resumenValue: { fontWeight: 700, textAlign: "right" },
+    limiteBox: {
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        backgroundColor: "#FFF5F5",
+        borderRadius: 4,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        marginBottom: 2
+    },
+    limiteLabel: {
+        // textTransform: "uppercase",
+    },
+    limiteValue: {
+        // marginTop: 2,
+        // fontSize: 12,
+        fontWeight: 700,
+        color: "#FF0000",
+    },
+});
+
+const totalDePago = (pago) =>
+    (pago?.pagosDetalles || []).reduce((acc, d) => acc + Number(d.monto || 0), 0);
+
+export default function PagoPDF({ pagos = [], venta, agencia }) {
+    const activos = pagos
+        .filter((p) => String(p.estatus) === "1")
+        .sort((a, b) => Number(a.id_pago) - Number(b.id_pago));
+
     const cliente = venta?.idCliente;
-    const total = detalles.reduce((acc, d) => acc + Number(d.monto || 0), 0);
+    const total = activos.reduce((acc, p) => acc + totalDePago(p), 0);
+    const granTotal = (venta?.ventasServicioses || []).reduce(
+        (acc, s) => acc + Number(s.tarifa_publica || 0),
+        0
+    );
+    const saldoPendiente = Math.max(0, Number((granTotal - total).toFixed(2)));
+
+    const concepto = conceptoVenta(venta);
 
     return (
-        <Document title={`Pago-${pago?.id_pago}`}>
+        <Document title={`recibo_pagos-${venta?.folio || venta?.id_venta}`}>
             <Page size="A4" style={styles.page}>
+                <Text style={{ fontWeight: 700, textAlign: "center", fontSize: 12 }}>
+                    RECIBO DE PAGOS
+                </Text>
                 <View style={styles.header}>
                     <View>
-                        <Text style={styles.title}>Comprobante de pago</Text>
+                        <Image
+                            src={
+                                agencia?.logotipo
+                                    ? `${process.env.NEXT_PUBLIC_API_URL}images/agencia/${agencia?.logotipo}`
+                                    : "/pdf/logo-placeholder.png"
+                            }
+                            style={styles.agencyImage}
+                        />
                     </View>
-                    <View style={{ textAlign: "right" }}>
-                        <Text style={{ color: "rgb(12, 92, 198)", fontWeight: "700" }}>
-                            <Text style={styles.label}>Folio de pago: </Text>
-                            {pago?.id_pago}
+                    <View style={{ width: "50%", textAlign: "center", textTransform: "uppercase"}}>
+                        <Text style={{ fontWeight: 700 }}>{agencia?.nombre_comercial}</Text>
+                        <Text>{agencia?.direccion}</Text>
+                    </View>
+                    <View style={{ textAlign: "center" }}>
+                        <Text style={{ fontWeight: 700, marginBottom: 2 }}>FOLIO DE VENTA</Text>
+                        <Text style={{ color: "#FF0000", fontSize: 11, fontWeight: 700 }}>{venta?.folio}</Text>
+                    </View>
+                </View>
+
+
+                <View style={[styles.header, { marginBottom: 4 }]}>
+                    <Text style={{ fontWeight: 700 }}>
+                        FECHA DE RECIBO: <Text style={{ fontWeight: 400 }}>{fecha(new Date().toISOString())}</Text>
+                    </Text>
+                </View>
+
+                {concepto ? (
+                    <View style={[styles.header, { marginBottom: 4 }]}>
+                        <Text style={{ fontWeight: 700 }}>
+                            CONCEPTO: <Text style={{ fontWeight: 400 }}>{concepto}</Text>
                         </Text>
-                        <Text>
-                            <Text style={styles.label}>Folio de venta: </Text>
-                            {venta?.folio}
+                    </View>
+                ) : null}
+
+                <View style={[styles.header, { marginBottom: 5 }]}>
+                    <View>
+                        <Text style={{ fontWeight: 700 }}>
+                            CLIENTE: <Text style={{ fontWeight: 400 }}>{cliente?.nombre}</Text>
                         </Text>
-                        <Text>
-                            <Text style={styles.label}>Fecha de pago: </Text>
-                            {fecha(pago?.fecha)}
+                    </View>
+                    <View>
+                        <Text style={{ fontWeight: 700 }}>
+                            VENDEDOR: <Text style={{ fontWeight: 400 }}>{activos[0]?.nombre_vendedor}</Text>
                         </Text>
                     </View>
                 </View>
 
-                {/* Agencia / Cliente */}
-                <View style={[styles.section, styles.twoCols]}>
-                    <View style={styles.col}>
-                        <Text style={styles.sectionTitle}>Información de la agencia</Text>
-                        <Field label="Nombre:" value={agencia?.nombre_comercial} />
-                        <Field label="Dirección:" value={agencia?.direccion} />
-                        <Field label="Correo:" value={agencia?.correo} />
-                        <Field label="Teléfono:" value={agencia?.telefono} />
-                    </View>
-                    <View style={styles.col}>
-                        <Text style={styles.sectionTitle}>Información del cliente</Text>
-                        <Field label="Nombre:" value={cliente?.nombre} />
-                        <Field label="Teléfono:" value={cliente?.telefono} />
-                        <Field label="Correo:" value={cliente?.correo} />
-                    </View>
-                </View>
 
-                {/* Datos del pago */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Datos del pago</Text>
-                    <Field label="Forma de pago:" value={pago?.idFormaPago?.descripcion} />
-                    <Field label="Observaciones:" value={pago?.descripcion} />
-                </View>
-
-                {/* Detalle */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Servicios pagados</Text>
+                <View style={{ margin: "8 0" }}>
                     <View style={styles.table}>
-                        <View style={styles.thead}>
-                            <Text style={[styles.cServicio, styles.label]}>Servicio</Text>
-                            <Text style={[styles.cProveedor, styles.label]}>Código</Text>
-                            <Text style={[styles.cDesc, styles.label]}>Descripción</Text>
-                            <Text style={[styles.cMonto, styles.label]}>Monto</Text>
+                        <View style={[styles.thead, { textTransform: "uppercase" }]}>
+                            <Text style={styles.cNum}>#</Text>
+                            <Text style={styles.cFecha}>Fecha</Text>
+                            <Text style={styles.cForma}>Forma de pago</Text>
+                            <Text style={styles.cDesc}>Descripción</Text>
+                            <Text style={styles.cMonto}>Monto</Text>
                         </View>
 
-                        {detalles.map((d) => (
-                            <View key={d.id_pago_detalle} style={styles.tr} wrap={false}>
-                                <Text style={styles.cServicio}>
-                                    {d.idVentaservicio?.descripcion ||
-                                        "—"}
-                                </Text>
-                                <Text style={styles.cProveedor}>
-                                    {d.idVentaservicio?.codigo || "—"}
-                                </Text>
-                                <Text style={styles.cDesc}>
-                                    {d.idVentaservicio?.descripcion || "—"}
-                                </Text>
-                                <Text style={styles.cMonto}>{money(d.monto)}</Text>
+                        {activos.map((p, i) => (
+                            <View key={p.id_pago} style={styles.tr} wrap={false}>
+                                <Text style={styles.cNum}>{i + 1}</Text>
+                                <Text style={styles.cFecha}>{fecha(p.fecha)}</Text>
+                                <Text style={styles.cForma}>{p.idFormaPago?.descripcion || "—"}</Text>
+                                <Text style={styles.cDesc}>{p.descripcion || "—"}</Text>
+                                <Text style={styles.cMonto}>{money(totalDePago(p))}</Text>
                             </View>
                         ))}
-                    </View>
 
-                    <View style={styles.totalBox}>
-                        <Text style={styles.totalLabel}>Total pagado:</Text>
-                        <Text style={styles.totalValue}>{money(total)}</Text>
+                        <View style={styles.resumenWrap} wrap={false}>
+                            <View style={styles.limiteBox}>
+                                <Text style={styles.limiteLabel}>Fecha límite de pago</Text>
+                                <Text style={styles.limiteValue}> {fecha(venta?.limite_cancelacion, "Sin fecha límite")}</Text>
+                            </View>
+                            <View style={styles.resumen}>
+                                <View style={[styles.resumenRow, { borderBottomWidth: 0.5, borderBottomColor: "#EBE9F1" }]}>
+                                    <Text style={styles.resumenLabel}>Total venta:</Text>
+                                    <Text style={styles.resumenValue}>{money(granTotal)}</Text>
+                                </View>
+                                <View style={styles.resumenRow}>
+                                    <Text style={styles.resumenLabel}>Total en pagos:</Text>
+                                    <Text style={[styles.resumenValue, { color: "rgb(12, 92, 198)" }]}>{money(total)}</Text>
+                                </View>
+                                <View style={[styles.resumenRow, styles.resumenRowSaldo]}>
+                                    <Text style={styles.resumenLabel}>Saldo a pagar:</Text>
+                                    <Text
+                                        style={[
+                                            styles.resumenValue,
+                                            { fontSize: 11, color: saldoPendiente > 0 ? "#FF0000" : "#28C76F" },
+                                        ]}
+                                    >
+                                        {money(saldoPendiente)}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 </View>
 
-                <Text
-                    style={styles.footer}
-                    render={({ pageNumber, totalPages }) =>
-                        `Página ${pageNumber} de ${totalPages}`
-                    }
-                    fixed
-                />
+                {venta?.terminos_pagos ? (
+                    <View style={{ marginTop: 8 }}>
+                        <Text style={{ fontWeight: 700 }}>
+                            NOTA IMPORTANTE: <Text style={{ fontWeight: 400 }}>{venta.terminos_pagos}</Text>
+                        </Text>
+                    </View>
+                ) : null}
             </Page>
         </Document>
     );
