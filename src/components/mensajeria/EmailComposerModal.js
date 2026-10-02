@@ -13,9 +13,12 @@ export default function EmailComposerModal({
   defaultIsQuote = false,
 }) {
   const [subject, setSubject] = useState("");
+  const [cc, setCc] = useState("");
+  const [bcc, setBcc] = useState("");
   const [body, setBody] = useState("");
   const [isQuote, setIsQuote] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [fechaInicial, setFechaInicial] = useState("");
   const [fechaFinal, setFechaFinal] = useState("");
   const [cargoServicios, setCargoServicios] = useState("");
@@ -23,9 +26,12 @@ export default function EmailComposerModal({
   useEffect(() => {
     if (show) {
       setSubject(initialSubject || "");
+      setCc("");
+      setBcc("");
       setBody("");
       setIsQuote(defaultIsQuote);
       setPdfFile(null);
+      setAttachments([]);
       const today = new Date().toISOString().slice(0, 10);
       setFechaInicial(today);
       setFechaFinal(today);
@@ -54,10 +60,13 @@ export default function EmailComposerModal({
 
     onSend({
       subject: subject.trim(),
+      cc: cc.trim(),
+      bcc: bcc.trim(),
       body: plainText.trim() || body.trim() || (isQuote ? "Adjuntamos la cotización solicitada." : ""),
       html: body.trim() || (isQuote ? "<p>Adjuntamos la cotización solicitada.</p>" : ""),
       isQuote,
       pdfFile,
+      attachments,
       fechaInicial,
       fechaFinal,
       cargoServicios,
@@ -125,6 +134,37 @@ export default function EmailComposerModal({
                     placeholder="Asunto del correo..."
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="row g-3 mb-3">
+                <div className="col-12 col-md-6">
+                  <label className="form-label text-secondary small font-poppins mb-1" htmlFor="email-cc">
+                    CC (Con Copia)
+                  </label>
+                  <input
+                    id="email-cc"
+                    type="text"
+                    className="form-control input-custom"
+                    style={{ borderRadius: "10px" }}
+                    placeholder="ejemplo@correo.com, otro@correo.com"
+                    value={cc}
+                    onChange={(e) => setCc(e.target.value)}
+                  />
+                </div>
+                <div className="col-12 col-md-6">
+                  <label className="form-label text-secondary small font-poppins mb-1" htmlFor="email-bcc">
+                    BCC (Copia Oculta)
+                  </label>
+                  <input
+                    id="email-bcc"
+                    type="text"
+                    className="form-control input-custom"
+                    style={{ borderRadius: "10px" }}
+                    placeholder="ejemplo@correo.com"
+                    value={bcc}
+                    onChange={(e) => setBcc(e.target.value)}
                   />
                 </div>
               </div>
@@ -218,6 +258,38 @@ export default function EmailComposerModal({
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className="mb-3">
+                 <label className="form-label text-secondary small font-poppins mb-1">
+                   Archivos Adjuntos Adicionales
+                 </label>
+                 <div className="input-group">
+                   <span className="input-group-text bg-white border-end-0 text-muted" style={{ borderRadius: "10px 0 0 10px" }}>
+                     <i className="bi bi-paperclip" style={{ fontSize: "16px" }}></i>
+                   </span>
+                   <input
+                     type="file"
+                     className="form-control input-custom border-start-0"
+                     multiple
+                     onChange={(e) => setAttachments(Array.from(e.target.files || []))}
+                     style={{ borderRadius: "0 10px 10px 0" }}
+                   />
+                 </div>
+                 {attachments.length > 0 && (
+                   <div className="d-flex flex-wrap gap-2 mt-2">
+                     {attachments.map((file, i) => (
+                       <span key={i} className="badge bg-secondary d-flex align-items-center gap-1" style={{ fontSize: '11px' }}>
+                         {file.name}
+                         <i className="bi bi-x-circle ms-1" style={{ cursor: 'pointer' }} onClick={() => {
+                           const newAtt = [...attachments];
+                           newAtt.splice(i, 1);
+                           setAttachments(newAtt);
+                         }}></i>
+                       </span>
+                     ))}
+                   </div>
+                 )}
               </div>
 
               <div className="mb-2">

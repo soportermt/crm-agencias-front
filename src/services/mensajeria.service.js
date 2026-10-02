@@ -65,6 +65,12 @@ export const mensajeriaService = {
   },
 
   async sendEmail(payload) {
+    if (payload instanceof FormData) {
+      const { data } = await api.post("/email/send", payload, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return data;
+    }
     const { data } = await api.post("/email/send", payload);
     return data;
   },
