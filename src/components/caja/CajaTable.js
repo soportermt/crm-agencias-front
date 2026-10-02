@@ -145,7 +145,12 @@ const ICONOS_SERVICIOS = {
 };
 const ICONO_DEFAULT = faCirclePlus;
 
-export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
+export default function CajaTable({ ventas = [], filters, onFiltersChange, showSaldo = false, }) {
+  const columns = useMemo(
+    () => (showSaldo ? COLUMNS : COLUMNS.filter((c) => c.key !== "saldo")),
+    [showSaldo]
+  );
+
   const {
     startDate,
     endDate,
@@ -392,7 +397,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
       </div>
 
       <DataTable
-        columns={COLUMNS}
+        columns={columns}
         data={paginatedData}
         renderCell={renderCell}
         pagination

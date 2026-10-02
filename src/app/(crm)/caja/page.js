@@ -70,6 +70,7 @@ export default function Caja() {
           ventas={caja}
           filters={filters}
           onFiltersChange={setFilters}
+          showSaldo
         />
         )}
       </div>
