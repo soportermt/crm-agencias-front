@@ -298,7 +298,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange }) {
               href={`caja/pagos/${row.id_venta}`}
               className="btn btn-link p-1 text-primary"
             >
-              <EyeIcon style={{ width: "20px", height: "20px" }} />
+              <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
             </a>
 
           </div>

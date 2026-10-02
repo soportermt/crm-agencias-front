@@ -147,7 +147,6 @@ export default function LoginPage() {
                   type="text"
                   id="email"
                   required
-                  placeholder="atencion@solucionesid.com"
                   className="form-control input-custom"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -181,7 +180,6 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     id="password"
                     required
-                    placeholder="••••••••••••••"
                     className="form-control input-custom pe-5"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
