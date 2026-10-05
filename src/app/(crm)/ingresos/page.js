@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import IngresosTable, { getEstatusByFechaLimite } from "@/components/ingresos/IngresosTable";
 import Chart from "@/components/ingresos/Chart";
 import { ingresosService } from "@/services/ingresos.service";
-
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 function formatToYMD(date) {
   if (!date) return null;
@@ -28,8 +28,14 @@ function getInitialMonthRange() {
   };
 }
 
-export default function IngresosPage() {
-  const [activeTab, setActiveTab] = useState("pendientes");
+const VALID_TABS = ["pendientes", "lista", "pagos"];
+function IngresosContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "pendientes";
+
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState(getInitialMonthRange);
@@ -43,6 +49,15 @@ export default function IngresosPage() {
   const [loadingVentas, setLoadingVentas] = useState(false);
 
   const ITEMS_PER_PAGE = 10;
+
+  const handleTabChange = useCallback(
+    (tab) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", tab);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   useEffect(() => {
     try {
@@ -143,7 +158,7 @@ export default function IngresosPage() {
 
           <IngresosTable
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             data={paginatedData}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -161,5 +176,14 @@ export default function IngresosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function IngresosPage() {
+  return (
+    <Suspense fallback={null}>
+      <IngresosContent/>
+    </Suspense>
   );
 }
