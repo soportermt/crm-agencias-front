@@ -57,7 +57,7 @@ export const cajaService = {
             withCredentials: true,
             headers: { "Content-Type": undefined },
         });
-    
+
         return data;
     },
 
@@ -67,5 +67,17 @@ export const cajaService = {
         });
         return data;
     },
+
+    async getAgencyPayments(startDate, endDate) {
+        const params = {};
+        if (startDate) params.fecha_inicio = startDate;
+        if (endDate) params.fecha_fin = endDate;
+    
+        const { data } = await api.get('/caja/getAgencyPayments', {
+            params,
+            withCredentials: true,
+        });
+        return data;
+    }
 
 }

@@ -10,6 +10,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
 import PagosTable from "./PagosTable";
+import PagosDetalleTable from "./PagosDetalleTable";
 
 registerLocale("es", es);
 
@@ -268,7 +269,7 @@ export default function IngresosTable({
       </div>
 
       <div className="bg-white" style={{ borderRadius: "12px" }}>
-        {isPendientes ?
+        {activeTab === "pendientes" && (
           <div>
             <div className="px-0 pt-1">
               <div className="d-flex justify-content-between align-items-start mb-1">
@@ -288,8 +289,8 @@ export default function IngresosTable({
                 </div>
                 <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
               </div>
-
             </div>
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <DatePicker
@@ -323,6 +324,7 @@ export default function IngresosTable({
                 width="350px"
               />
             </div>
+
             <DataTable
               columns={COLUMNS}
               data={data}
@@ -336,9 +338,15 @@ export default function IngresosTable({
               minWidth="1500px"
             />
           </div>
-          :
+        )}
+
+        {activeTab === "lista" && (
           <PagosTable />
-        }
+        )}
+
+        {activeTab === "pagos" && (
+          <PagosDetalleTable/>
+        )}
       </div>
     </div>
   );
