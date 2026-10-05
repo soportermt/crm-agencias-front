@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
@@ -11,6 +11,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
 import PagosTable from "./PagosTable";
 import PagosDetalleTable from "./PagosDetalleTable";
+import {
+  startOfDay, endOfDay, subDays,
+  startOfWeek, endOfWeek, subWeeks,
+  startOfMonth, endOfMonth, subMonths,
+} from "date-fns";
 
 registerLocale("es", es);
 
@@ -25,6 +30,45 @@ const COLUMNS = [
   { key: "moneda", label: "Moneda", width: "130px", align: "end" },
   { key: "diasRestantes", label: "Días restantes", width: "130px", align: "center" },
   { key: "estatus", label: "Estatus", width: "130px", align: "center" },
+];
+
+const WEEK = { weekStartsOn: 1 };
+
+const PRESETS = [
+  { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
+  {
+    label: "Ayer",
+    range: () => {
+      const d = subDays(new Date(), 1);
+      return [startOfDay(d), endOfDay(d)];
+    },
+  },
+  {
+    label: "Últimos 7 días",
+    range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
+  },
+  {
+    label: "Esta semana",
+    range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
+  },
+  {
+    label: "Semana pasada",
+    range: () => {
+      const d = subWeeks(new Date(), 1);
+      return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+    },
+  },
+  {
+    label: "Este mes",
+    range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
+  },
+  {
+    label: "Mes pasado",
+    range: () => {
+      const d = subMonths(new Date(), 1);
+      return [startOfMonth(d), endOfMonth(d)];
+    },
+  },
 ];
 
 function parseLocalDate(dateString) {
@@ -152,7 +196,6 @@ export default function IngresosTable({
   endDate,
   onDateRangeChange,
 }) {
-  const isPendientes = activeTab === "pendientes";
   const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return "$0.00";
     return new Intl.NumberFormat("es-MX", {
@@ -167,6 +210,12 @@ export default function IngresosTable({
     }
     const [start, end] = dates;
     onDateRangeChange({ startDate: start, endDate: end });
+  };
+  const pickerRef = useRef(null);
+
+  const applyPreset = (preset) => {
+    handleDateChange(preset.range());
+    pickerRef.current?.setOpen(false);
   };
 
   const renderCell = (key, row) => {
@@ -294,6 +343,7 @@ export default function IngresosTable({
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <DatePicker
+                  ref={pickerRef}
                   selectsRange={true}
                   startDate={startDate}
                   endDate={endDate}
@@ -304,7 +354,20 @@ export default function IngresosTable({
                   dateFormat="dd/MM/yyyy"
                   className="form-control form-control-sm"
                   autoComplete="off"
-                />
+                >
+                  <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                    {PRESETS.map((p) => (
+                      <button
+                        key={p.label}
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => applyPreset(p)}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </DatePicker>
                 <select
                   className="form-select form-select-sm"
                   style={{ width: "fit-content", minWidth: "180px" }}
@@ -345,7 +408,7 @@ export default function IngresosTable({
         )}
 
         {activeTab === "pagos" && (
-          <PagosDetalleTable/>
+          <PagosDetalleTable />
         )}
       </div>
     </div>

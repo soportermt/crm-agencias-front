@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import BookingList from "./BookingsList";
 import BookingGrouped from "./BookingGrouped";
 import BookingPassengers from "./BookingPassengers";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const tabComponents = {
     lista: BookingList,
@@ -11,14 +12,28 @@ const tabComponents = {
     pasajeros: BookingPassengers,
 };
 
-export default function BookingTable({ activeTab, onTabChange }) {
-    const ActiveComponent = tabComponents[activeTab];
+const VALID_TABS = ["lista", "agrupado", "pasajeros"];
+
+function BookingComponent({ activeTab, onTabChange }) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const tabParam = searchParams.get("tab");
+    const currentTab = VALID_TABS.includes(tabParam) ? tabParam : "lista";
+    const ActiveComponent = tabComponents[currentTab];
+
+    const handleTabChange = (tab) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("tab", tab);
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    };
 
     return (
         <div>
             <div className="d-flex flex-column flex-md-row gap-2 mb-2">
-                {["lista", "agrupado", "pasajeros"].map((tab) => {
-                    const isActive = activeTab === tab;
+                {VALID_TABS.map((tab) => {
+                    const isActive = currentTab === tab;
 
                     const labels = {
                         lista: "Lista",
@@ -29,7 +44,7 @@ export default function BookingTable({ activeTab, onTabChange }) {
                     return (
                         <button
                             key={tab}
-                            onClick={() => onTabChange(tab)}
+                            onClick={() => handleTabChange(tab)}
                             className={`btn border-0 transition-smooth ${isActive ? "bg-brand-blue-light text-brand-blue" : ""
                                 }`}
                             style={{
@@ -52,4 +67,12 @@ export default function BookingTable({ activeTab, onTabChange }) {
             </div>
         </div>
     );
+}
+
+export default function BookingTable() {
+    return (
+        <Suspense fallback={<div>Cargando vista...</div>}>
+          <BookingComponent />
+        </Suspense>
+      );
 }
