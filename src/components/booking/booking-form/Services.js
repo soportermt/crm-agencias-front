@@ -21,7 +21,7 @@ export default function Services({ mode }) {
 
   return (
     <div className="mt-3">
-      {!isEditMode && (
+      {/* {!isEditMode && ( */}
         <div className="d-flex flex-wrap gap-2 mb-3">
           {serviceCatalog.map((service) => {
             const isSelected = booking.servicios.some((item) => item.tipo === service.id);
@@ -38,7 +38,7 @@ export default function Services({ mode }) {
             );
           })}
         </div>
-      )}
+      {/* )} */}
 
       {draft && (
         <div className="card card-body p-3 d-flex flex-column gap-4">
