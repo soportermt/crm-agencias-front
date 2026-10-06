@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import DataTable from "@/components/common/DataTable";
 import SearchBar from "@/components/common/SearchBar";
@@ -10,15 +10,59 @@ import OperadoresSummary from "./OperadoresSummary";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
+import {
+  startOfDay, endOfDay, subDays,
+  startOfWeek, endOfWeek, subWeeks,
+  startOfMonth, endOfMonth, subMonths,
+} from "date-fns";
 
 registerLocale("es", es);
 
+const WEEK = { weekStartsOn: 1 };
+
+const PRESETS = [
+  { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
+  {
+    label: "Ayer",
+    range: () => {
+      const d = subDays(new Date(), 1);
+      return [startOfDay(d), endOfDay(d)];
+    },
+  },
+  {
+    label: "Últimos 7 días",
+    range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
+  },
+  {
+    label: "Esta semana",
+    range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
+  },
+  {
+    label: "Semana pasada",
+    range: () => {
+      const d = subWeeks(new Date(), 1);
+      return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+    },
+  },
+  {
+    label: "Este mes",
+    range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
+  },
+  {
+    label: "Mes pasado",
+    range: () => {
+      const d = subMonths(new Date(), 1);
+      return [startOfMonth(d), endOfMonth(d)];
+    },
+  },
+];
+
 const CATEGORY_STYLES = {
-  Hospedaje: { backgroundColor: "#e0e7ff", color: "#3730a3" }, 
-  Traslado:  { backgroundColor: "#dcfce7", color: "#166534" }, 
-  Tour:      { backgroundColor: "#ffedd5", color: "#9a3412" }, 
-  Vuelos:    { backgroundColor: "#e0f2fe", color: "#0369a1" }, 
-  Otros:     { backgroundColor: "#f3f4f6", color: "#374151" }, 
+  Hospedaje: { backgroundColor: "#e0e7ff", color: "#3730a3" },
+  Traslado: { backgroundColor: "#dcfce7", color: "#166534" },
+  Tour: { backgroundColor: "#ffedd5", color: "#9a3412" },
+  Vuelos: { backgroundColor: "#e0f2fe", color: "#0369a1" },
+  Otros: { backgroundColor: "#f3f4f6", color: "#374151" },
 };
 
 const DIAS_STYLES = {
@@ -77,9 +121,9 @@ function getDiasEstadoInfo(fechaLimite) {
   const diffDias = Math.round((fecha - hoy) / (1000 * 60 * 60 * 24));
 
   if (diffDias < 0) {
-    return { 
-      estado: "Vencido", 
-      diasLabel: diffDias === -1 ? "-1 día" : `${diffDias} días` 
+    return {
+      estado: "Vencido",
+      diasLabel: diffDias === -1 ? "-1 día" : `${diffDias} días`
     };
   }
   if (diffDias <= 15) {
@@ -186,10 +230,10 @@ export default function EgresosTable({
           { key: "proveedor", label: "Proveedor", width: "225px" },
           { key: "tipo_servicio", label: "Categoría", width: "155px" },
           { key: "descripcion", label: "Servicio", width: "225px" },
-          { key: "tarifa_publica", label: "Tarifa publica", width: "130px", align: "end"  },
-          { key: "comision", label: "Fee", width: "130px", align: "end"  },
+          { key: "tarifa_publica", label: "Tarifa publica", width: "130px", align: "end" },
+          { key: "comision", label: "Fee", width: "130px", align: "end" },
           { key: "costo", label: "Tarifa neta", width: "130px", align: "end" },
-          { key: "moneda", label: "Moneda", width: "130px", align: "end"  },
+          { key: "moneda", label: "Moneda", width: "130px", align: "end" },
           { key: "fecha_limite", label: "Fecha límite", width: "130px" },
           { key: "diasRestantes", label: "Días restantes", width: "130px" },
           { key: "estado", label: "Estado", width: "130px" },
@@ -197,6 +241,13 @@ export default function EgresosTable({
         ];
     }
   };
+
+    const pickerRef = useRef(null);
+  
+    const applyPreset = (preset) => {
+      handleDateChange(preset.range());
+      pickerRef.current?.setOpen(false);
+    };
 
   const handleDateChange = (dates) => {
     if (!dates) {
@@ -398,7 +449,20 @@ export default function EgresosTable({
                     dateFormat="dd/MM/yyyy"
                     className="form-control form-control-sm"
                     autoComplete="off"
-                  />
+                  >
+                    <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                      {PRESETS.map((p) => (
+                        <button
+                          key={p.label}
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => applyPreset(p)}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </DatePicker>
                   <select
                     name="categorias"
                     className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"

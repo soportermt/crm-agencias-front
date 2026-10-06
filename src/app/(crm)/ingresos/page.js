@@ -5,27 +5,25 @@ import IngresosTable, { getEstatusByFechaLimite } from "@/components/ingresos/In
 import Chart from "@/components/ingresos/Chart";
 import { ingresosService } from "@/services/ingresos.service";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { subDays } from "date-fns";
 
-function formatToYMD(date) {
-  if (!date) return null;
-  const d = date instanceof Date ? date : new Date(date);
-  if (isNaN(d.getTime())) return null;
-
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+const toYMD = (d) =>
+  d
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    : null;
+    
+function getInitialMonthRange() {
+  return {
+    startDate: subDays(new Date(), 30),
+    endDate: new Date(),
+  };
 }
 
-function getInitialMonthRange() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  return {
-    startDate: new Date(year, month, 1),
-    endDate: new Date(year, month + 1, 0),
-  };
+function getInitialRange() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 30);
+  return { startDate: start, endDate: end };
 }
 
 const VALID_TABS = ["pendientes", "lista", "pagos"];
@@ -99,8 +97,8 @@ function IngresosContent() {
 
     try {
       setLoadingVentas(true);
-      const strStart = formatToYMD(dateRange.startDate);
-      const strEnd = formatToYMD(dateRange.endDate);
+      const strStart = toYMD(dateRange.startDate);
+      const strEnd = toYMD(dateRange.endDate);
 
       const dataVentas = await ingresosService.getVentas(strStart, strEnd);
       setVentas(dataVentas || []);
@@ -183,7 +181,7 @@ function IngresosContent() {
 export default function IngresosPage() {
   return (
     <Suspense fallback={null}>
-      <IngresosContent/>
+      <IngresosContent />
     </Suspense>
   );
 }

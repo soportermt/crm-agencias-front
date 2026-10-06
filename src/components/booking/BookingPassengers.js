@@ -12,7 +12,7 @@ const COLUMNS = [
   { key: "tipo", label: "Tipo", width: "50px", align: "start" },
 ];
 
-const ITEMS_PER_PAGE = 25;
+const ITEMS_PER_PAGE = 10;
 
 export default function BookingPassengers() {
   const [searchValue, setSearchValue] = useState("");

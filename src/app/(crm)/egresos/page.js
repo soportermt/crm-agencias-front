@@ -1,35 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import StatCard from "@/components/common/StatCard";
 import AlertBanner from "@/components/common/AlertBanner";
 import EgresosTable from "@/components/egresos/EgresosTable";
 import { egresosService } from "@/services/egresos.service";
 import { catalogosService } from "@/services/catalogos.service";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { subDays } from "date-fns";
 
-function formatToYMD(date) {
-  if (!date) return null;
-  const d = date instanceof Date ? date : new Date(date);
-  if (isNaN(d.getTime())) return null;
+const toYMD = (d) =>
+  d
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    : null;
 
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 function getInitialMonthRange() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
   return {
-    startDate: new Date(year, month, 1),
-    endDate: new Date(year, month + 1, 0),
+    startDate: subDays(new Date(), 30),
+    endDate: new Date(),
   };
 }
+const VALID_TABS = ["pendientes", "proveedores"];
 
-export default function EgresosPage() {
-  const [activeTab, setActiveTab] = useState("pendientes");
+function EgresosContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "pendientes";
+
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState(getInitialMonthRange);
@@ -44,6 +43,16 @@ export default function EgresosPage() {
   const [estadoCuentasData, setEstadoCuentasData] = useState([]);
 
   const ITEMS_PER_PAGE = 10;
+
+  const handleTabChange = useCallback(
+    (tab) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", tab);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
+
 
   useEffect(() => {
     async function loadChartData() {
@@ -65,8 +74,8 @@ export default function EgresosPage() {
 
     try {
       setLoadingVentas(true);
-      const strStart = formatToYMD(dateRange.startDate);
-      const strEnd = formatToYMD(dateRange.endDate);
+      const strStart = toYMD(dateRange.startDate);
+      const strEnd = toYMD(dateRange.endDate);
 
       const dataVentas = await egresosService.getVentas(strStart, strEnd, servicioFilter);
       setVentas(dataVentas || []);
@@ -137,11 +146,6 @@ export default function EgresosPage() {
           >
             Control de egresos
           </h1>
-          {/* 
-          <AlertBanner
-            message="3 pagos vencen en los próximos 5 días"
-            description="— Reserva #0042 (hotel), #0051 (vuelo), #0067 (operador). Revisa la pestaña Pendientes."
-          /> */}
 
           <div className="row g-4">
             <div className="col-12 col-sm-6 col-xl-3">
@@ -192,7 +196,7 @@ export default function EgresosPage() {
 
           <EgresosTable
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             data={paginatedData}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -213,5 +217,13 @@ export default function EgresosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function IngresosPage() {
+  return (
+    <Suspense fallback={null}>
+      <EgresosContent />
+    </Suspense>
   );
 }

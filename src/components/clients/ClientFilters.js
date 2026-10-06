@@ -17,7 +17,7 @@ export default function ClientFilters({
   const isActivosActive = activeFilter === "Activos";
 
   return (
-    <div className="d-flex flex-column gap-3 mb-4">
+    <div className="d-flex flex-column gap-3 mb-2">
       <div className="d-flex justify-content-between align-items-center">
         <div>
           <h3 className="h6 fw-bold mb-0" style={{ color: "#0f1901" }}>
@@ -34,12 +34,12 @@ export default function ClientFilters({
 
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3">
         <div className="d-flex align-items-center gap-2 flex-wrap">
-          <DateRangeSelector
+          {/* <DateRangeSelector
             startDate={startDate}
             endDate={endDate}
             onChange={onDateRangeChange}
             showIcon={false}
-          />
+          /> */}
 
           <FilterButton
             onClick={() => onFilterChange(isActivosActive ? "Todos" : "Activos")}
