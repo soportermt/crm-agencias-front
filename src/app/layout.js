@@ -23,7 +23,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "CRM 2BusinessTravel - Control total de tu operación turística",
+  title: "CRM VJ NEXUS - Control total de tu operación turística",
   description: "Identifícate para gestionar salidas, pagos y reportes en tiempo real. Sistema CRM premium para operaciones turísticas.",
 };
 
