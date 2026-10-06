@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
         fontWeight: 500
     },
     agencyFooter: {
-        width: 100,
+        width: 80,
         height: 80
     },
     agencyInfo: {
