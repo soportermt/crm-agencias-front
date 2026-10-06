@@ -28,8 +28,12 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
 
-  const [logoAgencia, setLogoAgencia] = useState("/2bt2025.png");
+  const [logoAgencia, setLogoAgencia] = useState(null);
   const [nombreAgencia, setNombreAgencia] = useState("2Business Travel");
+
+  const logoSrc = logoAgencia
+    ? `${process.env.NEXT_PUBLIC_API_URL}images/agencia/${logoAgencia}`
+    : "/images.jpg";
 
   useEffect(() => {
     try {
@@ -141,11 +145,15 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
 
           <div className="d-flex justify-content-center">
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}images/agencia/${logoAgencia}`}
+              src={logoSrc}
               alt={`${nombreAgencia} Logo`}
               width={110}
               height={20}
-              style={{ height: "auto", maxWidth: "115px" }}
+              style={{ height: "auto", maxWidth: "115px", marginBottom: 12 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/images.jpg";
+              }}
             />
           </div>
 

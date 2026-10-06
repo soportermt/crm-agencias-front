@@ -161,7 +161,7 @@ export default function GeneralTab() {
             />
           </div>
 
-          <div className="col-12 col-md-6 mt-1">
+          <div className="col-12 col-md-6 mt-1 d-flex flex-column gap-2">
             <label className="form-label">Logotipo</label>
             <div className="d-flex flex-column flex-sm-row align-items-center gap-2 border rounded-3 p-1 w-100" style={{ borderColor: "rgba(161, 161, 170, 0.35)" }}>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept="image/png, image/jpeg, image/jpg" />
@@ -177,14 +177,14 @@ export default function GeneralTab() {
               </span>
             </div>
             {preview ? (
-              <img src={preview} alt="Preview logotipo" style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }} />
+              <img src={preview} alt="Preview logotipo" style={{ maxHeight: 60, marginTop: 6, borderRadius: 6, width: "fit-content" }} />
             ) : agencia.logotipo ? (
               <img
                 src={`${process.env.NEXT_PUBLIC_API_URL}images/agencia/${agencia.logotipo}`}
                 alt="Logotipo actual"
-                style={{ maxHeight: 60, marginTop: 8, borderRadius: 6 }}
+                style={{ maxHeight: 60, marginTop: 6, borderRadius: 6, width: "fit-content" }}
               />
-            ) : null}
+            ) : <img src="/images.jpg" alt="Empty logo" style={{ maxHeight: 50, marginTop: 6, borderRadius: 6, width: "fit-content" }} />}
             <span className="text-muted font-poppins" style={{ fontSize: "11px" }}>Tipo de archivos permitidos: jpg, png, jpeg.</span>
           </div>
         </div>
