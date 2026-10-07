@@ -5,6 +5,7 @@ import DataTable from "../common/DataTable";
 import ExportButton from "../common/ExportButton";
 import SearchBar from "../common/SearchBar";
 import { bookingService } from "@/services/booking.service";
+import ExportDocuments from "../common/ExportDocuments";
 
 const COLUMNS = [
   { key: "nombre", label: "Pasajero", width: "50px", align: "start" },
@@ -13,6 +14,13 @@ const COLUMNS = [
 ];
 
 const ITEMS_PER_PAGE = 10;
+
+const exportColumns = [
+  { header: "Pasajero", key: "nombre" },
+  { header: "Tipo", key: "tipo" },
+  { header: "Ult reserva", key: "folio" },
+  { header: "Fecha", key: "ultima_reserva" },
+];
 
 export default function BookingPassengers() {
   const [searchValue, setSearchValue] = useState("");
@@ -149,11 +157,16 @@ export default function BookingPassengers() {
         </div>
         <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
           <div className="d-flex flex-column flex-sm-row flex-wrap gap-2">
-            <ExportButton onExport={() => console.log("Exportar")} />
+            <ExportDocuments
+              data={filteredPassengers}
+              columns={exportColumns}
+              filename="pasajeros"
+              sheetName="Pasajeros"
+            />
             <select name="tipo" id="tipo"
               className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
               style={{
-                height: "38px",
+                // height: "38px",
                 borderRadius: "8px",
                 borderColor: "#d0d5dd",
                 backgroundColor: "#fff",

@@ -198,6 +198,7 @@ function EgresosContent() {
             activeTab={activeTab}
             onTabChange={handleTabChange}
             data={paginatedData}
+            exportData={filteredData}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             currentPage={currentPage}

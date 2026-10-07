@@ -15,6 +15,7 @@ import {
   startOfWeek, endOfWeek, subWeeks,
   startOfMonth, endOfMonth, subMonths,
 } from "date-fns";
+import ExportDocuments from "../common/ExportDocuments";
 
 registerLocale("es", es);
 
@@ -135,52 +136,25 @@ function getDiasEstadoInfo(fechaLimite) {
   return { estado: "Pendiente", diasLabel: `${diffDias} días` };
 }
 
-function exportToCSV(data) {
-  if (!data.length) return;
-
-  const headers = ["Reserva", "Proveedor", "Categoría", "Servicio", "Tarifa publica", "Fee", "Tarifa neta", "Moneda", "Fecha límite", "Días restantes", "Estado"];
-
-  const rows = data.map((row) => [
-    row.folio,
-    row.proveedor,
-    row.tipo_servicio,
-    row.descripcion,
-    row.tarifa_publica,
-    row.comision,
-    row.costo,
-    row.moneda,
-    row.fecha_limite,
-    row.diasRestantes,
-    row.estado,
-  ]);
-
-  const escapeCsvValue = (value) => {
-    const str = String(value ?? "");
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-
-  const csvContent = [headers, ...rows]
-    .map((r) => r.map(escapeCsvValue).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `egresos_${new Date().toISOString().slice(0, 10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+const exportColumns = [
+  { header: "Reserva", key: "folio" },
+  { header: "Proveedor", key: "proveedor" },
+  { header: "Categoría", key: "tipo_servicio" },
+  { header: "Servicio", key: "descripcion" },
+  { header: "Tarifa pública", value: (row) => Number(row.tarifa_publica) || 0 },
+  { header: "Fee", value: (row) => Number(row.comision) || 0 },
+  { header: "Tarifa neta", value: (row) => Number(row.costo) || 0 },
+  { header: "Moneda", key: "moneda" },
+  { header: "Fecha límite", value: (row) => formatDateRange(row.fecha_limite) },
+  { header: "Días restantes", value: (row) => getDiasEstadoInfo(row.fecha_limite).diasLabel },
+  { header: "Estado", value: (row) => getDiasEstadoInfo(row.fecha_limite).estado },
+];
 
 export default function EgresosTable({
   activeTab,
   onTabChange,
   data,
+  exportData,
   searchValue,
   onSearchChange,
   currentPage,
@@ -242,12 +216,12 @@ export default function EgresosTable({
     }
   };
 
-    const pickerRef = useRef(null);
-  
-    const applyPreset = (preset) => {
-      handleDateChange(preset.range());
-      pickerRef.current?.setOpen(false);
-    };
+  const pickerRef = useRef(null);
+
+  const applyPreset = (preset) => {
+    handleDateChange(preset.range());
+    pickerRef.current?.setOpen(false);
+  };
 
   const handleDateChange = (dates) => {
     if (!dates) {
@@ -496,7 +470,12 @@ export default function EgresosTable({
                     placeholder="Buscar por reserva, proveedor, categoria o servicio..."
                     width="350px"
                   />
-                  <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
+                  <ExportDocuments
+                    data={exportData}
+                    columns={exportColumns}
+                    filename="egresos"
+                    sheetName="Egresos"
+                  />
                 </div>
               </>
             )}

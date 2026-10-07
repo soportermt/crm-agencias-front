@@ -13,6 +13,7 @@ import SearchBar from '../common/SearchBar';
 import ExportButton from '../common/ExportButton';
 import { cajaService } from '@/services/caja.service';
 import { createPortal } from 'react-dom';
+import ExportDocuments from '../common/ExportDocuments';
 
 registerLocale("es", es);
 
@@ -86,41 +87,13 @@ const foliosDePago = (p) => [
     ...new Set((p.pagosDetalles || []).map(folioDeDetalle).filter(Boolean)),
 ];
 
-function exportToCSV(data) {
-    if (!data.length) return;
-
-    const headers = ["No. pago", "Fecha de pago", "Forma de pago", "Folios", "Total"];
-
-    const rows = data.map((p) => [
-        p.id_pago,
-        formatDate(p.fecha),
-        formaPagoNombre(p),
-        foliosDePago(p).join(" | "),
-        p.total_pago,
-    ]);
-
-    const escapeCsvValue = (value) => {
-        const str = String(value ?? "");
-        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-        }
-        return str;
-    };
-
-    const csvContent = [headers, ...rows]
-        .map((r) => r.map(escapeCsvValue).join(","))
-        .join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `pagos_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
+const exportColumns = [
+    { header: "No. pago", key: "id_pago" },
+    { header: "Fecha de pago", value: (row) => formatDate(row.fecha) },
+    { header: "Forma de pago", value: (row) => formaPagoNombre(row) },
+    { header: "Folio", value: (row) => foliosDePago(row).join(" | ") },
+    { header: "Total", key: "total_pago" },
+];
 
 function PagoDetalleModal({ pago, onClose }) {
     useEffect(() => {
@@ -390,9 +363,11 @@ export default function PagosDetalleTable() {
                         placeholder="Buscar por pago, forma de pago, folio"
                         width="300px"
                     />
-                    <ExportButton
-                        onExport={() => exportToCSV(filteredData)}
-                        disabled={filteredData.length === 0}
+                    <ExportDocuments
+                        data={filteredData}
+                        columns={exportColumns}
+                        filename="pagos-detalle"
+                        sheetName="Pagos-Detalle"
                     />
                 </div>
             </div>
