@@ -3,6 +3,7 @@
 import React from "react";
 import ExportButton from "@/components/common/ExportButton";
 import SearchBar from "@/components/common/SearchBar";
+import ExportDocuments from "../common/ExportDocuments";
 
 export default function ProveedoresFilters({ searchTerm, onSearchChange, filteredData }) {
 
@@ -42,16 +43,29 @@ export default function ProveedoresFilters({ searchTerm, onSearchChange, filtere
     URL.revokeObjectURL(url);
   }
 
+  const exportColumns = [
+    { header: "Nombre comercial", key: "nombre_comercial" },
+    { header: "Correo", key: "correo" },
+    { header: "Direccion", key: "direccion" },
+    { header: "Comision", key: "comision" },
+    { header: "Estatus", value: (row) => row.estatus === "A" ? "Activo" : "Inactivo" },
+  ];
+
   return (
-    <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-3 mt-4">
-      <div className="d-flex align-items-center gap-3">
-        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
-      </div>
-      <div className="w-100" style={{ maxWidth: "300px" }}>
-        <SearchBar
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar proveedor..."
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-3 mt-1">
+      <div className="d-flex align-items-center justify-content-between gap-2 w-100">
+        <div style={{ maxWidth: "300px" }}>
+          <SearchBar
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Buscar proveedor..."
+          />
+        </div>
+        <ExportDocuments
+          data={filteredData}
+          columns={exportColumns}
+          filename="proveedores"
+          sheetName="Proveedores"
         />
       </div>
     </div>

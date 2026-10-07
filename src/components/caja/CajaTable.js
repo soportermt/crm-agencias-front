@@ -16,6 +16,7 @@ import { vendedoresService } from "@/services/vendedores.service";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import ExportDocuments from "../common/ExportDocuments";
 
 registerLocale("es", es);
 
@@ -91,51 +92,20 @@ const normalize = (text) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
-function exportToCSV(data) {
-  if (!data.length) return;
 
-  const headers = [
-    "Folio",
-    "Fecha de venta",
-    "Pasajero titular",
-    "Descripción",
-    "Cliente",
-    "Usuario",
-    "Vendedor",
-  ];
+const ventasExportColumns = [
+  { header: "Folio", key: "folio" },
+  { header: "Fecha", key: "fecha" },
+  { header: "Descripción", key: "descripcion" },
+  { header: "Cliente", key: "cliente" },
+  { header: "Pasajero titular", key: "pasajero_titular" },
+  { header: "Vendedor", key: "vendedor" },
+  { header: "Usuario", key: "usuario" },
+  { header: "Servicios", value: (row) => row.servicios.map((s) => s.nombre).join(", ") },
+  { header: "Saldo", value: (row) => Number(row.saldo) || 0 },
+  { header: "Moneda", key: "moneda" },
+];
 
-  const rows = data.map((row) => [
-    row.folio,
-    formatDate(row.fecha),
-    row.pasajero_titular,
-    row.descripcion,
-    row.cliente,
-    row.usuario,
-    row.vendedor,
-  ]);
-
-  const escapeCsvValue = (value) => {
-    const str = String(value ?? "");
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-
-  const csvContent = [headers, ...rows]
-    .map((r) => r.map(escapeCsvValue).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `caja_${new Date().toISOString().slice(0, 10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 const ICONOS_SERVICIOS = {
   1: faHotel,
   2: faVanShuttle,
@@ -258,10 +228,10 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange, showS
   const formatMoney = (value) => {
     const num = Number(value || 0);
     return num.toLocaleString("es-MX", {
-        style: "currency",
-        currency: "MXN",
+      style: "currency",
+      currency: "MXN",
     });
-};
+  };
 
   const renderCell = (key, row) => {
     switch (key) {
@@ -316,82 +286,88 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange, showS
 
   return (
     <div className="mt-3">
-      <div className="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
-        <div className="d-flex gap-2">
-          <div className="col-md-4">
-            <select
-              name="clientes"
-              className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-              style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
-              value={clienteFilter}
-              onChange={(e) => setFilter({ cliente: e.target.value })}
-            >
-              <option value="">Todos los clientes</option>
-              {clientes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-md-4">
-            <select
-              name="vendedor"
-              className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-              style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
-              value={vendedorFilter}
-              onChange={(e) => setFilter({ vendedor: e.target.value })}
-            >
-              <option value="">Todos los vendedores</option>
-              {vendedores.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-md-4">
-            <DatePicker
-              ref={pickerRef}
-              selectsRange
-              startDate={startDate}
-              endDate={endDate}
-              onChange={handleDateChange}
-              isClearable
-              placeholderText="Fecha de venta"
-              locale="es"
-              dateFormat="dd/MM/yyyy"
-              className="form-control form-control-sm"
-              autoComplete="off"
-            >
-              <div className="d-flex flex-wrap gap-1 p-2 border-top">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p.label}
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => applyPreset(p)}
-                  >
-                    {p.label}
-                  </button>
+      <div className="row g-3 justify-content-between align-items-center mb-1">
+        <div className="col-12 col-lg-8">
+          <div className="row g-2">
+            <div className="col-12 col-md-3">
+              <select
+                name="clientes"
+                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
+                value={clienteFilter}
+                onChange={(e) => setFilter({ cliente: e.target.value })}
+              >
+                <option value="">Todos los clientes</option>
+                {clientes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
-              </div>
-            </DatePicker>
+              </select>
+            </div>
+
+            <div className="col-12 col-md-3">
+              <select
+                name="vendedor"
+                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
+                value={vendedorFilter}
+                onChange={(e) => setFilter({ vendedor: e.target.value })}
+              >
+                <option value="">Todos los vendedores</option>
+                {vendedores.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-12 col-md-4">
+              <DatePicker
+                ref={pickerRef}
+                selectsRange
+                startDate={startDate}
+                endDate={endDate}
+                onChange={handleDateChange}
+                isClearable
+                placeholderText="Fecha de venta"
+                locale="es"
+                dateFormat="dd/MM/yyyy"
+                className="form-control form-control-sm"
+                autoComplete="off"
+              >
+                <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => applyPreset(p)}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </DatePicker>
+            </div>
           </div>
         </div>
 
-        <div className="d-flex gap-2">
-          <SearchBar
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="Buscar por folio, cliente, pasajero"
-            width="300px"
-          />
-          <ExportButton
-            onExport={() => exportToCSV(filteredData)}
-            disabled={filteredData.length === 0}
+        <div className="col-12 col-lg-4 d-flex flex-column flex-sm-row justify-content-lg-end align-items-sm-center gap-2">
+          <div className="flex-grow-1 flex-sm-grow-0 w-100">
+            <SearchBar
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Buscar por folio, cliente, pasajero"
+              width="300px"
+            />
+          </div>
+          <ExportDocuments
+            data={filteredData}
+            columns={ventasExportColumns}
+            filename="caja"
+            sheetName="Caja"
           />
         </div>
       </div>

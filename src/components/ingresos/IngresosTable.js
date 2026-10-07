@@ -16,6 +16,7 @@ import {
   startOfWeek, endOfWeek, subWeeks,
   startOfMonth, endOfMonth, subMonths,
 } from "date-fns";
+import ExportDocuments from "../common/ExportDocuments";
 
 registerLocale("es", es);
 
@@ -138,52 +139,24 @@ export function getEstatusByFechaLimite(fechaLimiteStr) {
   }
 }
 
-function exportToCSV(data) {
-  if (!data.length) return;
-
-  const headers = ["Folio", "Cliente", "Descripción", "Servicio", "Límite pago", "Total Publico	", "Fee", "Moneda", "Días restantes", "Estatus"];
-
-  const rows = data.map((row) => [
-    row.folio,
-    row.cliente,
-    row.descripcion,
-    row.tipo_servicio,
-    row.fecha_limite,
-    row.tarifa_publica,
-    row.fee,
-    row.moneda,
-    getEstatusByFechaLimite(row.fecha_limite),
-    diasLabel,
-    estado
-  ]);
-
-  const escapeCsvValue = (value) => {
-    const str = String(value ?? "");
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-
-  const csvContent = [headers, ...rows]
-    .map((r) => r.map(escapeCsvValue).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `gestion_pagos_${new Date().toISOString().slice(0, 10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+const exportColumns = [
+  { header: "Folio", key: "folio" },
+  { header: "Cliente", key: "cliente" },
+  { header: "Descripción", key: "descripcion" },
+  { header: "Servicio", key: "tipo_servicio" },
+  { header: "Límite pago", value: (row) => formatDateRange(row.fecha_limite) },
+  { header: "Total público", value: (row) => Number(row.tarifa_publica) || 0 },
+  { header: "Fee", value: (row) => Number(row.fee) || 0 },
+  { header: "Moneda", key: "moneda" },
+  { header: "Días restantes", value: (row) => getEstatusByFechaLimite(row.fecha_limite).diasLabel },
+  { header: "Estatus", value: (row) => getEstatusByFechaLimite(row.fecha_limite).estado },
+];
 
 export default function IngresosTable({
   activeTab,
   onTabChange,
   data,
+  exportData,
   searchValue,
   onSearchChange,
   statusFilter,
@@ -336,7 +309,12 @@ export default function IngresosTable({
                     Consulta la información de tus pagos (filtra por límite de pago).
                   </p>
                 </div>
-                <ExportButton onExport={() => exportToCSV(data)} disabled={data.length === 0} />
+                <ExportDocuments
+                  data={exportData}
+                  columns={exportColumns}
+                  filename="ingresos"
+                  sheetName="Ingresos"
+                />
               </div>
             </div>
 
