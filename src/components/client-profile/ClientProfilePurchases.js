@@ -8,43 +8,16 @@ import DateRangeSelector from "@/components/common/DateRangeSelector";
 import ExportButton from "@/components/common/ExportButton";
 import FilterButton from "@/components/common/FilterButton";
 import { clientsService } from "@/services/clients.service";
+import ExportDocuments from "../common/ExportDocuments";
 
-function exportToCSV(data) {
-  if (!data.length) return;
-
-  const headers = ["Folio", "Fecha de venta", "Destino", "Descripción", "Total", "Moneda"];
-
-  const rows = data.map((row) => [
-    row.folio,
-    row.date,
-    row.destination,
-    row.description,
-    row.total,
-    row.currency,
-  ]);
-
-  const escapeCsvValue = (value) => {
-    const str = String(value ?? "");
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-
-  const csvContent = [headers, ...rows]
-    .map((r) => r.map(escapeCsvValue).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `historial_compras_${new Date().toISOString().slice(0, 10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+const exportColumns = [
+  { header: "Folio", key: "folio" },
+  { header: "Fecha de venta", key: "date" },
+  { header: "Destino", key: "destination" },
+  { header: "Descripción", key: "description" },
+  { header: "Total", key: "total" },
+  { header: "Moneda", key: "currency" },
+];
 
 export default function ClientProfilePurchases({ clientId }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -153,11 +126,18 @@ export default function ClientProfilePurchases({ clientId }) {
         <h3 className="font-poppins h6 fw-semibold mb-0" style={{ color: "var(--dark-green)" }}>
           Historial de compras
         </h3>
-        
-        <ExportButton
+
+        {/* <ExportButton
           onExport={() => exportToCSV(filteredPurchases)}
           disabled={filteredPurchases.length === 0}
+        /> */}
+        <ExportDocuments
+          data={filteredPurchases}
+          columns={exportColumns}
+          filename="cliente-ventas"
+          sheetName="Cliente-Ventas"
         />
+
       </div>
 
       {/* Filtros e Input de Búsqueda */}
@@ -169,7 +149,7 @@ export default function ClientProfilePurchases({ clientId }) {
             onChange={setDateRange}
             showIcon={false}
           />
-          
+
           <FilterButton>Activos</FilterButton>
         </div>
 

@@ -3,6 +3,7 @@ import ExportButton from "@/components/common/ExportButton";
 import SearchBar from "@/components/common/SearchBar";
 import DateRangeSelector from "@/components/common/DateRangeSelector";
 import FilterButton from "@/components/common/FilterButton";
+import ExportDocuments from "../common/ExportDocuments";
 
 export default function ClientFilters({
   searchTerm,
@@ -12,7 +13,8 @@ export default function ClientFilters({
   startDate,
   endDate,
   onDateRangeChange,
-  onExport,
+  getExportData,
+  exportColumns,
 }) {
   const isActivosActive = activeFilter === "Activos";
 
@@ -26,9 +28,6 @@ export default function ClientFilters({
           <p className="text-secondary small mb-0" style={{ fontSize: "12px" }}>
             Consulta, filtra y actualiza información de tus clientes
           </p>
-        </div>
-        <div>
-          <ExportButton onExport={onExport} />
         </div>
       </div>
 
@@ -55,11 +54,19 @@ export default function ClientFilters({
           </FilterButton>
         </div>
 
-        <SearchBar
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar cliente..."
-        />
+        <div className="d-flex gap-2">
+          <SearchBar
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Buscar cliente..."
+          />
+          <ExportDocuments
+            data={getExportData}
+            columns={exportColumns}
+            filename="clientes"
+            sheetName="Clientes"
+          />
+        </div>
       </div>
     </div>
   );

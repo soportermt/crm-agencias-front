@@ -8,6 +8,17 @@ import ClientTable from "@/components/clients/ClientTable";
 import ClientModal from "@/components/clients/ClientModal";
 import { clientsService } from "@/services/clients.service";
 
+const clientsExportColumns = [
+  { header: "Nombre", key: "nombreCompleto" },
+  { header: "Correo", key: "correo" },
+  { header: "Teléfono", key: "telefono" },
+  { header: "Ciudad", key: "ciudad" },
+  { header: "Estado", key: "estado" },
+  { header: "Estado Civil", key: "estadoCivil" },
+  { header: "Fecha de nacimiento", key: "fechaNacimiento" },
+  { header: "País", key: "pais" },
+  { header: "Estatus", key: "status" },
+];
 export default function ClientesPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,65 +77,15 @@ export default function ClientesPage() {
     loadClients(page);
   };
 
-  const exportToCSV = (data) => {
-    if (!data.length) return;
-
-    const headers = ["Nombre", "Correo", "Teléfono", "Estatus"];
-
-    const rows = data.map((row) => [
-      row.nombre || "",
-      row.correo || "",
-      row.telefono || "",
-      row.status || "",
-    ]);
-
-    const escapeCsvValue = (value) => {
-      const str = String(value ?? "");
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
-      }
-      return str;
-    };
-
-    const csvContent = [headers, ...rows]
-      .map((r) => r.map(escapeCsvValue).join(","))
-      .join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `clientes_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExport = async () => {
-    try {
-      setLoading(true);
-      const response = await clientsService.getClients({
-        page: 1,
-        perPage: 100000,
-        search: debouncedSearch,
-        filter: activeFilter,
-      });
-      const dataToExport = Array.isArray(response.data) ? response.data : [];
-      if (dataToExport.length === 0) {
-        alert("No hay clientes para exportar con los filtros actuales.");
-        return;
-      }
-      exportToCSV(dataToExport);
-    } catch (err) {
-      console.error("Error al exportar clientes:", err);
-      alert("No se pudieron exportar los clientes.");
-    } finally {
-      setLoading(false);
-      // Reload current page to restore the table state
-      loadClients(currentPage);
-    }
-  };
+  const getExportData = useCallback(async () => {
+    const response = await clientsService.getClients({
+      page: 1,
+      perPage: 100000,
+      search: debouncedSearch,
+      filter: activeFilter,
+    });
+    return Array.isArray(response.data) ? response.data : [];
+  }, [debouncedSearch, activeFilter]);
 
   return (
     <div className="container-fluid p-0">
@@ -141,7 +102,8 @@ export default function ClientesPage() {
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}
           onDateRangeChange={setDateRange}
-          onExport={handleExport}
+          getExportData={getExportData}
+          exportColumns={clientsExportColumns}
         />
 
         {loading ? (

@@ -12,10 +12,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { catalogosService } from "@/services/catalogos.service";
 import { es } from "date-fns/locale";
 import {
-  startOfDay, endOfDay, subDays,
-  startOfWeek, endOfWeek, subWeeks,
-  startOfMonth, endOfMonth, subMonths,
+    startOfDay, endOfDay, subDays,
+    startOfWeek, endOfWeek, subWeeks,
+    startOfMonth, endOfMonth, subMonths,
 } from "date-fns";
+import ExportDocuments from "../common/ExportDocuments";
 
 registerLocale("es", es);
 
@@ -37,40 +38,40 @@ const ITEMS_PER_PAGE = 15;
 const WEEK = { weekStartsOn: 1 };
 
 const PRESETS = [
-  { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
-  {
-    label: "Ayer",
-    range: () => {
-      const d = subDays(new Date(), 1);
-      return [startOfDay(d), endOfDay(d)];
+    { label: "Hoy", range: () => [startOfDay(new Date()), endOfDay(new Date())] },
+    {
+        label: "Ayer",
+        range: () => {
+            const d = subDays(new Date(), 1);
+            return [startOfDay(d), endOfDay(d)];
+        },
     },
-  },
-  {
-    label: "Últimos 7 días",
-    range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
-  },
-  {
-    label: "Esta semana",
-    range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
-  },
-  {
-    label: "Semana pasada",
-    range: () => {
-      const d = subWeeks(new Date(), 1);
-      return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+    {
+        label: "Últimos 7 días",
+        range: () => [startOfDay(subDays(new Date(), 6)), endOfDay(new Date())],
     },
-  },
-  {
-    label: "Este mes",
-    range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
-  },
-  {
-    label: "Mes pasado",
-    range: () => {
-      const d = subMonths(new Date(), 1);
-      return [startOfMonth(d), endOfMonth(d)];
+    {
+        label: "Esta semana",
+        range: () => [startOfWeek(new Date(), WEEK), endOfWeek(new Date(), WEEK)],
     },
-  },
+    {
+        label: "Semana pasada",
+        range: () => {
+            const d = subWeeks(new Date(), 1);
+            return [startOfWeek(d, WEEK), endOfWeek(d, WEEK)];
+        },
+    },
+    {
+        label: "Este mes",
+        range: () => [startOfMonth(new Date()), endOfMonth(new Date())],
+    },
+    {
+        label: "Mes pasado",
+        range: () => {
+            const d = subMonths(new Date(), 1);
+            return [startOfMonth(d), endOfMonth(d)];
+        },
+    },
 ];
 
 function parseDesglose(desgloseStr) {
@@ -167,51 +168,23 @@ function mapVentaToRow(venta) {
     };
 }
 
-function exportToCSV(data) {
-    if (!data.length) return;
-
-    const headers = ["Folio", "Cliente", "Hotel", "Servicio", "Fecha", "Inicio servicio", "Fin servicio", "Destino", "Total", "Estatus"];
-
-    const rows = data.map((row) => [
-        row.folio,
-        row.cliente,
-        row.hotel,
-        row.plan,
-        row.fecha,
-        row.inicio_servicio,
-        row.fin_servicio,
-        row.destino,
-        row.total,
-        row.estatus === "venta" ? "Activo" : row.estatus,
-    ]);
-
-    const escapeCsvValue = (value) => {
-        const str = String(value ?? "");
-        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-        }
-        return str;
-    };
-
-    const csvContent = [headers, ...rows]
-        .map((r) => r.map(escapeCsvValue).join(","))
-        .join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `reservaciones_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
 const toYMD = (d) =>
     d
         ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
         : null;
+
+const ventasExportColumns = [
+    { header: "Folio", key: "folio" },
+    { header: "Fecha de creación", key: "fecha" },
+    { header: "Cliente", key: "cliente" },
+    { header: "Descripción", key: "hotel" },
+    { header: "Servicio", key: "plan" },
+    { header: "Inicio servicio", key: "inicio_servicio" },
+    { header: "Fin servicio", key: "fin_servicio" },
+    { header: "Destino", key: "destino" },
+    { header: "Total", value: (row) => Number(row.total) || 0 },
+    { header: "Estatus", value: (row) => row.estatus === "venta" ? "Activo" : row.estatus },
+];
 
 export default function BookingList() {
     const [searchValue, setSearchValue] = useState("");
@@ -235,14 +208,14 @@ export default function BookingList() {
         const [start, end] = dates;
         setStartDate(start);
         setEndDate(end);
-    }  
+    }
     const pickerRef = useRef(null);
 
     const applyPreset = (preset) => {
         handleDateChange(preset.range());
         pickerRef.current?.setOpen(false);
-      };
-    
+    };
+
 
     useEffect(() => {
         let cancelado = false;
@@ -345,88 +318,98 @@ export default function BookingList() {
                 >
                     Lista de reservaciones
                 </h1>
-                <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
-                    <div className="d-flex gap-2">
-                        <div className="col-md-4">
-                            <select
-                                name="categorias"
-                                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                                style={{
-                                    height: "30px",
-                                    borderRadius: "8px",
-                                    borderColor: "#d0d5dd",
-                                    backgroundColor: "#fff",
-                                    fontSize: "13px",
-                                    color: "#0f1901",
-                                    fontWeight: 400,
-                                    appearance: "none",
-                                    textAlign: "start",
-                                    width: "100%",
-                                }}
-                                value={servicioFilter}
-                                onChange={(e) => setServicioFilter(e.target.value)}
-                            >
-                                <option value="">Todas las categorias</option>
-                                {servicios.map((s) => (
-                                    <option key={s.id_servicio} value={s.id_servicio}>
-                                        {s.tipo_servicio}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="col-md-4">
-                            <select
-                                name="clientes"
-                                className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
-                                style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
-                                value={clienteFilter}
-                                onChange={(e) => setClienteFilter(e.target.value)}
-                            >
-                                <option value="">Todos los clientes</option>
-                                {clientes.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="col-md-4">
-                            <DatePicker
-                                ref={pickerRef}
-                                selectsRange
-                                startDate={startDate}
-                                endDate={endDate}
-                                onChange={handleDateChange}
-                                isClearable
-                                placeholderText="Fecha de creación"
-                                locale="es"
-                                dateFormat="dd/MM/yyyy"
-                                className="form-control form-control-sm"
-                                autoComplete="off"
-                            >
-                                <div className="d-flex flex-wrap gap-1 p-2 border-top">
-                                    {PRESETS.map((p) => (
-                                        <button
-                                            key={p.label}
-                                            type="button"
-                                            className="btn btn-sm btn-outline-secondary"
-                                            onClick={() => applyPreset(p)}
-                                        >
-                                            {p.label}
-                                        </button>
+                <div className="row g-3 justify-content-between align-items-center mb-1">
+                    <div className="col-12 col-lg-8">
+                        <div className="row g-2">
+                            <div className="col-12 col-md-4">
+                                <select
+                                    name="categorias"
+                                    className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                                    style={{
+                                        height: "30px",
+                                        borderRadius: "8px",
+                                        borderColor: "#d0d5dd",
+                                        backgroundColor: "#fff",
+                                        fontSize: "13px",
+                                        color: "#0f1901",
+                                        fontWeight: 400,
+                                        appearance: "none",
+                                        textAlign: "start",
+                                        width: "100%",
+                                    }}
+                                    value={servicioFilter}
+                                    onChange={(e) => setServicioFilter(e.target.value)}
+                                >
+                                    <option value="">Todas las categorias</option>
+                                    {servicios.map((s) => (
+                                        <option key={s.id_servicio} value={s.id_servicio}>
+                                            {s.tipo_servicio}
+                                        </option>
                                     ))}
-                                </div>
-                            </DatePicker>
+                                </select>
+                            </div>
+                            <div className="col-12 col-md-4">
+                                <select
+                                    name="clientes"
+                                    className="btn d-flex align-items-center justify-content-center gap-2 border transition-smooth px-3"
+                                    style={{ height: "30px", borderRadius: "8px", borderColor: "#d0d5dd", backgroundColor: "#fff", fontSize: "13px", color: "#0f1901", fontWeight: 400, appearance: "none", textAlign: "start", width: "100%" }}
+                                    value={clienteFilter}
+                                    onChange={(e) => setClienteFilter(e.target.value)}
+                                >
+                                    <option value="">Todos los clientes</option>
+                                    {clientes.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="col-12 col-md-4">
+                                <DatePicker
+                                    ref={pickerRef}
+                                    selectsRange
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onChange={handleDateChange}
+                                    isClearable
+                                    placeholderText="Fecha de creación"
+                                    locale="es"
+                                    dateFormat="dd/MM/yyyy"
+                                    className="form-control form-control-sm"
+                                    autoComplete="off"
+                                >
+                                    <div className="d-flex flex-wrap gap-1 p-2 border-top">
+                                        {PRESETS.map((p) => (
+                                            <button
+                                                key={p.label}
+                                                type="button"
+                                                className="btn btn-sm btn-outline-secondary"
+                                                onClick={() => applyPreset(p)}
+                                            >
+                                                {p.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </DatePicker>
+                            </div>
                         </div>
                     </div>
-                    <div className="d-flex gap-2">
-                        <SearchBar
-                            value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
-                            placeholder="Buscar por cliente, folio, hotel"
-                            width="300px"
+                    <div className="col-12 col-lg-4 d-flex flex-column flex-sm-row justify-content-lg-end align-items-sm-center gap-2">
+                        <div className="flex-grow-1 flex-sm-grow-0 w-100">
+                            <SearchBar
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                                placeholder="Buscar por cliente, folio, hotel"
+                                width="100%" /* Cambiado de 300px a 100% para evitar desbordamiento en móviles */
+                            />
+                        </div>
+                        {/* <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} /> */}
+                        <ExportDocuments
+                            data={filteredData}
+                            columns={ventasExportColumns}
+                            filename="ventas"
+                            sheetName="Ventas"
                         />
-                        <ExportButton onExport={() => exportToCSV(filteredData)} disabled={filteredData.length === 0} />
                     </div>
                 </div>
                 {error && (

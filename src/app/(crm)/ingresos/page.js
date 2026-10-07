@@ -170,6 +170,7 @@ function IngresosContent() {
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
             onDateRangeChange={setDateRange}
+            exportData={filteredData}
           />
         </div>
       </div>
