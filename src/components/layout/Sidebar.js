@@ -149,7 +149,16 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
               alt={`${nombreAgencia} Logo`}
               width={110}
               height={20}
-              style={{ height: "auto", maxWidth: "115px", marginBottom: 12 }}
+              style={{
+                width: isExpanded ? "110px" : "80px",
+                height: "auto",
+                maxWidth: "100%",
+                objectFit: "contain",
+                transform: isExpanded ? "scale(1)" : "scale(0.7)",
+                transformOrigin: "center",
+                marginBottom: 12,
+                transition: "all 0.25s ease-in-out",
+              }}
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = "/images.jpg";
