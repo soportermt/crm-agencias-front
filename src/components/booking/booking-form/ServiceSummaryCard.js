@@ -87,7 +87,7 @@ export default function ServiceSummaryCard({ service, data, onEdit, onRemove }) 
           <div
             className="card shadow-lg p-3"
             onClick={(e) => e.stopPropagation()} 
-            style={{ maxWidth: "350px", width: "90%", border: "none", borderRadius: "12px" }}
+            style={{ maxWidth: "350px", width: "90%", border: "none", borderRadius: "8px" }}
           >
             <h5 className="fw-bold mb-2">¿Quitar servicio?</h5>
             <p className="text-muted mb-2" style={{ fontSize: "14px" }}>

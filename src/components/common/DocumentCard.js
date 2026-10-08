@@ -8,7 +8,7 @@ export default function DocumentCard({ name, size, type, url, onDelete, onDownlo
       className="d-flex align-items-center justify-content-between px-3 py-2 w-100"
       style={{
         backgroundColor: "#f5f5f5",
-        borderRadius: "12px",
+        borderRadius: "8px",
         minHeight: "56px",
       }}
     >

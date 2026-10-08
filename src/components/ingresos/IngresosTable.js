@@ -290,7 +290,7 @@ export default function IngresosTable({
         })}
       </div>
 
-      <div className="bg-white" style={{ borderRadius: "12px" }}>
+      <div className="bg-white" style={{ borderRadius: "8px" }}>
         {activeTab === "pendientes" && (
           <div>
             <div className="px-0 pt-1">

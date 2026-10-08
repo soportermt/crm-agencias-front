@@ -7,7 +7,7 @@ import { formatPhone } from "./utils";
 export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onRefreshEmails, showEmails = true }) {
   if (!clientInfo) {
     return (
-      <div className="bg-white p-3" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-3" style={{ borderRadius: "8px" }}>
         <p className="small text-center mb-0 py-4" style={{ color: "var(--grey-text)" }}>
           Selecciona una conversación para ver los datos del cliente
         </p>
@@ -20,7 +20,7 @@ export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onR
   return (
     <div className="d-flex flex-column gap-3">
       {/* Datos del cliente */}
-      <div className="bg-white p-3" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-3" style={{ borderRadius: "8px" }}>
         <div className="d-flex align-items-center gap-2 mb-3">
           <div
             className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
@@ -73,7 +73,7 @@ export default function ClientInfoPanel({ clientInfo, emails, emailsLoading, onR
 
       {/* Correos recientes */}
       {showEmails && (
-        <div className="bg-white p-3" style={{ borderRadius: "12px" }}>
+        <div className="bg-white p-3" style={{ borderRadius: "8px" }}>
           <div className="d-flex align-items-center justify-content-between mb-2">
             <p className="fw-semibold mb-0 font-poppins" style={{ color: "#0f1901", fontSize: "13px" }}>
               Correos recientes

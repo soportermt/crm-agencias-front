@@ -138,7 +138,7 @@ export default function UsuarioModal({ show, onClose, user, isAdmin }) {
           maxWidth: "500px",
           maxHeight: "90vh",
           overflowY: "auto",
-          borderRadius: "20px",
+          borderRadius: "8px",
         }}
         onClick={(e) => e.stopPropagation()}
       >

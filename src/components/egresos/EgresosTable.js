@@ -385,7 +385,7 @@ export default function EgresosTable({
         })}
       </div>
 
-      <div className="bg-white" style={{ borderRadius: "12px" }}>
+      <div className="bg-white" style={{ borderRadius: "8px" }}>
         <div className="px-3 pt-1">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <div className="d-flex align-items-center gap-3">

@@ -48,7 +48,7 @@ export default function VendedoresPage() {
 
   return (
     <div className="container-fluid p-0">
-      <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "8px" }}>
         <VendedoresHeader onAddVendedorClick={() => setShowModal(true)} />
 
         <VendedoresFilters

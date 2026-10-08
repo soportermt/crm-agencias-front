@@ -14,7 +14,7 @@ export default function BookingMetrics({ metrics, loading = false }) {
             <div
               className="p-3"
               style={{
-                borderRadius: "12px",
+                borderRadius: "8px",
                 backgroundColor: "#f2f2f2",
                 minHeight: "76px",
               }}

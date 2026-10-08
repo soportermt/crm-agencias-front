@@ -90,7 +90,7 @@ export default function TerminosTab() {
           </label>
           <div
             className="border rounded-3 w-100 d-flex flex-column overflow-hidden"
-            style={{ borderColor: "#e1e1e1", minHeight: "222px", borderRadius: "12px" }}
+            style={{ borderColor: "#e1e1e1", minHeight: "222px", borderRadius: "8px" }}
           >
             {/* Mockup Toolbar */}
             <div className="d-flex align-items-center gap-3 px-3 py-2 border-bottom" style={{ backgroundColor: "#fafafa", borderColor: "rgba(161, 161, 170, 0.35) !important" }}>

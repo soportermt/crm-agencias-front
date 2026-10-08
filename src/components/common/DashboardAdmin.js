@@ -121,7 +121,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
               <div
                 className="p-3"
                 style={{
-                  borderRadius: "12px",
+                  borderRadius: "8px",
                   backgroundColor: "#f2f2f2",
                   minHeight: "76px",
                 }}
@@ -180,7 +180,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
 
       <div className="row g-3 mb-4">
         <div className="col-12 col-md-6">
-          <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
+          <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "8px" }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <p className="mb-0" style={{ fontWeight: 500 }}>
                 Ventas del día <span style={{fontSize: 12, color: "rgba(0, 0, 0, 0.4)"}}>({salesDay.length} en total)</span> 
@@ -212,7 +212,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
                     style={{
                       backgroundColor: "rgb(231, 241, 254, 0.6)",
                       padding: "10px 16px",
-                      borderRadius: "12px",
+                      borderRadius: "8px",
                     }}
                   >
                     <div className="d-flex justify-content-between align-items-start">
@@ -267,7 +267,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
                     style={{
                       backgroundColor: "rgba(231, 241, 254, 0.6)",
                       padding: "10px 16px",
-                      borderRadius: "12px",
+                      borderRadius: "8px",
                     }}
                   >
                     <div className="d-flex justify-content-between align-items-start">
@@ -316,7 +316,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
         <div className="col-12 col-md-6">
           <div
             className="bg-white p-3 border shadow-premium h-100 d-flex flex-column"
-            style={{ borderRadius: "12px" }}
+            style={{ borderRadius: "8px" }}
           >
             <p className="mb-3" style={{ fontWeight: 500 }}>Ventas del mes</p>
 
@@ -343,7 +343,7 @@ export default function DashboardAdmin({ user, sales, vendedores }) {
         </div>
       </div>
 
-      <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "8px" }}>
         <InfoTableVendedor data={sales} dashboard vendedores={vendedores} />
       </div>
     </div>

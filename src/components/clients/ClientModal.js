@@ -516,7 +516,7 @@ export default function ClientModal({ show, onClose, onClientCreated, client }) 
                 borderColor: "var(--primary-color)",
                 width: "215px",
                 height: "43px",
-                borderRadius: "12px",
+                borderRadius: "8px",
               }}
             >
               {submitting ? (

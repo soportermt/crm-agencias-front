@@ -12,7 +12,7 @@ export default function QuoteCard({ title, details, dateRange, type, icon, pdfUr
       style={{
         backgroundColor: "#f8fafc",
         border: "1px solid #e2e8f0",
-        borderRadius: "12px",
+        borderRadius: "8px",
         width: "100%",
       }}
     >

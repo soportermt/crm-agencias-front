@@ -76,7 +76,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                 className="form-control"
                 value={formData.fechaPago}
                 onChange={(e) => handleChange("fechaPago", e.target.value)}
-                style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+                style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
               />
             </div>
             <div className="col-4">
@@ -87,7 +87,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                 className="form-select"
                 value={formData.formaPago}
                 onChange={(e) => handleChange("formaPago", e.target.value)}
-                style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+                style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
               >
                 <option value="TRANSFERENCIA">TRANSFERENCIA</option>
                 <option value="EFECTIVO">EFECTIVO</option>
@@ -103,7 +103,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                 className="form-select"
                 value={formData.cuentaPago}
                 onChange={(e) => handleChange("cuentaPago", e.target.value)}
-                style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+                style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
               >
                 <option value="">Selecciona</option>
                 <option value="cuenta1">BBVA - ****1234</option>
@@ -121,7 +121,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
               rows={3}
               value={formData.observaciones}
               onChange={(e) => handleChange("observaciones", e.target.value)}
-              style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+              style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
             />
           </div>
 
@@ -136,7 +136,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                 value={formData.quienRecibe}
                 readOnly
                 style={{
-                  borderRadius: "12px",
+                  borderRadius: "8px",
                   borderColor: "#e1e1e1",
                   fontSize: "14px",
                   backgroundColor: "rgba(161,161,170,0.35)",
@@ -153,7 +153,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                 className="form-control"
                 value={formData.quienPaga}
                 onChange={(e) => handleChange("quienPaga", e.target.value)}
-                style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+                style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
               <div
                 key={index}
                 className="border p-3 mb-2"
-                style={{ borderRadius: "12px", borderColor: "rgba(161,161,170,0.35)" }}
+                style={{ borderRadius: "8px", borderColor: "rgba(161,161,170,0.35)" }}
               >
                 <div className="row g-3 mb-2">
                   <div className="col-4">
@@ -230,7 +230,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
                       className="form-control"
                       value={formData.montos[index] || ""}
                       onChange={(e) => handleMontoChange(index, e.target.value)}
-                      style={{ borderRadius: "12px", borderColor: "#e1e1e1", fontSize: "14px" }}
+                      style={{ borderRadius: "8px", borderColor: "#e1e1e1", fontSize: "14px" }}
                     />
                   </div>
                   <div className="col-4">
@@ -258,7 +258,7 @@ export default function PagoRegistroModal({ show, onClose, servicios }) {
               className="d-flex flex-column align-items-center justify-content-center py-5"
               style={{
                 border: "1px solid #0c5cc6",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 backgroundColor: "#e7f1fe",
                 cursor: "pointer",
               }}

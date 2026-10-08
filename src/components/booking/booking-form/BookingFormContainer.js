@@ -84,7 +84,7 @@ export default function BookingFormContainer({ mode }) {
         <div className="col-12 col-xl-9 my-3">
           <div
             className="bg-white shadow-premium p-1"
-            style={{ borderRadius: "12px" }}
+            style={{ borderRadius: "8px" }}
           >
             <BookingForm mode={mode} />
           </div>
@@ -94,7 +94,7 @@ export default function BookingFormContainer({ mode }) {
           <div
             className="bg-white shadow-premium p-1 position-sticky"
             style={{
-              borderRadius: "12px",
+              borderRadius: "8px",
               top: "1rem",
               maxHeight: "calc(100vh - 2rem)",
               overflowY: "auto",

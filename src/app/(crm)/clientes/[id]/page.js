@@ -67,7 +67,7 @@ export default function ClienteDetailPage({ params }) {
       <div className="row g-4">
         {/* Columna principal (Izquierda) */}
         <div className="col-12 col-xl-9">
-          <div className="bg-white p-4 p-md-5" style={{ borderRadius: "12px", boxShadow: "0 8px 16px 0 rgba(12, 12, 13, 0.1)" }}>
+          <div className="bg-white p-4 p-md-5" style={{ borderRadius: "8px", boxShadow: "0 8px 16px 0 rgba(12, 12, 13, 0.1)" }}>
             <ClientProfileHeader client={client} onEditClick={() => setShowClientModal(true)} />
             
             <hr className="my-4" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }} />

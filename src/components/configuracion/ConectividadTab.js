@@ -190,7 +190,7 @@ export default function ConectividadTab() {
                 value={whatsappSettings.wabaId}
                 onChange={handleWhatsappChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="WhatsApp Business Account ID" 
               />
             </div>
@@ -202,7 +202,7 @@ export default function ConectividadTab() {
                 value={whatsappSettings.token}
                 onChange={handleWhatsappChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="Permanent Access Token" 
               />
             </div>
@@ -217,7 +217,7 @@ export default function ConectividadTab() {
                 value={whatsappSettings.phoneNumberId}
                 onChange={handleWhatsappChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="ID del número de teléfono" 
               />
             </div>
@@ -250,7 +250,7 @@ export default function ConectividadTab() {
                 value={emailSettings.imapServer}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="Ej: imap.midominio.com" 
               />
             </div>
@@ -262,7 +262,7 @@ export default function ConectividadTab() {
                 value={emailSettings.imapPort}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="Ej: 993" 
               />
             </div>
@@ -277,7 +277,7 @@ export default function ConectividadTab() {
                 value={emailSettings.smtpServer}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="Ej: smtp.midominio.com" 
               />
             </div>
@@ -289,7 +289,7 @@ export default function ConectividadTab() {
                 value={emailSettings.smtpPort}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="Ej: 465" 
               />
             </div>
@@ -304,7 +304,7 @@ export default function ConectividadTab() {
                 value={emailSettings.emailAddress}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="correo@midominio.com" 
               />
             </div>
@@ -316,7 +316,7 @@ export default function ConectividadTab() {
                 value={emailSettings.emailPassword}
                 onChange={handleEmailChange}
                 className="form-control font-poppins" 
-                style={{ borderRadius: "12px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
+                style={{ borderRadius: "8px", padding: "11px 14px", color: "#404040", fontSize: "14px", borderColor: "#e1e1e1" }} 
                 placeholder="•••••••••••••••" 
               />
             </div>
@@ -356,7 +356,7 @@ export default function ConectividadTab() {
                   <div className="row g-4">
                     {/* Plantilla 1: Apertura */}
                     <div className="col-12 col-lg-6">
-                      <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "12px", borderColor: "#e2e8f0" }}>
+                      <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "8px", borderColor: "#e2e8f0" }}>
                         <div className="d-flex align-items-center justify-content-between mb-3">
                           <div className="d-flex align-items-center gap-2">
                             <span className="badge bg-primary text-white rounded-pill px-2 py-1" style={{ fontSize: "11px" }}>
@@ -430,7 +430,7 @@ export default function ConectividadTab() {
 
                     {/* Plantilla 2: Reserva */}
                     <div className="col-12 col-lg-6">
-                      <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "12px", borderColor: "#e2e8f0" }}>
+                      <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "8px", borderColor: "#e2e8f0" }}>
                         <div className="d-flex align-items-center justify-content-between mb-3">
                           <div className="d-flex align-items-center gap-2">
                             <span className="badge bg-success text-white rounded-pill px-2 py-1" style={{ fontSize: "11px" }}>

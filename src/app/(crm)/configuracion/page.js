@@ -16,7 +16,7 @@ export default function ConfiguracionPage() {
   return (
     <div className="d-flex flex-column w-100 p-2 gap-3">
       <ConfiguracionHeader activeTab={activeTab} />
-      <div className="bg-white rounded-4 shadow-sm w-100 d-flex flex-column flex-md-row p-3 gap-4 mb-2" style={{ flex: 1 }}>
+      <div className="bg-white rounded-2 shadow-sm w-100 d-flex flex-column flex-md-row p-3 gap-4 mb-2" style={{ flex: 1 }}>
         <ConfigSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-grow-1">
           {activeTab === "general" && <GeneralTab />}

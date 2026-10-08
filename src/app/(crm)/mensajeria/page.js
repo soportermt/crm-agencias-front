@@ -930,7 +930,7 @@ function MensajeriaContent() {
       {toast && (
         <div
           className={`position-fixed bottom-0 end-0 m-3 p-3 text-white shadow-premium ${toast.type === "error" ? "bg-danger" : toast.type === "warning" ? "bg-warning" : "bg-success"}`}
-          style={{ borderRadius: "12px", fontSize: "13px", zIndex: 2000, maxWidth: "340px" }}
+          style={{ borderRadius: "8px", fontSize: "13px", zIndex: 2000, maxWidth: "340px" }}
           role="alert"
         >
           <div className="d-flex align-items-center gap-2">

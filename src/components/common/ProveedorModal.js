@@ -260,7 +260,7 @@ export default function ProveedorModal({ show, onClose, onProveedorCreated, prov
                                 borderColor: "var(--primary-color)",
                                 width: "215px",
                                 height: "43px",
-                                borderRadius: "12px",
+                                borderRadius: "8px",
                             }}
                         >
                             {submitting ? (
