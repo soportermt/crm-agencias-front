@@ -18,7 +18,7 @@ export default function EmailPanel({
     return (
       <div
         className="d-flex flex-column align-items-center justify-content-center h-100 bg-white"
-        style={{ borderRadius: "12px" }}
+        style={{ borderRadius: "8px" }}
       >
         <div
           className="rounded-circle d-flex align-items-center justify-content-center mb-3"
@@ -44,7 +44,7 @@ export default function EmailPanel({
   };
 
   return (
-    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "12px", overflow: "hidden" }}>
+    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "8px", overflow: "hidden" }}>
       {/* Header */}
       <div
         className="d-flex align-items-center gap-2 px-3 py-2 border-bottom"

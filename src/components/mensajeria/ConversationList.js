@@ -41,7 +41,7 @@ export default function ConversationList({
   const isSearching = searchQuery.trim().length > 0;
 
   return (
-    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "12px", overflow: "hidden" }}>
+    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "8px", overflow: "hidden" }}>
       {/* Buscador */}
       <div className="p-3 border-bottom" style={{ borderColor: "#f0f0f0" }}>
         <div className="position-relative">

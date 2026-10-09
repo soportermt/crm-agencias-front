@@ -117,7 +117,7 @@ export default function ClientProfileDocuments({ clientId }) {
           style={{
             backgroundColor: uploading ? "#f1f5f9" : "#e7f1fe",
             height: "97px",
-            borderRadius: "12px",
+            borderRadius: "8px",
             border: "1.5px dashed rgba(12, 92, 198, 0.2)",
             cursor: uploading ? "not-allowed" : "pointer"
           }}

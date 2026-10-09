@@ -89,7 +89,7 @@ export default function ClientesPage() {
 
   return (
     <div className="container-fluid p-0">
-      <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-4 border shadow-premium" style={{ borderRadius: "8px" }}>
         <ClientHeader onRegisterClientClick={() => { setEditingClient(null); setShowModal(true); }} />
 
         <ClientMetrics />

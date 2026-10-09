@@ -26,7 +26,7 @@ export default function StatCard({
       className="bg-white transition-smooth d-flex flex-column justify-content-center"
       style={{
         border: "1px solid rgba(161, 161, 170, 0.35)",
-        borderRadius: "12px",
+        borderRadius: "8px",
         boxShadow: hasShadow ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
         height: "100%",
         minHeight: size === "sm" ? "64px" : "86px",

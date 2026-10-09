@@ -23,7 +23,7 @@ export function VentasBarChart({ dataUser }) {
     ];
 
     return (
-        <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
+        <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "8px" }}>
             <p className="fw-semibold font-poppins text-dark mb-3">Resumen de ventas</p>
             <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
@@ -55,7 +55,7 @@ export function CobradoPendientePieChart({ dataUser }) {
     const sinDatos = totalAnio === 0;
 
     return (
-        <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "12px" }}>
+        <div className="bg-white p-3 border shadow-premium h-100" style={{ borderRadius: "8px" }}>
             <p className="fw-semibold font-poppins text-dark mb-3">Cobrado vs. pendiente (año)</p>
             {sinDatos ? (
                 <p className="text-secondary small">Sin ventas registradas este año</p>

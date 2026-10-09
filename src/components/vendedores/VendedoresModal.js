@@ -241,7 +241,7 @@ export default function VendedoresModal({ show, onClose, onClientCreated }) {
               style={{
                 width: "220px",
                 height: "43px",
-                borderRadius: "12px",
+                borderRadius: "8px",
               }}
             >
               {submitting ? "Guardando..." : "Confirmar"}

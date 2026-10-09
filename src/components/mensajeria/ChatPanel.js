@@ -207,7 +207,7 @@ export default function ChatPanel({
 
   if (!conversation) {
     return (
-      <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-white" style={{ borderRadius: "12px" }}>
+      <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-white" style={{ borderRadius: "8px" }}>
         <i className="bi bi-chat-left-text text-secondary" style={{ fontSize: "44px", color: "#cbd5e1" }}></i>
         <p className="mt-3 mb-1 fw-medium" style={{ color: "#0f1901", fontSize: "14px" }}>
           Selecciona una conversación
@@ -218,7 +218,7 @@ export default function ChatPanel({
         <button
           onClick={onOpenConversation}
           className="btn btn-primary-custom d-flex align-items-center gap-2 mt-3"
-          style={{ fontSize: "13px", padding: "10px 16px", borderRadius: "12px" }}
+          style={{ fontSize: "13px", padding: "10px 16px", borderRadius: "8px" }}
         >
           <i className="bi bi-whatsapp" style={{ fontSize: "15px" }}></i>
           Nueva conversación
@@ -293,7 +293,7 @@ export default function ChatPanel({
   };
 
   return (
-    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "12px", overflow: "hidden" }}>
+    <div className="d-flex flex-column h-100 bg-white" style={{ borderRadius: "8px", overflow: "hidden" }}>
       {/* Header del chat */}
       <div className="d-flex align-items-center gap-2 px-3 py-2 border-bottom" style={{ borderColor: "#f0f0f0", minHeight: "64px" }}>
         <div
@@ -451,7 +451,7 @@ export default function ChatPanel({
                       {isFirstUnread && (
                         <div id="first-unread-divider" className="d-flex align-items-center justify-content-center my-3" style={{ width: "100%" }}>
                           <div style={{ flex: 1, height: "1px", backgroundColor: "#e2e8f0" }}></div>
-                          <span className="px-3 text-muted small fw-medium py-1" style={{ fontSize: "11.5px", backgroundColor: "#f8f9fa", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                          <span className="px-3 text-muted small fw-medium py-1" style={{ fontSize: "11.5px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
                             {unreadToDisplay} {unreadToDisplay === 1 ? 'mensaje nuevo' : 'mensajes nuevos'}
                           </span>
                           <div style={{ flex: 1, height: "1px", backgroundColor: "#e2e8f0" }}></div>
@@ -642,7 +642,7 @@ export default function ChatPanel({
               style={{
                 fontSize: "12px",
                 padding: "0 12px",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 height: "43px",
                 whiteSpace: "nowrap",
               }}
@@ -663,7 +663,7 @@ export default function ChatPanel({
           <button 
             type="button" 
             className="btn btn-light d-flex align-items-center justify-content-center flex-shrink-0 border"
-            style={{ width: "43px", height: "43px", borderRadius: "12px", color: "var(--grey-text)" }}
+            style={{ width: "43px", height: "43px", borderRadius: "8px", color: "var(--grey-text)" }}
             title="Adjuntar archivo"
             disabled={!isWindowOpen || sending}
             onClick={() => fileInputRef.current?.click()}
@@ -674,7 +674,7 @@ export default function ChatPanel({
           <button 
             type="button" 
             className={`btn d-flex align-items-center justify-content-center flex-shrink-0 border ${showEmojiPicker ? 'btn-light' : 'btn-white'}`}
-            style={{ width: "43px", height: "43px", borderRadius: "12px", color: "var(--grey-text)" }}
+            style={{ width: "43px", height: "43px", borderRadius: "8px", color: "var(--grey-text)" }}
             title="Emojis"
             disabled={!isWindowOpen || sending}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -709,7 +709,7 @@ export default function ChatPanel({
               width: "43px",
               height: "43px",
               padding: 0,
-              borderRadius: "12px",
+              borderRadius: "8px",
             }}
             disabled={sending || (!text.trim() && !selectedFile) || !isWindowOpen}
             title="Enviar mensaje"

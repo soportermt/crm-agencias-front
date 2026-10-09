@@ -413,7 +413,7 @@ export default function Pago() {
                 <div className="col-12 col-xl-8 p-3">
                     <div
                         className="bg-white shadow-premium p-3"
-                        style={{ borderRadius: "12px" }}
+                        style={{ borderRadius: "8px" }}
                     >
                         <div className="row mb-3">
                             <div className="col-6"
@@ -671,7 +671,7 @@ export default function Pago() {
                                             key={servicioKey}
                                             className="mb-3 p-2" // Cambiamos el padding y agregamos margen inferior
                                             style={{
-                                                borderRadius: "12px",
+                                                borderRadius: "8px",
                                                 // Si está activo: fondo blanco puro. Si no: transparente
                                                 backgroundColor: isActivo ? "#FFFFFF" : "transparent",
                                                 // Si está activo: borde de color primario (ej. morado/azul). Si no: solo línea inferior sutil
@@ -863,7 +863,7 @@ export default function Pago() {
                     <div
                         className="bg-white shadow-premium p-3 position-sticky"
                         style={{
-                            borderRadius: "12px",
+                            borderRadius: "8px",
                             top: "1rem",
                             maxHeight: "calc(100vh - 2rem)",
                             overflowY: "auto",
@@ -948,7 +948,7 @@ export default function Pago() {
                 </div>
 
                 <div className="col-12 p-3">
-                    <div className="bg-white shadow-premium p-3" style={{ borderRadius: "12px" }}>
+                    <div className="bg-white shadow-premium p-3" style={{ borderRadius: "8px" }}>
                         <div className="d-flex justify-content-between aling-items-end mb-3">
                             <p className="mb-0" style={{ fontWeight: 600, fontSize: 18 }}>Desglose de pagos</p>
                             <button

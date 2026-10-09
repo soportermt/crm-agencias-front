@@ -100,7 +100,7 @@ export default function BookingPassengers() {
             style={{
               padding: "4px 8px",
               backgroundColor: isAdult ? "#E7F1FE" : "#FAEBF9",
-              borderRadius: "12px",
+              borderRadius: "8px",
               fontWeight: 600,
             }}
           >
@@ -133,7 +133,7 @@ export default function BookingPassengers() {
               className="bg-white transition-smooth d-flex justify-content-between align-items-center"
               style={{
                 border: "1px solid rgba(161, 161, 170, 0.35)",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 padding: "12px 14px",
               }}
             >
@@ -146,7 +146,7 @@ export default function BookingPassengers() {
               className="bg-white transition-smooth d-flex justify-content-between align-items-center"
               style={{
                 border: "1px solid rgba(161, 161, 170, 0.35)",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 padding: "12px 14px",
               }}
             >

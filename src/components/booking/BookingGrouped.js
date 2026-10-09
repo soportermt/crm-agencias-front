@@ -93,7 +93,7 @@ export default function BookingGrouped() {
 
       <div className="d-flex flex-column gap-3">
         {grupos.map((group, index) => (
-          <div key={index} className="bg-white p-3 shadow-group" style={{ borderRadius: "12px" }}>
+          <div key={index} className="bg-white p-3 shadow-group" style={{ borderRadius: "8px" }}>
             <section
               className="d-flex align-items-center justify-content-between"
               data-bs-toggle="collapse"

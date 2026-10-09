@@ -49,7 +49,7 @@ export default function Caja() {
 
   return (
     <div className="container-fluid p-0">
-      <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "8px" }}>
         <h1
           className="font-inter fw-medium mb-1"
           style={{ color: "#0f1901", fontSize: "20px", lineHeight: "1.2" }}

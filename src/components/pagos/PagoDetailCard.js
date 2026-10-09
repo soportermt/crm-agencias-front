@@ -7,7 +7,7 @@ export default function PagoDetailCard({ pago, onAddPayment }) {
   return (
     <div
       className="bg-white shadow-premium d-flex flex-column flex-lg-row gap-4 align-items-stretch align-items-lg-center p-4"
-      style={{ borderRadius: "12px" }}
+      style={{ borderRadius: "8px" }}
     >
       <div className="d-flex flex-column gap-3" style={{ flex: "1 1 0%", minWidth: "0" }}>
         <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">

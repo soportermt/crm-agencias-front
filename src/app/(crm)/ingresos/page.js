@@ -142,7 +142,7 @@ function IngresosContent() {
     <div className="container-fluid p-0">
       <div
         className="bg-white shadow-premium"
-        style={{ borderRadius: "12px", padding: "24px" }}
+        style={{ borderRadius: "8px", padding: "24px" }}
       >
         <div className="d-flex flex-column" style={{ gap: "16px" }}>
           <h1

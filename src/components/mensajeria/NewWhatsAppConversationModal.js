@@ -159,7 +159,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
     <>
       <div className="modal fade show d-block" tabIndex="-1" role="dialog" aria-modal="true" style={{ zIndex: 1050 }}>
         <div className="modal-dialog modal-dialog-centered modal-xl">
-          <div className="modal-content" style={{ borderRadius: "12px", border: "none", boxShadow: "0 8px 16px 0 rgba(12,12,13,0.1)", maxWidth: "none", width: "100%" }}>
+          <div className="modal-content" style={{ borderRadius: "8px", border: "none", boxShadow: "0 8px 16px 0 rgba(12,12,13,0.1)", maxWidth: "none", width: "100%" }}>
             <div className="modal-header border-0 pb-0">
               <div>
                 <h5 className="modal-title font-poppins fw-semibold" style={{ color: "#0f1901", fontSize: "16px" }}>
@@ -215,7 +215,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
                       />
                     </div>
 
-                    <div className="flex-grow-1 overflow-y-auto border rounded" style={{ borderRadius: "12px", borderColor: "#f0f0f0" }}>
+                    <div className="flex-grow-1 overflow-y-auto border rounded" style={{ borderRadius: "8px", borderColor: "#f0f0f0" }}>
                       {loading ? (
                         <div className="text-center py-5">
                           <div className="spinner-border text-primary" role="status" style={{ width: "22px", height: "22px" }}></div>
@@ -290,7 +290,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
                             style={{
                               borderColor: isSelected ? "#0c5cc6" : "#e1e1e1",
                               backgroundColor: isSelected ? "#f4f9ff" : "#ffffff",
-                              borderRadius: "12px",
+                              borderRadius: "8px",
                             }}
                           >
                             <div className="d-flex align-items-center justify-content-between gap-2 mb-1">
@@ -362,7 +362,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
                       className="p-3 border rounded shadow-sm flex-grow-1 d-flex flex-column justify-content-end"
                       style={{
                         backgroundColor: "#efeae2",
-                        borderRadius: "12px",
+                        borderRadius: "8px",
                         minHeight: "220px",
                       }}
                     >
@@ -428,7 +428,7 @@ export default function NewWhatsAppConversationModal({ show, onClose, onSendTemp
               <button
                 type="button"
                 className="btn btn-light"
-                style={{ borderRadius: "12px", fontSize: "13px", padding: "10px 20px" }}
+                style={{ borderRadius: "8px", fontSize: "13px", padding: "10px 20px" }}
                 onClick={onClose}
               >
                 Cancelar

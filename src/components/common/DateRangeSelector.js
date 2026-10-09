@@ -76,7 +76,7 @@ export default function DateRangeSelector({
         <div
           className="position-absolute bg-white border p-3 mt-1 shadow-premium"
           style={{
-            borderRadius: "12px",
+            borderRadius: "8px",
             zIndex: 1050,
             minWidth: "280px",
             right: 0,

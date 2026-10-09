@@ -75,7 +75,7 @@ export default function DashboardAgente({ user, sales }) {
                             <div
                                 className="p-3"
                                 style={{
-                                    borderRadius: "12px",
+                                    borderRadius: "8px",
                                     backgroundColor: "#f2f2f2",
                                     minHeight: "76px",
                                 }}
@@ -141,7 +141,7 @@ export default function DashboardAgente({ user, sales }) {
                 </div>
             </div>
 
-            <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "12px" }}>
+            <div className="bg-white p-2 border shadow-premium" style={{ borderRadius: "8px" }}>
                 <InfoTableVendedor data={sales} dashboardAgente dashboard />
             </div>
         </div>

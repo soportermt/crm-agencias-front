@@ -33,7 +33,7 @@ export default function ReservacionesPage() {
   }, []);
   return (
     <div className="container-fluid p-0">
-      <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "12px" }}>
+      <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "8px" }}>
         <BookingTableHeader />
 
         <BookingMetrics metrics={metrics} loading={isLoading}/>

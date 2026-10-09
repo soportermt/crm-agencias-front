@@ -317,7 +317,7 @@ export default function PlantillasTab() {
 
       <div
         className="card border mb-4 shadow-sm"
-        style={{ borderRadius: "12px", borderColor: "#e2e8f0", backgroundColor: "#f8fafc" }}
+        style={{ borderRadius: "8px", borderColor: "#e2e8f0", backgroundColor: "#f8fafc" }}
       >
         <div className="card-body p-3 p-md-4">
           <div className="d-flex align-items-center gap-2 mb-2">
@@ -396,7 +396,7 @@ export default function PlantillasTab() {
 
       <div className="d-flex flex-column gap-3">
         {templates.length === 0 ? (
-          <div className="text-center py-5 border rounded bg-white" style={{ borderRadius: "12px" }}>
+          <div className="text-center py-5 border rounded bg-white" style={{ borderRadius: "8px" }}>
             <i className="bi bi-chat-square-text text-secondary" style={{ fontSize: "32px" }}></i>
             <p className="mt-2 mb-2 fw-medium text-dark" style={{ fontSize: "14px" }}>
               No tienes plantillas registradas todavía
@@ -437,7 +437,7 @@ export default function PlantillasTab() {
                   <div
                     className="card h-100 border shadow-sm transition-smooth"
                     style={{
-                      borderRadius: "12px",
+                      borderRadius: "8px",
                       borderColor: isDefaultOpen || isDefaultReserva ? "#0c5cc6" : "#e2e8f0",
                       backgroundColor: "#ffffff",
                     }}
@@ -576,7 +576,7 @@ export default function PlantillasTab() {
       {modalOpen && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050, backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: "1300px", width: "75%" }}>
-            <div className="modal-content" style={{ borderRadius: "12px", border: "none", maxWidth: "100%" }}>
+            <div className="modal-content" style={{ borderRadius: "8px", border: "none", maxWidth: "100%" }}>
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title font-poppins fw-semibold text-dark" style={{ fontSize: "16px" }}>
                   {editingTemplate ? "Editar Plantilla" : "Nueva Plantilla de WhatsApp"}
@@ -763,7 +763,7 @@ export default function PlantillasTab() {
                         className="p-3 border rounded shadow-sm"
                         style={{
                           backgroundColor: "#efeae2",
-                          borderRadius: "12px",
+                          borderRadius: "8px",
                           minHeight: "260px",
                           display: "flex",
                           flexDirection: "column",

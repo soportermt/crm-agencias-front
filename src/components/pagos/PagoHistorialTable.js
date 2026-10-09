@@ -62,7 +62,7 @@ export default function PagoHistorialTable({
   };
 
   return (
-    <div className="bg-white shadow-premium" style={{ borderRadius: "12px", padding: "16px" }}>
+    <div className="bg-white shadow-premium" style={{ borderRadius: "8px", padding: "16px" }}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3
           className="font-inter fw-medium mb-0"
