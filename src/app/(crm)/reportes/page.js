@@ -15,6 +15,7 @@ function ReportesContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
 
   const tabParam = searchParams.get("tab");
   const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "resumen";
@@ -35,6 +36,8 @@ function ReportesContent() {
     },
     [router, pathname, searchParams]
   );
+
+
 
   return (
     <div className="container-fluid p-0">
@@ -92,8 +95,8 @@ function ReportesContent() {
           </div>
         </div>
 
-        <div className="mt-2">
-          <div className="d-flex align-items-center gap-2 mb-3">
+        <div className="mt-4">
+          {/* <div className="d-flex align-items-center gap-2 mb-3">
             {[
               { key: "resumen", label: "Resumen" },
               { key: "ventas", label: "Ventas" },
@@ -124,7 +127,7 @@ function ReportesContent() {
                 </button>
               );
             })}
-          </div>
+          </div> */}
 
           <div>
             {activeTab === "resumen" && <ResumenView mes={mes} anio={anio} />}

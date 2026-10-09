@@ -6,6 +6,7 @@ import { reportesService } from '@/services/reportes.service';
 import DataTable from '../common/DataTable';
 import Link from 'next/link';
 import StatusBadge from '../common/StatusBadge';
+import ResumenCharts from './ResumenCharts';
 
 const ITEMS_PER_PAGE = 8;
 const columns = [
@@ -113,6 +114,13 @@ export default function ResumenView({ mes, anio }) {
         }
     };
 
+    if (loading) return (<div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando...</span>
+        </div>
+    </div>);
+
+
     return (
         <div>
             <div className="row g-3 mb-2">
@@ -148,6 +156,14 @@ export default function ResumenView({ mes, anio }) {
                         value={formatCurrency(resumen?.utilidad)}
                         hasShadow={true}
                         dashboard
+                    />
+                </div>
+            </div>
+            <div>
+                <div className="mt-4">
+                    <ResumenCharts
+                        porServicio={data?.por_servicio}
+                        porVendedor={data?.por_vendedor}
                     />
                 </div>
             </div>

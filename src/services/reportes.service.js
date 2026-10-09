@@ -1,5 +1,4 @@
 import api from "@/lib/axios";
-import { conectividadService } from "./conectividad.service";
 
 export const reportesService = {
     async getReportesResumen(mes, anio) {
