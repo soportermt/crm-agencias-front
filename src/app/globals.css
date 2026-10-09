@@ -565,3 +565,7 @@ body {
 .btn-pdf:hover {
   background-color: #b6d5fd;
 }
+
+.ventas-datepicker-wrapper .react-datepicker__input-container input {
+  height: 37px;
+}

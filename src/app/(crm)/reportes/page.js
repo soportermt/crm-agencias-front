@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
@@ -8,6 +8,8 @@ import ExportDocuments from "@/components/common/ExportDocuments";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ResumenView from "@/components/reportes/ResumenView";
+import { reportesService } from "@/services/reportes.service";
+import { exportReportesExcel } from "@/utils/exportReportesExcel";
 
 const VALID_TABS = ["resumen", "ventas", "utilidad"];
 
@@ -15,7 +17,8 @@ function ReportesContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const tabParam = searchParams.get("tab");
   const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "resumen";
@@ -37,7 +40,24 @@ function ReportesContent() {
     [router, pathname, searchParams]
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await reportesService.getReportesResumen(mes, anio);
+        if (!cancelled) setData(res);
+      } catch (error) {
+        console.error("Error fetching reportes:", error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => { cancelled = true; };
+  }, [mes, anio]);
 
+  const handleExport = () => exportReportesExcel({ data, mes, anio });
 
   return (
     <div className="container-fluid p-0">
@@ -58,13 +78,13 @@ function ReportesContent() {
                 marginBottom: 0,
               }}
             >
-              Reportes
+              Reportes de cada mes
             </h1>
           </div>
 
           <div className="col-12 col-md-6 d-flex justify-content-end gap-2">
             <div className="col-12 col-md-4">
-              <div className="position-relative">
+              <div className="position-relative ventas-datepicker-wrapper">
                 <CalendarIcon
                   className="position-absolute"
                   style={{
@@ -91,7 +111,14 @@ function ReportesContent() {
               </div>
             </div>
 
-            <ExportDocuments />
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleExport}
+              disabled={loading || !data}
+            >
+              Exportar Excel
+            </button>
           </div>
         </div>
 
@@ -130,7 +157,7 @@ function ReportesContent() {
           </div> */}
 
           <div>
-            {activeTab === "resumen" && <ResumenView mes={mes} anio={anio} />}
+            {activeTab === "resumen" && <ResumenView data={data} loading={loading} />}
 
             {activeTab === "ventas" && (
               <div>

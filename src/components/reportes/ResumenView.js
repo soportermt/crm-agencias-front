@@ -43,9 +43,7 @@ function mapDetalleToRow(item) {
     };
 }
 
-export default function ResumenView({ mes, anio }) {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+export default function ResumenView({ data, loading }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
 
@@ -57,23 +55,7 @@ export default function ResumenView({ mes, anio }) {
         }).format(value);
     };
 
-    useEffect(() => {
-        let cancelled = false;
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const res = await reportesService.getReportesResumen(mes, anio);
-                if (!cancelled) setData(res);
-            } catch (error) {
-                console.error("Error fetching reportes:", error);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
-
-        fetchData();
-        return () => { cancelled = true; };
-    }, [mes, anio]);
+    useEffect(() => { setCurrentPage(1); }, [data]);
 
     const resumen = data?.resumen_mensual?.[0];
 
