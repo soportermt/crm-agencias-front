@@ -35,13 +35,14 @@ export default function TourForm() {
                             updateDraftField("providerData", provider);
                         }}
                     />
+                    {errors.provider && <div className="text-danger small">{errors.provider}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
                     <label className="form-label">Código *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.code ? "is-invalid" : ""}`}
                         value={data.code}
                         onChange={(e) => updateDraftField("code", e.target.value)}
                     />
@@ -69,10 +70,11 @@ export default function TourForm() {
                 <div className="col-12 col-md-8">
                     <label className="form-label">Descripción *</label>
                     <textarea
-                        className="form-control"
+                        className={`form-control ${errors.descripcion ? "is-invalid" : ""}`}
                         value={data.descripcion}
                         onChange={(e) => updateDraftField("descripcion", e.target.value)}
                     />
+                    {errors.descripcion && <div className="text-danger small">{errors.descripcion}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -104,6 +106,8 @@ export default function TourForm() {
                         required
                         autoComplete='off'
                     />
+                    {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
+                    {errors.checkOut && <div className="text-danger small">{errors.checkOut}</div>}
                 </div>
             </div>
             <p className="mb-1" style={{ fontSize: "18px", fontWeight: 600 }}>Datos de los pasajeros</p>
@@ -191,6 +195,7 @@ export default function TourForm() {
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />
+                    {errors.limitePago && <div className="text-danger small">{errors.limitePago}</div>}
                 </div>
                 <div className="col-12 col-md-4">
                     <label className="form-label">Límite cliente</label>
