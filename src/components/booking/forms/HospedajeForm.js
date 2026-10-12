@@ -89,7 +89,7 @@ export default function HospedajeForm() {
           <label className="form-label">Código *</label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.code ? "is-invalid" : ""}`}
             value={data.code}
             onChange={(e) => updateDraftField("code", e.target.value)}
             required
@@ -111,7 +111,7 @@ export default function HospedajeForm() {
 
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.destino ? "is-invalid" : ""}`}
             value={data.destino}
             onChange={(e) => setField("destino", e.target.value)}
             required

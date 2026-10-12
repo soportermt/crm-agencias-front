@@ -80,11 +80,17 @@ export const serviceCatalog = [
       fee: "",
       total_publico: "",
       total_neto: "",
+      redondo: false,
     },
     validate: (data) => {
       const errors = {};
-      if (!data.origen) errors.origen = "Requerido";
-      if (!data.destino) errors.destino = "Requerido";
+      if (!data.provider) errors.provider = "Selecciona un proveedor";
+      if (!data.code?.trim()) errors.code = "Requerido";
+      if (!data.origen?.trim()) errors.origen = "Requerido";
+      if (!data.destino?.trim()) errors.destino = "Requerido";
+      if (!data.checkIn) errors.checkIn = "Requerido";
+      if (data.redondo && !data.checkOut) errors.checkOut = "Requerido para traslado redondo";
+      if (!data.limitePago) errors.limitePago = "Requerido";
       return errors;
     },
     summary: (data) => ({
