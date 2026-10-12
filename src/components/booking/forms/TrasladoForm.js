@@ -39,12 +39,12 @@ export default function TrasladoForm() {
                 <div className="col-12 col-md-4">
                     <ProviderSelect
                         value={data.provider}
+                        error={errors.provider}
                         onChange={(provider) => {
                             updateDraftField("provider", provider.value);
                             updateDraftField("providerData", provider);
                         }}
                     />
-                    {errors.provider && <div className="text-danger small">{errors.provider}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -170,7 +170,7 @@ export default function TrasladoForm() {
                         minDate={new Date()}
                         monthsShown={isRedondo ? 2 : 1}
                         isClearable
-                        className="form-control form-datepicker"
+                        className={`form-control form-datepicker ${(errors.checkIn || errors.checkOut) ? "is-invalid" : ""}`}
                         placeholderText={isRedondo ? "Rango de fechas" : "Selecciona una fecha"}
                         autoComplete='off'
                     />
@@ -312,7 +312,7 @@ export default function TrasladoForm() {
                         onChange={(date) => updateDraftField("limitePago", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control form-datepicker"
+                        className={`form-control form-datepicker ${errors.limitePago ? "is-invalid" : ""}`}
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />

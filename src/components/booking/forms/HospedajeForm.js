@@ -78,12 +78,12 @@ export default function HospedajeForm() {
         <div className="col-12 col-md-4">
           <ProviderSelect
             value={data.provider}
+            error={errors.provider}
             onChange={(provider) => {
               updateDraftField("provider", provider.value);
               updateDraftField("providerData", provider);
             }}
           />
-          {errors.provider && <div className="text-danger small">{errors.provider}</div>}
         </div>
         <div className="col-12 col-md-4">
           <label className="form-label">Código *</label>
@@ -147,7 +147,7 @@ export default function HospedajeForm() {
             monthsShown={2}
             shouldCloseOnSelect={false}
             isClearable
-            className="form-control form-datepicker"
+            className={`form-control form-datepicker ${(errors.checkIn || errors.checkOut) ? "is-invalid" : ""}`}
             placeholderText="Selecciona una fecha"
             required
             autoComplete='off'
@@ -364,7 +364,7 @@ export default function HospedajeForm() {
             onChange={(date) => updateDraftField("limitePago", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control form-datepicker"
+            className={`form-control form-datepicker ${errors.limitePago ? "is-invalid" : ""}`}
             placeholderText="Selecciona una fecha"
             required
             autoComplete='off'
