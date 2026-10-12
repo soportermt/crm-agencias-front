@@ -52,6 +52,7 @@ export default function VueloForm() {
                 <div className="col-12 col-md-4">
                     <ProviderSelect
                         value={data.provider}
+                        error={errors.provider}
                         onChange={(provider) => {
                             updateDraftField("provider", provider.value);
                             updateDraftField("providerData", provider);
@@ -62,7 +63,7 @@ export default function VueloForm() {
                     <label className="form-label">Código *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.code ? "is-invalid" : ""}`}
                         value={data.code}
                         onChange={(e) => updateDraftField("code", e.target.value)}
                     />
@@ -89,19 +90,21 @@ export default function VueloForm() {
                     <label className="form-label">Origen *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.origen ? "is-invalid" : ""}`}
                         value={data.origen}
                         onChange={(e) => updateDraftField("origen", e.target.value)}
                     />
+                    {errors.origen && <div className="text-danger small">{errors.origen}</div>}
                 </div>
                 <div className="col-12 col-md-4">
                     <label className="form-label">Destino *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.destino ? "is-invalid" : ""}`}
                         value={data.destino}
                         onChange={(e) => updateDraftField("destino", e.target.value)}
                     />
+                    {errors.destino && <div className="text-danger small">{errors.destino}</div>}
                 </div>
                 <div className="col-12 col-md-4">
                     <label className="form-label">Equipaje</label>
@@ -201,10 +204,12 @@ export default function VueloForm() {
                         minDate={new Date()}
                         monthsShown={isRedondo ? 2 : 1}
                         isClearable
-                        className="form-control form-datepicker"
+                        className={`form-control form-datepicker ${errors.checkIn ? "is-invalid" : ""}`}
                         placeholderText={isRedondo ? "Rango de fechas" : "Selecciona una fecha"}
                         autoComplete='off'
                     />
+                    {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
+                    {errors.checkOut && <div className="text-danger small">{errors.checkOut}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -260,9 +265,7 @@ export default function VueloForm() {
                                     checked={data.escala === 0}
                                     onChange={() => updateDraftField("escala", 0)}
                                 />
-                                <label className="form-check-label" htmlFor="checkDirecto">
-                                    Directo
-                                </label>
+                                <label className="form-check-label" htmlFor="flight-stop-direct">Directo</label>
                             </div>
                         </div>
                         <div className="d-flex gap-1 mb-1">
@@ -274,9 +277,7 @@ export default function VueloForm() {
                                     checked={data.escala === 1}
                                     onChange={() => updateDraftField("escala", 1)}
                                 />
-                                <label className="form-check-label" htmlFor="checkEscala">
-                                    Con escala
-                                </label>
+                                <label className="form-check-label" htmlFor="flight-stop-stop">Con escala</label>
                             </div>
                         </div>
                     </div>
@@ -584,18 +585,16 @@ export default function VueloForm() {
                                         </div>
                                         <div className="col-md-2 mt-0 mb-0">
                                             <input
-                                                type="number"
                                                 className="form-control"
-                                                value={pasajero.edad}
-                                                onChange={(e) => updatePassenger("menores", index, "edad", Number(e.target.value))}
+                                                value={pasajero.no_pasaporte ?? ""}
+                                                onChange={(e) => updatePassenger("menores", index, "no_pasaporte", e.target.value)}
                                             />
                                         </div>
                                         <div className="col-md-2 mt-0 mb-0">
                                             <input
-                                                type="number"
                                                 className="form-control"
-                                                value={pasajero.edad}
-                                                onChange={(e) => updatePassenger("menores", index, "edad", Number(e.target.value))}
+                                                value={pasajero.no_visa ?? ""}
+                                                onChange={(e) => updatePassenger("menores", index, "no_visa", e.target.value)}
                                             />
                                         </div>
                                     </>
@@ -634,20 +633,21 @@ export default function VueloForm() {
                     <div className="col-12 col-md-4">
                         <label className="form-label">Límite pago *</label>
                         <DatePicker
-                            id="fecha"
+                            id="limitePago"
                             selected={data.limitePago}
                             onChange={(date) => updateDraftField("limitePago", date)}
                             locale="es"
                             dateFormat="dd/MM/yyyy"
-                            className="form-control form-datepicker"
+                            className={`form-control form-datepicker ${errors.limitePago ? "is-invalid" : ""}`}
                             placeholderText="Selecciona una fecha"
                             autoComplete='off'
                         />
+                        {errors.limitePago && <div className="text-danger small">{errors.limitePago}</div>}
                     </div>
                     <div className="col-12 col-md-4">
                         <label className="form-label">Límite cliente</label>
                         <DatePicker
-                            id="fecha"
+                            id="limiteCliente"
                             selected={data.limiteCliente}
                             onChange={(date) => updateDraftField("limiteCliente", date)}
                             locale="es"

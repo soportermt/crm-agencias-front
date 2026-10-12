@@ -77,12 +77,16 @@ export default function ProviderSelect({
                         ...provided,
                         fontSize: "14px",
                         borderRadius: "8px",
-                        border: state.isFocused
-                            ? "0.5px solid rgb(120, 174, 245)"
-                            : "1px solid #ccc",
+                        border: error
+                            ? "1px solid #dc3545"
+                            : state.isFocused
+                                ? "0.5px solid rgb(120, 174, 245)"
+                                : "1px solid #ccc",
                         boxShadow: "none",
                         "&:hover": {
-                            border: "0.5px solid rgb(120, 174, 245)",
+                            border: error
+                                ? "1px solid #dc3545"
+                                : "0.5px solid rgb(120, 174, 245)",
                         },
                     }),
                     input: (provided) => ({

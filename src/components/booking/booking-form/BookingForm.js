@@ -9,10 +9,7 @@ import VendedoresSelect from '@/components/common/VendedoresSelect';
 
 registerLocale("es", es);
 export default function BookingForm({ mode }) {
-  const {
-    booking,
-    updateBooking
-  } = useBookingForm();
+  const { booking, updateBooking, bookingErrors } = useBookingForm();
 
   return (
     <div className="container-fluid py-2">
@@ -20,11 +17,12 @@ export default function BookingForm({ mode }) {
       <div className="row g-3">
         <div className="col-12 col-md-6 col-lg-3">
           <VendedoresSelect
-           value={booking.idVendedor}
+            value={booking.idVendedor}
             onChange={(vendedor) => {
               updateBooking("idVendedor", vendedor.id)
             }}
           />
+          {bookingErrors.idVendedor && <div className="text-danger small">{bookingErrors.idVendedor}</div>}
         </div>
         <div className="col-12 col-md-6 col-lg-3">
           <label htmlFor="moneda" className="form-label">
@@ -53,10 +51,11 @@ export default function BookingForm({ mode }) {
             placeholderText="Selecciona una fecha"
             autoComplete='off'
           />
+          {bookingErrors.fecha && <div className="text-danger small">{bookingErrors.fecha}</div>}
         </div>
         <div className="col-12 col-md-6 col-lg-3">
           <label htmlFor="fechaLimite" className="form-label">
-            Límite de cambios 
+            Límite de cambios
           </label>
           <DatePicker
             id="fechaLimite"
@@ -82,6 +81,7 @@ export default function BookingForm({ mode }) {
               updateBooking("pasajeroTitular", customer.label ?? customer.text ?? "");
             }}
           />
+          {bookingErrors.customerId && <div className="text-danger small">{bookingErrors.customerId}</div>}
         </div>
         <div className="col-12 col-md-6 col-lg-4">
           <label htmlFor="titular" className="form-label">
@@ -90,10 +90,13 @@ export default function BookingForm({ mode }) {
           <input
             id="titular"
             type="text"
-            className="form-control"
+            className={`form-control ${bookingErrors.pasajeroTitular ? "is-invalid" : ""}`}
             value={booking.pasajeroTitular}
             onChange={(e) => updateBooking("pasajeroTitular", e.target.value)}
           />
+          {bookingErrors.pasajeroTitular && (
+            <div className="invalid-feedback">{bookingErrors.pasajeroTitular}</div>
+          )}
         </div>
         <div className="col-12">
           <label htmlFor="observaciones" className="form-label">
@@ -108,6 +111,7 @@ export default function BookingForm({ mode }) {
           />
         </div>
       </div>
+      {bookingErrors.servicios && <div className="text-danger small mt-3 mb-1">{bookingErrors.servicios}</div>}
       <Services mode={mode} />
     </div>
   )

@@ -39,6 +39,7 @@ export default function TrasladoForm() {
                 <div className="col-12 col-md-4">
                     <ProviderSelect
                         value={data.provider}
+                        error={errors.provider}
                         onChange={(provider) => {
                             updateDraftField("provider", provider.value);
                             updateDraftField("providerData", provider);
@@ -50,7 +51,7 @@ export default function TrasladoForm() {
                     <label className="form-label">Código *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.origen ? "is-invalid" : ""}`}
                         value={data.code}
                         onChange={(e) => updateDraftField("code", e.target.value)}
                     />
@@ -78,20 +79,22 @@ export default function TrasladoForm() {
                     <label className="form-label">Origen *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.origen ? "is-invalid" : ""}`}
                         value={data.origen}
                         onChange={(e) => updateDraftField("origen", e.target.value)}
                     />
+                    {errors.origen && <div className="text-danger small">{errors.origen}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
                     <label className="form-label">Destino *</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${errors.origen ? "is-invalid" : ""}`}
                         value={data.destino}
                         onChange={(e) => updateDraftField("destino", e.target.value)}
                     />
+                    {errors.destino && <div className="text-danger small">{errors.destino}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -167,10 +170,12 @@ export default function TrasladoForm() {
                         minDate={new Date()}
                         monthsShown={isRedondo ? 2 : 1}
                         isClearable
-                        className="form-control form-datepicker"
+                        className={`form-control form-datepicker ${(errors.checkIn || errors.checkOut) ? "is-invalid" : ""}`}
                         placeholderText={isRedondo ? "Rango de fechas" : "Selecciona una fecha"}
                         autoComplete='off'
                     />
+                    {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
+                    {errors.checkOut && <div className="text-danger small">{errors.checkOut}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -307,10 +312,11 @@ export default function TrasladoForm() {
                         onChange={(date) => updateDraftField("limitePago", date)}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
-                        className="form-control form-datepicker"
+                        className={`form-control form-datepicker ${errors.limitePago ? "is-invalid" : ""}`}
                         placeholderText="Selecciona una fecha"
                         autoComplete='off'
                     />
+                    {errors.limitePago && <div className="text-danger small">{errors.limitePago}</div>}
                 </div>
                 <div className="col-12 col-md-4">
                     <label className="form-label">Límite cliente</label>

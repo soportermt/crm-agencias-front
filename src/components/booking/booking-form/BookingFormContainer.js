@@ -28,7 +28,8 @@ async function enviarComprobanteAutomatico(idVenta) {
 }
 
 export default function BookingFormContainer({ mode }) {
-  const { booking, setRawVenta } = useBookingForm();
+  const { booking, setRawVenta, validateBooking, draft } = useBookingForm();
+  const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const router = useRouter();
@@ -36,11 +37,28 @@ export default function BookingFormContainer({ mode }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError("");
+
+    const errors = validateBooking();
+    if (Object.keys(errors).length > 0) {
+      setSubmitError("Completa los campos obligatorios marcados en rojo.");
+      setTimeout(() => {
+        document.querySelector(".is-invalid, .text-danger")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
+      return;
+    }
+
+    if (draft) {
+      setSubmitError("Tienes un servicio sin confirmar. Confírmalo o cancélalo antes de guardar.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const payload = serializeBookingToForm(booking);
-
+      
       const result = mode === "edit"
         ? await bookingService.update(payload)
         : await bookingService.create(payload);
@@ -58,7 +76,8 @@ export default function BookingFormContainer({ mode }) {
       }
 
       setShowAlert(true);
-      // console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
+
+      //// console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
     } catch (error) {
       console.error("Error al crear la reserva: ", error);
     } finally {
@@ -80,7 +99,13 @@ export default function BookingFormContainer({ mode }) {
       <form
         className="row g-5 m-0 form-booking align-items-startg"
         onSubmit={handleSubmit}
+        noValidate
       >
+        {submitError && (
+          <div className="col-12 mt-3">
+            <div className="alert alert-danger mb-0 p-2" style={{fontSize: 14}}>{submitError}</div>
+          </div>
+        )}
         <div className="col-12 col-xl-9 my-3">
           <div
             className="bg-white shadow-premium p-1"
@@ -110,8 +135,8 @@ export default function BookingFormContainer({ mode }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
           </svg>}
           title={isEditMode ? "Actualización lista" : "Reservación creada"}
-          description={isEditMode 
-            ? "Los detalles han sido modificados." 
+          description={isEditMode
+            ? "Los detalles han sido modificados."
             : "El registro se completó sin problemas."}
           onClose={() => {
             setShowAlert(false);

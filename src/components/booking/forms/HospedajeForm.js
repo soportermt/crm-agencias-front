@@ -78,6 +78,7 @@ export default function HospedajeForm() {
         <div className="col-12 col-md-4">
           <ProviderSelect
             value={data.provider}
+            error={errors.provider}
             onChange={(provider) => {
               updateDraftField("provider", provider.value);
               updateDraftField("providerData", provider);
@@ -88,7 +89,7 @@ export default function HospedajeForm() {
           <label className="form-label">Código *</label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.code ? "is-invalid" : ""}`}
             value={data.code}
             onChange={(e) => updateDraftField("code", e.target.value)}
             required
@@ -110,7 +111,7 @@ export default function HospedajeForm() {
 
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.destino ? "is-invalid" : ""}`}
             value={data.destino}
             onChange={(e) => setField("destino", e.target.value)}
             required
@@ -146,11 +147,12 @@ export default function HospedajeForm() {
             monthsShown={2}
             shouldCloseOnSelect={false}
             isClearable
-            className="form-control form-datepicker"
+            className={`form-control form-datepicker ${(errors.checkIn || errors.checkOut) ? "is-invalid" : ""}`}
             placeholderText="Selecciona una fecha"
             required
             autoComplete='off'
           />
+          {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
         </div>
         {/* <div className="col-12 col-md-4">
           <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#75BF06", borderColor: "#75BF06" }}>
@@ -341,6 +343,7 @@ export default function HospedajeForm() {
           </div>
         </div>
       ))}
+      {errors.habitaciones && <div className="text-danger small">{errors.habitaciones}</div>}
       {/*       
       {data.habitaciones.length > 0 && ( */}
       <div className="row mb-2 justify-content-end align-items-center">
@@ -361,11 +364,12 @@ export default function HospedajeForm() {
             onChange={(date) => updateDraftField("limitePago", date)}
             locale="es"
             dateFormat="dd/MM/yyyy"
-            className="form-control form-datepicker"
+            className={`form-control form-datepicker ${errors.limitePago ? "is-invalid" : ""}`}
             placeholderText="Selecciona una fecha"
             required
             autoComplete='off'
           />
+          {errors.limitePago && <div className="text-danger small">{errors.limitePago}</div>}
         </div>
         <div className="col-12 col-md-4">
           <label className="form-label">Límite cliente</label>
