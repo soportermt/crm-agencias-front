@@ -24,9 +24,14 @@ export const serviceCatalog = [
     },
     validate: (data) => {
       const errors = {};
+      if (!data.provider) errors.provider = "Selecciona un proveedor";
+      if (!data.code?.trim()) errors.code = "Requerido";
       if (!data.hotel) errors.hotel = "Selecciona un hotel";
+      if (!data.destino?.trim()) errors.destino = "Requerido";
       if (!data.checkIn) errors.checkIn = "Requerido";
       if (!data.checkOut) errors.checkOut = "Requerido";
+      if (!data.limitePago) errors.limitePago = "Requerido";
+      if (!data.habitaciones?.length) errors.habitaciones = "Agrega al menos una habitación";
       return errors;
     },
     summary: (data) => {

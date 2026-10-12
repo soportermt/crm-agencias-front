@@ -83,6 +83,7 @@ export default function HospedajeForm() {
               updateDraftField("providerData", provider);
             }}
           />
+          {errors.provider && <div className="text-danger small">{errors.provider}</div>}
         </div>
         <div className="col-12 col-md-4">
           <label className="form-label">Código *</label>
@@ -151,6 +152,7 @@ export default function HospedajeForm() {
             required
             autoComplete='off'
           />
+          {errors.checkIn && <div className="text-danger small">{errors.checkIn}</div>}
         </div>
         {/* <div className="col-12 col-md-4">
           <button type="button" className="btn btn-primary w-100" onClick={addPasajero} style={{ backgroundColor: "#75BF06", borderColor: "#75BF06" }}>
@@ -341,6 +343,7 @@ export default function HospedajeForm() {
           </div>
         </div>
       ))}
+      {errors.habitaciones && <div className="text-danger small">{errors.habitaciones}</div>}
       {/*       
       {data.habitaciones.length > 0 && ( */}
       <div className="row mb-2 justify-content-end align-items-center">
@@ -366,6 +369,7 @@ export default function HospedajeForm() {
             required
             autoComplete='off'
           />
+          {errors.limitePago && <div className="text-danger small">{errors.limitePago}</div>}
         </div>
         <div className="col-12 col-md-4">
           <label className="form-label">Límite cliente</label>

@@ -27,12 +27,30 @@ const initialBooking = {
 
 export function BookingFormProvider({ children, initialData = null }) {
   // const [booking, setBooking] = useState(initialBooking);
+  const [bookingErrors, setBookingErrors] = useState({});
   const [booking, setBooking] = useState(() =>
     initialData ? mapVentaToBooking(initialData) : initialBooking
   );
   const [rawVenta, setRawVenta] = useState(initialData);
-  const updateBooking = (field, value) =>
+
+  const validateBooking = () => {
+    const errors = {};
+    if (!booking.idVendedor) errors.idVendedor = "Selecciona un vendedor";
+    if (!booking.fecha) errors.fecha = "Requerido";
+    if (!booking.customerId) errors.customerId = "Selecciona un cliente";
+    if (!booking.pasajeroTitular?.trim()) errors.pasajeroTitular = "Requerido";
+    if (booking.servicios.length === 0) errors.servicios = "Agrega al menos un servicio";
+    setBookingErrors(errors);
+    return errors;
+  };
+  const updateBooking = (field, value) => {
     setBooking((prev) => ({ ...prev, [field]: value }));
+    setBookingErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _, ...rest } = prev;
+      return rest;
+    });
+  };
 
   const [draft, setDraft] = useState(null);
 
@@ -42,11 +60,11 @@ export function BookingFormProvider({ children, initialData = null }) {
 
     if (!editingId && booking.servicios.length > 0) {
       const pool = getPassengersPool(booking.servicios);
-    
+
       if (tipo !== "hospedaje") {
         const adultos = pool.adultos.length > 0 ? pool.adultos : baseData.pasajeros.adultos;
         const menores = pool.menores.length > 0 ? pool.menores : baseData.pasajeros.menores;
-      
+
         baseData = {
           ...baseData,
           adultos: adultos.length,
@@ -57,7 +75,7 @@ export function BookingFormProvider({ children, initialData = null }) {
           },
         };
       }
-    
+
       if (tipo === "hospedaje" && (pool.adultos.length > 0 || pool.menores.length > 0)) {
         baseData = {
           ...baseData,
@@ -97,7 +115,10 @@ export function BookingFormProvider({ children, initialData = null }) {
   };
 
   const updateDraftField = (field, value) =>
-    setDraft((d) => ({ ...d, data: { ...d.data, [field]: value } }));
+    setDraft((d) => {
+      const { [field]: _, ...restErrors } = d.errors || {};
+      return { ...d, data: { ...d.data, [field]: value }, errors: restErrors };
+    });
 
   const cancelDraft = () => setDraft(null);
 
@@ -129,6 +150,7 @@ export function BookingFormProvider({ children, initialData = null }) {
   const resetBooking = () => {
     setBooking(initialBooking);
     setDraft(null);
+    setBookingErrors({});
   };
 
   return (
@@ -144,7 +166,9 @@ export function BookingFormProvider({ children, initialData = null }) {
         removeService,
         resetBooking,
         rawVenta,
-        setRawVenta
+        setRawVenta,
+        bookingErrors,
+        validateBooking
       }}
     >
       {children}
