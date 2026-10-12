@@ -58,25 +58,24 @@ export default function BookingFormContainer({ mode }) {
 
     try {
       const payload = serializeBookingToForm(booking);
-      console.log(payload);
       
-      // const result = mode === "edit"
-      //   ? await bookingService.update(payload)
-      //   : await bookingService.create(payload);
+      const result = mode === "edit"
+        ? await bookingService.update(payload)
+        : await bookingService.create(payload);
 
-      // if (!result.success) {
-      //   console.error("Error al guardar:", result.error, result);
-      //   return;
-      // }
+      if (!result.success) {
+        console.error("Error al guardar:", result.error, result);
+        return;
+      }
 
-      // if (isEditMode) {
-      //   const ventaActualizada = await bookingService.getSaleInfo(booking.idVenta);
-      //   setRawVenta(ventaActualizada);
-      // } else {
-      //   enviarComprobanteAutomatico(result.sale.id_venta);
-      // }
+      if (isEditMode) {
+        const ventaActualizada = await bookingService.getSaleInfo(booking.idVenta);
+        setRawVenta(ventaActualizada);
+      } else {
+        enviarComprobanteAutomatico(result.sale.id_venta);
+      }
 
-      // setShowAlert(true);
+      setShowAlert(true);
 
       //// console.log(mode === "edit" ? "Reserva actualizada" : "Reserva creada", result);
     } catch (error) {
