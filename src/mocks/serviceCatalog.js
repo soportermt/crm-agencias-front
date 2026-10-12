@@ -1,9 +1,10 @@
+import GrupoForm from "@/components/booking/forms/GrupoForm";
 import HospedajeForm from "@/components/booking/forms/HospedajeForm";
 import OtrosForm from "@/components/booking/forms/OtrosForm";
 import TourForm from "@/components/booking/forms/TourForm";
 import TrasladoForm from "@/components/booking/forms/TrasladoForm";
 import VueloForm from "@/components/booking/forms/VueloForm";
-import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import { faCirclePlus, faHotel, faMap, faPeopleGroup, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 
 export const serviceCatalog = [
   {
@@ -96,6 +97,49 @@ export const serviceCatalog = [
     summary: (data) => ({
       title: (data.origen && data.destino) ? `${data.origen} a ${data.destino}` : "Ruta sin definir",
       subtitle: data.redondo ? "Traslado Redondo" : "Traslado Sencillo",
+      dateStart: data.checkIn,
+      dateEnd: data.checkOut,
+      precio: data.total_publico
+    }),
+  },
+  {
+    id: "grupo",
+    nombre: "Grupo",
+    icon: faPeopleGroup,
+    Form: GrupoForm,
+    defaultData: {
+      provider: "",
+      providerName: "",
+      code: "",
+      descripcion: "",
+      checkIn: null,
+      checkOut: null,
+      pasajeros: {
+        adultos: [
+          { nombre: "", apellidos: "" },
+          { nombre: "", apellidos: "" },
+        ],
+        menores: [],
+      },
+      limitePago: null,
+      limiteCliente: null,
+      fee: "",
+      total_publico: "",
+      total_neto: "",
+    },
+    validate: (data) => {
+      const errors = {};
+      if (!data.provider) errors.provider = "Selecciona un proveedor";
+      if (!data.code?.trim()) errors.code = "Requerido";
+      if (!data.descripcion?.trim()) errors.descripcion = "Requerido";
+      if (!data.checkIn) errors.checkIn = "Requerido";
+      if (!data.checkOut) errors.checkOut = "Requerido";
+      if (!data.limitePago) errors.limitePago = "Requerido";
+      return errors;
+    },
+    summary: (data) => ({
+      title: data.descripcion || "Tour sin nombre",
+      subtitle: "Actividad / Excursión",
       dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
