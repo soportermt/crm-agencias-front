@@ -1,4 +1,4 @@
-const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "5": "tour", "6": "vuelos", "10": "otros" };
+const ID_TO_TIPO_SERVICIO = { "1": "hospedaje", "2": "traslado", "3": "grupo", "5": "tour", "6": "vuelos", "10": "otros" };
 
 function parseLocalDate(dateString) {
     if (!dateString || dateString === "0000-00-00") return null;
@@ -87,7 +87,7 @@ function mapVentaServicioToItem(vs) {
     }
 
 
-    if (tipo === "tour" || tipo === "otros") {
+    if (tipo === "tour" || tipo === "otros" || tipo === "grupo") {
         data = {
             ...data,
             descripcion: vs.descripcion,

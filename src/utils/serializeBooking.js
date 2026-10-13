@@ -4,6 +4,7 @@ import { calcularTotalNeto } from "./pricing";
 const TIPO_SERVICIO_MAP = {
   hospedaje: 1,
   traslado: 2,
+  grupo: 3,
   tour: 5,
   vuelos: 6,
   otros: 10,
@@ -122,6 +123,15 @@ function buildDesglose(tipoId, data, comisionPct) {
     };
   }
 
+  if (tipoId === TIPO_SERVICIO_MAP.grupo) {
+    return {
+      evento: data.evento ?? "",
+      fecha_evento: data.fecha_evento ? toISODateOnly(data.fecha_evento) : null,
+      tipo_hab: data.tipo_hab ?? "",
+      no_hab: data.no_hab ?? "",
+    };
+  }
+
   if (tipoId === TIPO_SERVICIO_MAP.tour) {
     return {
       adultos: data.adultos ?? 0,
@@ -235,7 +245,7 @@ function buildService(item) {
 
   if (tipoId === TIPO_SERVICIO_MAP.hospedaje) {
     descripcion = item.data.hotel;
-  } else if (tipoId === TIPO_SERVICIO_MAP.tour || tipoId === TIPO_SERVICIO_MAP.otros) {
+  } else if (tipoId === TIPO_SERVICIO_MAP.tour || tipoId === TIPO_SERVICIO_MAP.otros ||  tipoId === TIPO_SERVICIO_MAP.grupo) {
     descripcion = item.data.descripcion;
   } else if (tipoId === TIPO_SERVICIO_MAP.traslado) {
     descripcion = item.data.redondo ? "Traslado Redondo" : "Traslado Sencillo";

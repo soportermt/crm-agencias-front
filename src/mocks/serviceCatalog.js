@@ -114,13 +114,11 @@ export const serviceCatalog = [
       descripcion: "",
       checkIn: null,
       checkOut: null,
-      pasajeros: {
-        adultos: [
-          { nombre: "", apellidos: "" },
-          { nombre: "", apellidos: "" },
-        ],
-        menores: [],
-      },
+      fecha_evento: null,
+      evento: "",
+      tipo_hab: "",
+      no_hab: "",
+      
       limitePago: null,
       limiteCliente: null,
       fee: "",
@@ -138,8 +136,8 @@ export const serviceCatalog = [
       return errors;
     },
     summary: (data) => ({
-      title: data.descripcion || "Tour sin nombre",
-      subtitle: "Actividad / Excursión",
+      title: data.evento || "Grupo sin evento",
+      subtitle: "Grupo",
       dateStart: data.checkIn,
       dateEnd: data.checkOut,
       precio: data.total_publico
