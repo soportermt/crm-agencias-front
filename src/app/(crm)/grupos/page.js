@@ -1,9 +1,10 @@
 "use client";
 
+import GrupoModal from "@/components/grupos/GrupoModal";
 import GruposTable from "@/components/grupos/GruposTable";
 import { grupoService } from "@/services/grupo.service";
 import { subDays } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const toYMD = (d) =>
   d
@@ -13,38 +14,57 @@ const toYMD = (d) =>
 export default function Grupos() {
   const [grupos, setGrupos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     startDate: subDays(new Date(), 30),
     endDate: new Date(),
   });
 
+  const [grupoAEditar, setGrupoAEditar] = useState(null);
+
+  const cargarGrupos = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await grupoService.gruposapi(
+        toYMD(filters.startDate),
+        toYMD(filters.endDate),
+      );
+      setGrupos(data);
+    } catch (err) {
+      console.error("Error al cargar grupos:", err);
+      setError("No se pudieron cargar los grupos");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters]);
 
   useEffect(() => {
     if (filters.startDate && !filters.endDate) return;
-    let cancelado = false;
-    async function cargarGrupos() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await grupoService.gruposapi(
-          toYMD(filters.startDate),
-          toYMD(filters.endDate),
-        );
-        if (!cancelado) setGrupos(data);
-      } catch (err) {
-        console.error("Error al cargar ventas:", err);
-        if (!cancelado) setError("No se pudieron cargar las ventas");
-      } finally {
-        if (!cancelado) setIsLoading(false);
-      }
-    }
-
     cargarGrupos();
-    return () => {
-      cancelado = true;
-    };
-  }, [filters]);
+  }, [cargarGrupos, filters.startDate, filters.endDate]);
+
+  const handleGrupoSaved = () => {
+    setShowModal(false);
+    setGrupoAEditar(null);
+    cargarGrupos();
+  };
+
+  const handleEditClick = (grupos) => {
+    setGrupoAEditar(grupos);
+    setShowModal(true);
+  };
+
+  const handleAddClick = () => {
+    setGrupoAEditar(null);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setGrupoAEditar(null);
+  };
 
   return (
     <div className="container-fluid p-0">
@@ -69,8 +89,16 @@ export default function Grupos() {
             filters={filters}
             onFiltersChange={setFilters}
             isLoading={isLoading}
+            onEditClick={handleEditClick}
           />
         )}
+
+        <GrupoModal
+          show={showModal}
+          onClose={handleCloseModal}
+          onGrupoCreated={handleGrupoSaved}
+          grupoAEditar={grupoAEditar}
+        />
       </div>
     </div>
   )

@@ -11,4 +11,14 @@ export const grupoService = {
         });
         return data;
     },
+
+    async update(formData) {
+        const { data } = await api.post('/grupos/update', formData, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        });
+        return data;
+    },
 };

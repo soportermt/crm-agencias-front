@@ -10,6 +10,8 @@ import {
 } from "date-fns";
 import SearchBar from '../common/SearchBar';
 import ExportDocuments from '../common/ExportDocuments';
+import Link from 'next/link';
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 registerLocale("es", es);
 const ITEMS_PER_PAGE = 15;
@@ -21,7 +23,7 @@ const columns = [
     { key: "noches", label: "Noches", width: "80px" },
     { key: "hotel", label: "Hotel", width: "150px" },
     { key: "tipo_habitacion", label: "Tipo de habitación", align: "end", width: "100px" },
-    { key: "acciones", label: "Acciones", width: "80px", align: "center" },
+    { key: "acciones", label: "Acciones", width: "100px", align: "center" },
 ];
 
 const gruposExportColumns = columns
@@ -73,7 +75,7 @@ const PRESETS = [
     },
 ];
 
-export default function GruposTable({ data = [], filters, onFiltersChange, isLoading = false }) {
+export default function GruposTable({ data = [], filters, onFiltersChange, isLoading = false, onEditClick }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
     const pickerRef = useRef(null);
@@ -94,8 +96,10 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                 const venta = g.idVentaservicio?.idVenta;
                 return {
                     ...g,
+                    id_venta: venta?.id_venta ?? "—",
                     folio: venta?.folio ?? "—",
                     pasajero_titular: venta?.pasajero_titular ?? "—",
+                    hotel: g.hotel,
                 };
             }),
         [data]
@@ -126,8 +130,46 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
     const renderCell = (key, row) => {
         switch (key) {
             case "folio":
+                return (
+                    <Link
+                        className="font-inter fw-semibold text-brand-blue"
+                        style={{ textDecoration: "none" }}
+                        href={`/reservaciones/editar/${row.id_venta}`}
+                        target="_blank"
+                    >
+                        {row.folio}
+                    </Link>
+                );
+
+            case "hotel":
             case "pasajero_titular":
                 return <span className="font-inter fw-semibold">{row[key]}</span>;
+
+            case "acciones":
+                return (
+                    <div className="d-flex align-items-center justify-content-center gap-1">
+                        <a
+                            href={`caja/pagos/${row.id_venta}`}
+                            className="btn btn-link p-1 text-primary"
+                        >
+                            <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
+                        </a>
+                        <button
+                            onClick={() => onEditClick(row)}
+                            className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
+                            style={{ whiteSpace: "normal", textAlign: "left", fontSize: 14 }}
+                        >
+                            <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
+                        </button>
+                        <a
+                            href={`caja/pagos/${row.id_venta}`}
+                            className="btn btn-link p-1 text-primary"
+                        >
+                            <TrashIcon style={{ width: "20px", height: "20px", color: "rgb(175, 35, 58)" }} />
+                        </a>
+                    </div>
+                );
+
             default:
                 return row[key];
         }
