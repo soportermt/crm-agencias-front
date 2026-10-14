@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams, useParams } from "next/navigation";
 import General from "@/components/grupos/info/General";
 import Habitaciones from "@/components/grupos/info/Habitaciones";
 import Archivos from "@/components/grupos/info/Archivos";
@@ -37,6 +37,9 @@ function GrupoComponent() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+
+    const params = useParams();
+    const id_grupo = params.id || params.id_grupo;
 
     const tabParam = searchParams.get("tab");
     const currentTab = VALID_TABS.includes(tabParam) ? tabParam : "general";
@@ -86,7 +89,7 @@ function GrupoComponent() {
                         })}
                     </div>
                     <div>
-                        {ActiveComponent && <ActiveComponent />}
+                        {ActiveComponent && <ActiveComponent id_grupo={id_grupo} />}
                     </div>
                 </div>
             </div>

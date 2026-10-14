@@ -21,4 +21,15 @@ export const grupoService = {
         });
         return data;
     },
+
+    async getGroupInfo(id_grupo) {
+        const body = new URLSearchParams();
+        body.append("id", id_grupo);
+        body.append("tipo", "grupo");
+    
+        const { data } = await api.post("/grupos/getGroupInfo/", body, {
+            withCredentials: true,
+        });
+        return data;
+    },
 };

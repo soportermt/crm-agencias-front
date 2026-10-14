@@ -100,6 +100,7 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                     folio: venta?.folio ?? "—",
                     pasajero_titular: venta?.pasajero_titular ?? "—",
                     hotel: g.hotel,
+                    id_grupo: g.id_grupo,
                 };
             }),
         [data]
@@ -149,7 +150,7 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                 return (
                     <div className="d-flex align-items-center justify-content-center gap-1">
                         <a
-                            href={`/grupos/${row.id_venta}`}
+                            href={`/grupos/${row.id_grupo}`}
                             className="btn btn-link p-1 text-primary"
                         >
                             <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
