@@ -149,7 +149,7 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                 return (
                     <div className="d-flex align-items-center justify-content-center gap-1">
                         <a
-                            href={`caja/pagos/${row.id_venta}`}
+                            href={`/grupos/${row.id_venta}`}
                             className="btn btn-link p-1 text-primary"
                         >
                             <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
@@ -162,7 +162,7 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                             <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
                         </button>
                         <a
-                            href={`caja/pagos/${row.id_venta}`}
+                            href={`/grupos/${row.id_venta}`}
                             className="btn btn-link p-1 text-primary"
                         >
                             <TrashIcon style={{ width: "20px", height: "20px", color: "rgb(175, 35, 58)" }} />
