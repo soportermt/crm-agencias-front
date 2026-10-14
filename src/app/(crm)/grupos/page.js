@@ -2,20 +2,35 @@
 
 import GruposTable from "@/components/grupos/GruposTable";
 import { grupoService } from "@/services/grupo.service";
+import { subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
+
+const toYMD = (d) =>
+  d
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    : null;
 
 export default function Grupos() {
   const [grupos, setGrupos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    startDate: subDays(new Date(), 30),
+    endDate: new Date(),
+  });
+
 
   useEffect(() => {
+    if (filters.startDate && !filters.endDate) return;
     let cancelado = false;
     async function cargarGrupos() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await grupoService.gruposapi();
+        const data = await grupoService.gruposapi(
+          toYMD(filters.startDate),
+          toYMD(filters.endDate),
+        );
         if (!cancelado) setGrupos(data);
       } catch (err) {
         console.error("Error al cargar ventas:", err);
@@ -29,7 +44,7 @@ export default function Grupos() {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [filters]);
 
   return (
     <div className="container-fluid p-0">
@@ -49,7 +64,12 @@ export default function Grupos() {
             <p className="text-muted mt-2 font-poppins small">Cargando...</p>
           </div>
         ) : (
-          <GruposTable data={grupos}/>
+          <GruposTable
+            data={grupos}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isLoading={isLoading}
+          />
         )}
       </div>
     </div>
