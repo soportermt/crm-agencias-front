@@ -32,4 +32,9 @@ export const grupoService = {
         });
         return data;
     },
+
+    async getGroupHabs(id) {
+        const { data } = await api.get(`/grupos/getGroupHabs/${id}`);
+        return data;
+    },
 };
