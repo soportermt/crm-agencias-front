@@ -17,6 +17,11 @@ export const conectividadService = {
     return data;
   },
 
+  async validateWhatsapp(payload = {}) {
+    const { data } = await api.post('/settings/whatsapp/validate', payload);
+    return data;
+  },
+
   async saveWhatsappSettings(settingsData) {
     const { data } = await api.post('/settings/whatsapp', settingsData);
     return data;

@@ -1,19 +1,24 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { templatesService } from "@/services/templates.service";
+import { conectividadService } from "@/services/conectividad.service";
 
 export default function PlantillasTab() {
   const [templates, setTemplates] = useState([]);
   const [agencySettings, setAgencySettings] = useState({
     default_open_template_id: null,
     default_reservation_template_id: null,
+    default_receipt_template_id: null,
   });
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [generatingDefaults, setGeneratingDefaults] = useState(false);
   const [message, setMessage] = useState(null);
+  const [connection, setConnection] = useState(null);
+  const [validating, setValidating] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -31,7 +36,29 @@ export default function PlantillasTab() {
 
   useEffect(() => {
     loadData();
+    validarConexion();
   }, []);
+
+  const validarConexion = async () => {
+    try {
+      setValidating(true);
+      const res = await conectividadService.validateWhatsapp();
+      setConnection(res);
+      return res;
+    } catch (err) {
+      console.error("Error al validar la conexión con WhatsApp:", err);
+      const res = {
+        ok: false,
+        message:
+          err?.response?.data?.message ||
+          "No se pudo validar la conexión con WhatsApp. Revisa las credenciales en Conectividad.",
+      };
+      setConnection(res);
+      return res;
+    } finally {
+      setValidating(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -48,6 +75,7 @@ export default function PlantillasTab() {
         setAgencySettings({
           default_open_template_id: settings.default_open_template_id || null,
           default_reservation_template_id: settings.default_reservation_template_id || null,
+          default_receipt_template_id: settings.default_receipt_template_id || null,
         });
       }
     } catch (err) {
@@ -69,6 +97,7 @@ export default function PlantillasTab() {
       await templatesService.updateAgencySettings({
         defaultOpenTemplateId: agencySettings.default_open_template_id,
         defaultReservationTemplateId: agencySettings.default_reservation_template_id,
+        defaultReceiptTemplateId: agencySettings.default_receipt_template_id,
       });
       showMessage("success", "Preferencias globales de plantillas guardadas correctamente.");
     } catch (err) {
@@ -83,8 +112,13 @@ export default function PlantillasTab() {
     try {
       setSyncing(true);
       const res = await templatesService.syncMeta();
-      showMessage("success", res.message || "Sincronización con Meta completada.");
+      if (res?.success === false) {
+        showMessage("danger", res.message || "No se pudo sincronizar con Meta.");
+      } else {
+        showMessage("success", res.message || "Sincronización con Meta completada.");
+      }
       await loadData();
+      await validarConexion();
     } catch (err) {
       console.error("Error al sincronizar con Meta:", err);
       showMessage("danger", err?.response?.data?.message || "Error al sincronizar con Meta.");
@@ -97,8 +131,13 @@ export default function PlantillasTab() {
     try {
       setGeneratingDefaults(true);
       const res = await templatesService.createDefaultsInMeta();
-      showMessage("success", res.message || "Plantillas base creadas.");
+      if (res?.success === false) {
+        showMessage("danger", res.message || "No se pudieron crear las plantillas base.");
+      } else {
+        showMessage("success", res.message || "Plantillas base creadas.");
+      }
       await loadData();
+      await validarConexion();
     } catch (err) {
       console.error("Error creando plantillas base:", err);
       showMessage("danger", err?.response?.data?.message || "Error al crear plantillas base.");
@@ -264,6 +303,9 @@ export default function PlantillasTab() {
     return text;
   }, [formData.body, formData.variablesMapping]);
 
+  const conexionInvalida = Boolean(connection && connection.ok === false);
+  const accionesBloqueadas = validating || conexionInvalida;
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center py-5">
@@ -290,7 +332,8 @@ export default function PlantillasTab() {
             className="btn btn-outline-secondary d-flex align-items-center gap-2"
             style={{ borderRadius: "8px", fontSize: "13px", padding: "8px 14px" }}
             onClick={handleSyncMeta}
-            disabled={syncing}
+            disabled={syncing || accionesBloqueadas}
+            title={accionesBloqueadas ? "Configura y valida las credenciales de WhatsApp primero" : ""}
           >
             <i className={`bi bi-arrow-repeat ${syncing ? "spin" : ""}`}></i>
             {syncing ? "Sincronizando..." : "Sincronizar con Meta"}
@@ -301,13 +344,51 @@ export default function PlantillasTab() {
             className="btn btn-outline-primary d-flex align-items-center gap-2"
             style={{ borderRadius: "8px", fontSize: "13px", padding: "8px 14px" }}
             onClick={handleGenerateDefaults}
-            disabled={generatingDefaults}
+            disabled={generatingDefaults || accionesBloqueadas}
+            title={accionesBloqueadas ? "Configura y valida las credenciales de WhatsApp primero" : ""}
           >
             <i className="bi bi-magic"></i>
             {generatingDefaults ? "Creando..." : "Crear Plantillas Base"}
           </button>
         </div>
       </div>
+
+      {validating && (
+        <div
+          className="alert alert-light border py-2 px-3 small mb-3 d-flex align-items-center gap-2"
+          style={{ borderRadius: "8px", fontSize: "13px" }}
+        >
+          <span className="spinner-border spinner-border-sm text-primary" role="status"></span>
+          Validando la conexión con WhatsApp Business...
+        </div>
+      )}
+
+      {!validating && conexionInvalida && (
+        <div className="alert alert-warning py-2 px-3 small mb-3" style={{ borderRadius: "8px" }}>
+          <div className="d-flex align-items-start gap-2">
+            <i className="bi bi-exclamation-triangle-fill"></i>
+            <div className="flex-grow-1">
+              <strong className="d-block">Conexión de WhatsApp no válida</strong>
+              <span>{connection?.message}</span>
+              <div className="mt-1">
+                Revisa tus credenciales en{" "}
+                <Link href="/configuracion?tab=conectividad" className="fw-semibold">
+                  Configuración → Conectividad
+                </Link>
+                .
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary text-nowrap"
+              style={{ fontSize: "12px" }}
+              onClick={validarConexion}
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      )}
 
       {message && (
         <div className={`alert alert-${message.type} py-2 px-3 small mb-3`} style={{ borderRadius: "8px" }}>
@@ -327,11 +408,11 @@ export default function PlantillasTab() {
             </h6>
           </div>
           <p className="small text-muted mb-3" style={{ fontSize: "12px" }}>
-            Elige qué plantilla se abrirá por defecto al iniciar una conversación en la Bandeja o al enviar un comprobante de reserva en PDF.
+            Elige qué plantilla se abrirá por defecto al iniciar una conversación en la Bandeja, al enviar un comprobante de reserva en PDF y al enviar un recibo de pagos en PDF.
           </p>
 
           <div className="row g-3">
-            <div className="col-12 col-md-5">
+            <div className="col-12 col-md-4">
               <label className="form-label small fw-medium text-dark mb-1" style={{ fontSize: "12px" }}>
                 Plantilla para Apertura de Conversación
               </label>
@@ -355,7 +436,7 @@ export default function PlantillasTab() {
               </select>
             </div>
 
-            <div className="col-12 col-md-5">
+            <div className="col-12 col-md-4">
               <label className="form-label small fw-medium text-dark mb-1" style={{ fontSize: "12px" }}>
                 Plantilla para Envío de Reservación (PDF)
               </label>
@@ -379,11 +460,35 @@ export default function PlantillasTab() {
               </select>
             </div>
 
-            <div className="col-12 col-md-2 d-flex align-items-end">
+            <div className="col-12 col-md-4">
+              <label className="form-label small fw-medium text-dark mb-1" style={{ fontSize: "12px" }}>
+                Plantilla para Envío de Recibo de Pago (PDF)
+              </label>
+              <select
+                className="form-select"
+                style={{ borderRadius: "8px", fontSize: "13px" }}
+                value={agencySettings.default_receipt_template_id || ""}
+                onChange={(e) =>
+                  setAgencySettings((prev) => ({
+                    ...prev,
+                    default_receipt_template_id: e.target.value ? Number(e.target.value) : null,
+                  }))
+                }
+              >
+                <option value="">-- Sin predeterminar --</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.header_type || "Texto"})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-12 d-flex justify-content-end">
               <button
                 type="button"
-                className="btn btn-primary-custom w-100"
-                style={{ borderRadius: "8px", fontSize: "13px", height: "38px" }}
+                className="btn btn-primary-custom"
+                style={{ borderRadius: "8px", fontSize: "13px", height: "38px", minWidth: "160px" }}
                 onClick={handleSaveSettings}
                 disabled={savingSettings}
               >
@@ -418,6 +523,7 @@ export default function PlantillasTab() {
             {templates.map((t) => {
               const isDefaultOpen = agencySettings.default_open_template_id === t.id;
               const isDefaultReserva = agencySettings.default_reservation_template_id === t.id;
+              const isDefaultRecibo = agencySettings.default_receipt_template_id === t.id;
 
               let buttons = [];
               if (t.buttons) {
@@ -438,7 +544,7 @@ export default function PlantillasTab() {
                     className="card h-100 border shadow-sm transition-smooth"
                     style={{
                       borderRadius: "8px",
-                      borderColor: isDefaultOpen || isDefaultReserva ? "#0c5cc6" : "#e2e8f0",
+                      borderColor: isDefaultOpen || isDefaultReserva || isDefaultRecibo ? "#0c5cc6" : "#e2e8f0",
                       backgroundColor: "#ffffff",
                     }}
                   >
@@ -487,6 +593,14 @@ export default function PlantillasTab() {
                                 style={{ fontSize: "10px", borderRadius: "10px" }}
                               >
                                 Default Reserva
+                              </span>
+                            )}
+                            {isDefaultRecibo && (
+                              <span
+                                className="badge text-white"
+                                style={{ fontSize: "10px", borderRadius: "10px", backgroundColor: "#25D366" }}
+                              >
+                                Default Recibo
                               </span>
                             )}
                             {t.header_type && (

@@ -24,6 +24,8 @@ export default function ConectividadTab() {
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [message, setMessage] = useState(null);
+  const [validating, setValidating] = useState(false);
+  const [connectionResult, setConnectionResult] = useState(null);
 
   // Template Modal State
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -33,6 +35,7 @@ export default function ConectividadTab() {
   const [btn1Text, setBtn1Text] = useState("Sí, me interesa");
   const [btn2Text, setBtn2Text] = useState("No, gracias");
   const [reservaBody, setReservaBody] = useState("Hola {{1}}, adjunto encontrarás los detalles de tu reservación.");
+  const [reciboBody, setReciboBody] = useState("Hola {{1}}, adjunto encontrarás el recibo de pago de tu reservación.");
 
   useEffect(() => {
     fetchSettings();
@@ -81,12 +84,49 @@ export default function ConectividadTab() {
     setEmailSettings(prev => ({ ...prev, [name]: value }));
   };
 
+  const validarConexion = async (values = whatsappSettings) => {
+    try {
+      setValidating(true);
+      const res = await conectividadService.validateWhatsapp({
+        wabaId: values.wabaId,
+        token: values.token,
+        phoneNumberId: values.phoneNumberId,
+      });
+      setConnectionResult(res);
+      return res;
+    } catch (err) {
+      console.error("Error validando la conexión con WhatsApp:", err);
+      const res = {
+        ok: false,
+        message:
+          err?.response?.data?.message || "No se pudo validar la conexión con Meta. Intenta de nuevo.",
+      };
+      setConnectionResult(res);
+      return res;
+    } finally {
+      setValidating(false);
+    }
+  };
+
   const handleSaveWhatsapp = async () => {
     try {
       setSavingWhatsapp(true);
       setMessage(null);
+
+      const validation = await validarConexion();
+      if (!validation.ok) {
+        setMessage({
+          type: "danger",
+          text: `No se guardó la configuración: ${validation.message}`,
+        });
+        return;
+      }
+
       await conectividadService.saveWhatsappSettings(whatsappSettings);
-      setMessage({ type: "success", text: "Configuración de WhatsApp guardada correctamente." });
+      setMessage({
+        type: "success",
+        text: "Configuración de WhatsApp guardada correctamente. Conexión verificada con Meta.",
+      });
 
       // Sincronizar plantillas con Meta (limpia BD y trae las de la nueva cuenta)
       try {
@@ -101,8 +141,9 @@ export default function ConectividadTab() {
         const templatesList = templates.data || templates; // depending on interceptor
         const hasApertura = Array.isArray(templatesList) && templatesList.some(t => t.name === 'crm_apertura_default');
         const hasReserva = Array.isArray(templatesList) && templatesList.some(t => t.name === 'crm_reserva_default');
-        
-        if (!hasApertura || !hasReserva) {
+        const hasRecibo = Array.isArray(templatesList) && templatesList.some(t => t.name === 'crm_recibo_default');
+
+        if (!hasApertura || !hasReserva || !hasRecibo) {
           setShowTemplateModal(true);
         }
       } catch (e) {
@@ -113,14 +154,15 @@ export default function ConectividadTab() {
       setMessage({ type: "danger", text: "Error al guardar la configuración de WhatsApp." });
     } finally {
       setSavingWhatsapp(false);
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 7000);
     }
   };
 
   const handleCreateDefaults = async () => {
     try {
       setCreatingTemplates(true);
-      setTemplateStatus("Enviando plantillas a Meta y procesando documento...");
+      setTemplateStatus("Validando conexión y enviando plantillas a Meta...");
+      await validarConexion();
       await templatesService.createDefaultsInMeta({
         aperturaBody,
         aperturaButtons: [
@@ -128,6 +170,7 @@ export default function ConectividadTab() {
           { type: "QUICK_REPLY", text: btn2Text || "No, gracias" }
         ],
         reservaBody,
+        reciboBody,
       });
       setTemplateStatus("Plantillas base creadas y registradas exitosamente.");
       setTimeout(() => {
@@ -136,7 +179,9 @@ export default function ConectividadTab() {
       }, 2000);
     } catch (e) {
       console.error(e);
-      setTemplateStatus("Error al crear plantillas. Verifica credenciales en Meta.");
+      setTemplateStatus(
+        e?.response?.data?.message || "Error al crear plantillas. Verifica credenciales en Meta."
+      );
     } finally {
       setCreatingTemplates(false);
     }
@@ -223,12 +268,41 @@ export default function ConectividadTab() {
             </div>
           </div>
           
-          <div className="mt-3 text-end">
+          {connectionResult && (
+            <div
+              className={`alert ${connectionResult.ok ? "alert-success" : "alert-warning"} py-2 px-3 mb-0`}
+              style={{ borderRadius: "8px", fontSize: "13px" }}
+            >
+              <strong className="d-block mb-1">
+                {connectionResult.ok ? "Conexión verificada con Meta" : "Conexión no válida"}
+              </strong>
+              <span>{connectionResult.message}</span>
+              {Array.isArray(connectionResult.checks) && connectionResult.checks.length > 0 && (
+                <ul className="mb-0 mt-1 ps-3">
+                  {connectionResult.checks.map((check, index) => (
+                    <li key={index}>
+                      <strong>{check.name}:</strong> {check.ok ? "OK" : "Error"} — {check.detail}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          <div className="mt-3 d-flex justify-content-end gap-2">
+            <button 
+              className="btn btn-outline-secondary shadow-premium px-4" 
+              style={{ borderRadius: "8px", fontSize: "14px", fontWeight: "500", padding: "10px 16px" }}
+              onClick={() => validarConexion()}
+              disabled={validating || savingWhatsapp}
+            >
+              {validating ? 'Validando...' : 'Probar conexión'}
+            </button>
             <button 
               className="btn btn-primary-custom shadow-premium px-4" 
               style={{ borderRadius: "8px", fontSize: "14px", fontWeight: "500", padding: "10px 16px" }}
               onClick={handleSaveWhatsapp}
-              disabled={savingWhatsapp}
+              disabled={savingWhatsapp || validating}
             >
               {savingWhatsapp ? 'Guardando...' : 'Guardar WhatsApp'}
             </button>
@@ -346,7 +420,7 @@ export default function ConectividadTab() {
                       Creación Asistida de Plantillas de WhatsApp
                     </h5>
                     <p className="small text-muted mb-0 mt-1" style={{ fontSize: "13px" }}>
-                      Tus credenciales se han guardado con éxito. Para operar con WhatsApp Business, la agencia requiere las 2 plantillas base. Puedes personalizar sus textos a continuación antes de enviarlas a Meta:
+                      Tus credenciales se han guardado con éxito. Para operar con WhatsApp Business, la agencia requiere las 3 plantillas base. Puedes personalizar sus textos a continuación antes de enviarlas a Meta:
                     </p>
                   </div>
                   <button type="button" className="btn-close" onClick={() => setShowTemplateModal(false)} aria-label="Close"></button>
@@ -355,7 +429,7 @@ export default function ConectividadTab() {
                 <div className="modal-body p-4 pt-3">
                   <div className="row g-4">
                     {/* Plantilla 1: Apertura */}
-                    <div className="col-12 col-lg-6">
+                    <div className="col-12 col-lg-4">
                       <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "8px", borderColor: "#e2e8f0" }}>
                         <div className="d-flex align-items-center justify-content-between mb-3">
                           <div className="d-flex align-items-center gap-2">
@@ -429,7 +503,7 @@ export default function ConectividadTab() {
                     </div>
 
                     {/* Plantilla 2: Reserva */}
-                    <div className="col-12 col-lg-6">
+                    <div className="col-12 col-lg-4">
                       <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "8px", borderColor: "#e2e8f0" }}>
                         <div className="d-flex align-items-center justify-content-between mb-3">
                           <div className="d-flex align-items-center gap-2">
@@ -467,6 +541,50 @@ export default function ConectividadTab() {
                           />
                           <span className="text-muted" style={{ fontSize: "11px" }}>
                             La variable <code>{'{{1}}'}</code> se sustituirá por el nombre del cliente y el PDF irá adjunto en el encabezado.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Plantilla 3: Recibo de pago */}
+                    <div className="col-12 col-lg-4">
+                      <div className="border rounded p-3 p-md-4 h-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc", borderRadius: "8px", borderColor: "#e2e8f0" }}>
+                        <div className="d-flex align-items-center justify-content-between mb-3">
+                          <div className="d-flex align-items-center gap-2">
+                            <span className="badge bg-success text-white rounded-pill px-2 py-1" style={{ fontSize: "11px" }}>
+                              3
+                            </span>
+                            <span className="fw-semibold text-dark font-poppins" style={{ fontSize: "15px" }}>
+                              Envío de Recibo de Pago (PDF)
+                            </span>
+                          </div>
+                          <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style={{ fontSize: "11px", fontWeight: "600" }}>
+                            UTILITY
+                          </span>
+                        </div>
+
+                        <div className="p-2 mb-3 border rounded bg-white d-flex align-items-center gap-2" style={{ fontSize: "12px", borderRadius: "8px" }}>
+                          <i className="bi bi-file-earmark-pdf-fill text-danger" style={{ fontSize: "20px" }}></i>
+                          <div>
+                            <strong className="d-block text-dark" style={{ fontSize: "12px" }}>Encabezado: Documento PDF</strong>
+                            <span className="text-muted" style={{ fontSize: "11px" }}>Se usa el mismo documento de ejemplo validado en Meta</span>
+                          </div>
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="form-label small fw-medium text-dark mb-1" style={{ fontSize: "12px" }}>
+                            Texto del mensaje:
+                          </label>
+                          <textarea
+                            rows="4"
+                            className="form-control"
+                            style={{ fontSize: "13px", borderRadius: "8px", borderColor: "#cbd5e1" }}
+                            value={reciboBody}
+                            onChange={(e) => setReciboBody(e.target.value)}
+                            placeholder="Texto del recibo..."
+                          />
+                          <span className="text-muted" style={{ fontSize: "11px" }}>
+                            La variable <code>{'{{1}}'}</code> se sustituirá por el nombre del cliente y el recibo irá adjunto en el encabezado.
                           </span>
                         </div>
                       </div>

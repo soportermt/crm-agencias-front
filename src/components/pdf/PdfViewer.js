@@ -3,9 +3,15 @@
 import { useState, useEffect } from "react";
 import { pdf } from "@react-pdf/renderer";
 import BookingPdf from "./BookingPdf";
-import { conectividadService } from "@/services/conectividad.service";
 import { templatesService } from "@/services/templates.service";
 import AlertModal from "@/components/common/AlertModal";
+import {
+    PURPOSE_RESERVA,
+    getSendBlockedReason,
+    getWhatsappCredentialsStatus,
+    resolveTemplate,
+    sendPdfViaWhatsapp,
+} from "@/utils/whatsappReceipt";
 
 export default function PdfViewer({ venta, customer, terminos }) {
     const [downloading, setDownloading] = useState(false);
@@ -13,22 +19,31 @@ export default function PdfViewer({ venta, customer, terminos }) {
     const [alertData, setAlertData] = useState(null);
     const [agencySettings, setAgencySettings] = useState(null);
     const [templates, setTemplates] = useState([]);
+    const [connection, setConnection] = useState(null);
+    const [loadingSettings, setLoadingSettings] = useState(true);
 
     useEffect(() => {
         const loadSettings = async () => {
             try {
-                const [resSettings, resTemplates] = await Promise.all([
-                    templatesService.getAgencySettings(),
-                    templatesService.getTemplates()
+                const [resSettings, resTemplates, connectionStatus] = await Promise.all([
+                    templatesService.getAgencySettings().catch(() => null),
+                    templatesService.getTemplates().catch(() => []),
+                    getWhatsappCredentialsStatus(),
                 ]);
                 if (resSettings) setAgencySettings(resSettings);
                 setTemplates(Array.isArray(resTemplates) ? resTemplates : (resTemplates.data || []));
+                setConnection(connectionStatus);
             } catch (e) {
                 console.error("Error loading template settings in PdfViewer", e);
+            } finally {
+                setLoadingSettings(false);
             }
         };
         loadSettings();
     }, []);
+
+    const template = resolveTemplate({ templates, agencySettings, purpose: PURPOSE_RESERVA });
+    const credentialsMissing = connection?.configured === false;
 
     const handleDownload = async () => {
         if (!venta) {
@@ -74,17 +89,20 @@ export default function PdfViewer({ venta, customer, terminos }) {
 
         const phone = customer?.phone || customer?.celular || venta?.idCliente?.telefono || venta?.idCliente?.celular || "";
         const clientName = customer?.label || venta?.idCliente?.nombre || "Cliente";
+        const email = customer?.email || customer?.mail || venta?.idCliente?.correo || "";
         const clientId = venta?.id_cliente || venta?.idCliente?.id_cliente || customer?.value || "";
 
-        if (!phone && !clientId) {
+        const blockedReason = getSendBlockedReason({ connection, template, phone });
+
+        if (blockedReason) {
             setAlertData({
                 icon: (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#f59e0b" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                     </svg>
                 ),
-                title: "Teléfono no disponible",
-                description: "El cliente asociado a esta reservación no tiene un número telefónico registrado.",
+                title: "No se puede enviar el comprobante",
+                description: blockedReason,
             });
             return;
         }
@@ -95,80 +113,48 @@ export default function PdfViewer({ venta, customer, terminos }) {
             const blob = await pdf(<BookingPdf venta={venta} terminos={terminos}/>).toBlob();
             const fileName = `Reserva-${venta.folio || "comprobante"}.pdf`;
 
-            let templateName = "prueba_envio_docs";
-            let language = "es";
-            const parameters = [];
+            const res = await sendPdfViaWhatsapp({
+                blob,
+                fileName,
+                folio: venta.folio,
+                clientId,
+                clientName,
+                phone,
+                email,
+                template,
+                purpose: PURPOSE_RESERVA,
+            });
 
-            if (agencySettings?.default_reservation_template_id && templates.length > 0) {
-                const defaultTpl = templates.find(t => t.id === agencySettings.default_reservation_template_id);
-                if (defaultTpl) {
-                    templateName = defaultTpl.name;
-                    language = defaultTpl.language || "es_MX";
-                    
-                    if (defaultTpl.variables_mapping) {
-                        let mapping = defaultTpl.variables_mapping;
-                        if (typeof mapping === 'string') {
-                            try { mapping = JSON.parse(mapping); } catch { mapping = []; }
-                        }
-                        if (Array.isArray(mapping)) {
-                            mapping.forEach(m => {
-                                let value = '';
-                                if (m.source === 'client_name') value = clientName;
-                                else if (m.source === 'client_phone') value = phone;
-                                else if (m.source === 'client_email') value = customer?.email || customer?.mail || venta?.idCliente?.correo || '';
-                                parameters.push(value);
-                            });
-                        } else if (typeof mapping === 'object' && mapping !== null) {
-                            const sortedKeys = Object.keys(mapping).sort((a, b) => Number(a) - Number(b));
-                            sortedKeys.forEach(k => {
-                                const mVal = mapping[k];
-                                let value = '';
-                                if (mVal === 'CLIENT_NAME' || mVal === 'client_name') value = clientName;
-                                else if (mVal === 'CLIENT_PHONE' || mVal === 'client_phone') value = phone;
-                                else if (mVal === 'CLIENT_EMAIL' || mVal === 'client_email') value = customer?.email || customer?.mail || venta?.idCliente?.correo || '';
-                                parameters.push(value);
-                            });
-                        }
-                    }
-                }
-            }
-
-            const formData = new FormData();
-            formData.append("file", blob, fileName);
-            formData.append("folio", String(venta.folio || ""));
-            if (clientId) formData.append("clientId", String(clientId));
-            if (phone) formData.append("toPhone", String(phone));
-            formData.append("clientName", clientName);
-            formData.append("templateName", templateName);
-            formData.append("language", language);
-            formData.append("parameters", JSON.stringify(parameters));
-
-            const res = await conectividadService.sendReceiptWhatsapp(formData);
-
-            if (res && res.success) {
-                if (res.delivered) {
-                    setAlertData({
-                        icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#25D366" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                            </svg>
-                        ),
-                        title: "¡Comprobante enviado!",
-                        description: `El comprobante en PDF se ha enviado por WhatsApp exitosamente al ${res.toPhone || phone}.`,
-                    });
-                } else {
-                    setAlertData({
-                        icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#0c5cc6" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-                            </svg>
-                        ),
-                        title: "Flujo procesado en el servidor",
-                        description: `El PDF y la plantilla "${res.templateName}" fueron procesados por el backend. ${res.apiError ? `Estado Meta API: ${res.apiError}.` : ""}`,
-                    });
-                }
+            if (res?.success === false) {
+                setAlertData({
+                    icon: (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#dc3545" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                    ),
+                    title: "Envío no realizado",
+                    description: res.message || "No se intentó el envío porque falta configuración de WhatsApp.",
+                });
+            } else if (res?.delivered === false) {
+                setAlertData({
+                    icon: (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#0c5cc6" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                        </svg>
+                    ),
+                    title: "WhatsApp no entregó el comprobante",
+                    description: res.apiMessage || res.message || `La plantilla "${res.templateName}" fue procesada pero Meta no confirmó la entrega.`,
+                });
             } else {
-                throw new Error(res?.error || "Respuesta no exitosa del servidor");
+                setAlertData({
+                    icon: (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={46} color="#25D366" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                        </svg>
+                    ),
+                    title: "¡Comprobante enviado!",
+                    description: `El comprobante en PDF se ha enviado por WhatsApp exitosamente al ${res.toPhone || phone}.`,
+                });
             }
         } catch (error) {
             console.error("Error al enviar comprobante por WhatsApp:", error);
@@ -219,7 +205,7 @@ export default function PdfViewer({ venta, customer, terminos }) {
                         transition: "all 0.2s ease-in-out"
                     }}
                     onClick={handleSendWhatsapp}
-                    disabled={downloading || sendingWhatsapp}
+                    disabled={downloading || sendingWhatsapp || loadingSettings}
                 >
                     {sendingWhatsapp ? (
                         <>
@@ -235,6 +221,12 @@ export default function PdfViewer({ venta, customer, terminos }) {
                         </>
                     )}
                 </button>
+
+                {credentialsMissing && (
+                    <small className="text-center text-secondary" style={{ fontSize: "12px" }}>
+                        Sin credenciales de WhatsApp configuradas. Ve a Configuración → Conectividad.
+                    </small>
+                )}
             </div>
 
             {alertData && (

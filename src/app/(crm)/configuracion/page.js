@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ConfigSidebar from "@/components/configuracion/ConfigSidebar";
 import GeneralTab from "@/components/configuracion/GeneralTab";
 import UsuariosTab from "@/components/configuracion/UsuariosTab";
@@ -10,8 +11,14 @@ import ConectividadTab from "@/components/configuracion/ConectividadTab";
 import PlantillasTab from "@/components/configuracion/PlantillasTab";
 import ConfiguracionHeader from "@/components/configuracion/ConfiguracionHeader";
 
-export default function ConfiguracionPage() {
-  const [activeTab, setActiveTab] = useState("general");
+const TABS_VALIDOS = ["general", "usuarios", "bancos", "terminos", "conectividad", "plantillas"];
+
+function ConfiguracionContent() {
+  const searchParams = useSearchParams();
+  const tabUrl = searchParams?.get("tab");
+  const initialTab = TABS_VALIDOS.includes(tabUrl) ? tabUrl : "general";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <div className="d-flex flex-column w-100 p-2 gap-3">
@@ -28,5 +35,13 @@ export default function ConfiguracionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfiguracionPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConfiguracionContent />
+    </Suspense>
   );
 }
