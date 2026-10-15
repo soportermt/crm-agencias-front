@@ -6,10 +6,12 @@ import General from "@/components/grupos/info/General";
 import Habitaciones from "@/components/grupos/info/Habitaciones";
 import Archivos from "@/components/grupos/info/Archivos";
 import {
+    ChevronRightIcon,
     FolderIcon,
     InformationCircleIcon,
     UserGroupIcon
 } from '@heroicons/react/24/outline';
+import Link from "next/link";
 
 const tabComponents = {
     general: General,
@@ -54,7 +56,11 @@ function GrupoComponent() {
     return (
         <div className="container-fluid p-0">
             <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "8px" }}>
-                <h4>Detalles del grupo</h4>
+                <div className="d-flex align-items-center gap-1">
+                    <h4>Detalles del grupo</h4>
+                    <ChevronRightIcon width={18}/>
+                    <Link href="/grupos" style={{textDecoration: "none"}}>Listado de grupos</Link>
+                </div>
                 <div className='mt-4'>
                     <div className="d-flex flex-column flex-md-row gap-2 mb-3">
                         {VALID_TABS.map((tab) => {
