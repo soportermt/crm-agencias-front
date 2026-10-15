@@ -5,6 +5,7 @@ import SearchBar from "@/components/common/SearchBar";
 import { grupoService } from "@/services/grupo.service";
 import { EnvelopeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useMemo, useState } from "react";
+import HabModal from "./HabModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -30,12 +31,15 @@ const normalize = (s) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
-export default function Habitaciones({ id_grupo }) {
+export default function Habitaciones({ id_grupo, comision }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+  const [habAEditar, setHabAEditar] = useState(null);
 
   async function loadData(id) {
     setIsLoading(true);
@@ -74,8 +78,8 @@ export default function Habitaciones({ id_grupo }) {
           huespedes: nombres.length ? nombres : ["Sin dato"],
           edades: edades.length ? edades.join(", ") : "Sin dato",
           tipo_habitacion: h.tipo_habitacion && h.tipo_habitacion !== "-" ? h.tipo_habitacion : "Sin dato",
-          fecha_entrada: formatDate(h.fecha_entrada),
-          fecha_salida: formatDate(h.fecha_salida),
+          fecha_entrada_raw: h.fecha_entrada,
+          fecha_salida_raw: h.fecha_salida,
         };
       }),
     [data]
@@ -95,14 +99,14 @@ export default function Habitaciones({ id_grupo }) {
         return (
           <div className="d-flex align-items-center justify-content-center gap-1">
             <button
-              onClick={() => onEditClick(row)}
+              onClick={() => handleEditClick(row)}
               className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
               style={{ whiteSpace: "normal", textAlign: "left", fontSize: 14 }}
             >
               <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
             </button>
             <button
-              onClick={() => onEditClick(row)}
+              onClick={() => handleEditClick(row)}
               className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
               style={{ whiteSpace: "normal", textAlign: "left", fontSize: 14 }}
             >
@@ -138,6 +142,27 @@ export default function Habitaciones({ id_grupo }) {
     setCurrentPage(1);
   }, [searchValue]);
 
+  const handleHabSaved = () => {
+    setShowModal(false);
+    setHabAEditar(null);
+    loadData(id_grupo);
+  };
+
+  const handleEditClick = (grupos) => {
+    setHabAEditar(grupos);
+    setShowModal(true);
+  };
+
+  const handleAddClick = () => {
+    setHabAEditar(null);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setHabAEditar(null);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-5">
@@ -151,35 +176,48 @@ export default function Habitaciones({ id_grupo }) {
   if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="mt-0">
-      <div className="mb-3">
-        <div className="d-flex justify-content-between align-items-end w-100">
-          <div>
-            <SearchBar
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Buscar por huéspedes"
-              width="300px"
-            />
-          </div>
-          <div>
-            <button className="btn btn-primary">
-              <i className="bi bi-plus-lg" style={{ marginRight: 8 }}></i>
+    <>
+      <div className="mt-0">
+        <div className="mb-3">
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-end gap-2 w-100">
+            <div className="flex-grow-1 flex-sm-grow-0">
+              <SearchBar
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Buscar por huéspedes"
+                width="100%"
+              />
+            </div>
+            <button
+              onClick={handleAddClick}
+              className="btn btn-primary text-nowrap"
+              style={{ fontSize: 14 }}
+            >
+              <i className="bi bi-plus-lg me-2"></i>
               <span>Habitación</span>
             </button>
           </div>
         </div>
+        <DataTable
+          columns={columns}
+          data={paginated}
+          renderCell={renderCell}
+          pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          emptyMessage="No se encontraron habitaciones."
+        />
+
       </div>
-      <DataTable
-        columns={columns}
-        data={paginated}
-        renderCell={renderCell}
-        pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        emptyMessage="No se encontraron habitaciones."
+      <HabModal
+        show={showModal}
+        onClose={handleCloseModal}
+        onHabCreated={handleHabSaved}
+        habAEditar={habAEditar}
+        id_grupo={id_grupo}
+        comision={comision}
       />
-    </div>
+    </>
   )
 }

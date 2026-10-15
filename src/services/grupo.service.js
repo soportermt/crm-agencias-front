@@ -37,4 +37,24 @@ export const grupoService = {
         const { data } = await api.get(`/grupos/getGroupHabs/${id}`);
         return data;
     },
+
+    async createHab(hab, guests) {
+        const params = new URLSearchParams();
+    
+        Object.entries(hab).forEach(([key, value]) => {
+            params.append(`hab[${key}]`, value ?? "");
+        });
+    
+        guests.forEach((guest, i) => {
+            Object.entries(guest).forEach(([key, value]) => {
+                params.append(`guests[${i}][${key}]`, value ?? "");
+            });
+        });
+    
+        const { data } = await api.post('/grupos/createHab', params.toString(), {
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+        return data;
+    },
 };
