@@ -50,6 +50,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
     useEffect(() => {
         if (!show) return;
         setError(null);
+    
         if (habAEditar) {
             setTipoHabitacion(habAEditar.tipo_habitacion === "Sin dato" ? "" : habAEditar.tipo_habitacion ?? "");
             setStartDate(parseYMD(habAEditar.fecha_entrada_raw));
@@ -57,7 +58,15 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
             setTotalPublico(habAEditar.total_publico ?? "");
             setGuests(
                 habAEditar.habitacionesHuespedes?.length
-                    ? habAEditar.habitacionesHuespedes.map((g) => ({ ...emptyGuest(), ...g }))
+                    ? habAEditar.habitacionesHuespedes.map((g) => ({
+                        id_huesped: g.id_huesped ?? 0,
+                        id_habitacion: g.id_habitacion ?? 0,
+                        nombres: g.nombres ?? "",
+                        apellidos: g.apellidos ?? "",
+                        edad: g.edad ?? "",
+                        correo: g.correo ?? "",
+                        telefono: g.telefono ?? "",
+                    }))
                     : [emptyGuest()]
             );
         } else {
@@ -65,14 +74,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
             setStartDate(null);
             setEndDate(null);
             setTotalPublico("");
-            setGuests(
-                habAEditar.habitacionesHuespedes?.length
-                    ? habAEditar.habitacionesHuespedes.map((g) => ({
-                        ...emptyGuest(),
-                        ...g
-                    }))
-                    : [emptyGuest()]
-            );
+            setGuests([emptyGuest()]);
         }
     }, [show, habAEditar]);
 

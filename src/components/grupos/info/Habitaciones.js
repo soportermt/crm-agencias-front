@@ -75,9 +75,9 @@ export default function Habitaciones({ id_grupo, comision }) {
 
         return {
           ...h,
-          huespedes: nombres.length ? nombres : ["Sin dato"],
-          edades: edades.length ? edades.join(", ") : "Sin dato",
-          tipo_habitacion: h.tipo_habitacion && h.tipo_habitacion !== "-" ? h.tipo_habitacion : "Sin dato",
+          huespedes: nombres.length ? nombres : ["Sin datos"],
+          edades: edades.length ? edades.join(", ") : "Sin datos",
+          tipo_habitacion: h.tipo_habitacion ? h.tipo_habitacion : "Sin datos",
           fecha_entrada_raw: h.fecha_entrada,
           fecha_salida_raw: h.fecha_salida,
         };
@@ -95,6 +95,17 @@ export default function Habitaciones({ id_grupo, comision }) {
             ))}
           </div>
         );
+
+      case "fecha_entrada": 
+        return (
+          <span>{formatDate(row.fecha_entrada_raw)}</span>
+        );
+
+      case "fecha_salida": 
+        return (
+          <span>{formatDate(row.fecha_salida_raw)}</span>
+        );
+
       case "acciones":
         return (
           <div className="d-flex align-items-center justify-content-center gap-1">
