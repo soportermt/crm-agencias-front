@@ -94,15 +94,6 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!tipoHabitacion.trim() || !startDate || !endDate) {
-            setError("Completa tipo de habitación y fechas de estancia.");
-            return;
-        }
-        if (guests.some((g) => !g.nombres.trim() || !g.apellidos.trim())) {
-            setError("Cada huésped debe tener nombre y apellidos.");
-            return;
-        }
-
         const hab = {
             id_habitacion: habAEditar?.id_habitacion ?? 0,
             id_grupo,
@@ -117,8 +108,14 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
         try {
             setSubmitting(true);
             setError(null);
+        
+            let res;
 
-            const res = await grupoService.createHab(hab, guests);
+            if (habAEditar) {
+                res = await grupoService.updateHab(hab, guests);
+            } else {
+                res = await grupoService.createHab(hab, guests);
+            }
 
             if (!res?.hab) {
                 const firstError = res && Object.values(res)[0];
@@ -176,7 +173,6 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                             </label>
                             <input
                                 type="text"
-                                required
                                 className="form-control input-custom"
                                 value={tipoHabitacion}
                                 onChange={(e) => setTipoHabitacion(e.target.value)}
@@ -258,7 +254,6 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                                 </label>
                                 <input
                                     type="text"
-                                    required
                                     className="form-control input-custom"
                                     value={guest.nombres}
                                     onChange={(e) => updateGuest(i, "nombres", e.target.value)}
@@ -270,7 +265,6 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                                 </label>
                                 <input
                                     type="text"
-                                    required
                                     className="form-control input-custom"
                                     value={guest.apellidos  ?? ""}
                                     onChange={(e) => updateGuest(i, "apellidos", e.target.value)}
