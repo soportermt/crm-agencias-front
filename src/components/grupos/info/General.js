@@ -1,6 +1,7 @@
 "use client";
 
 import { grupoService } from "@/services/grupo.service";
+import { calcularTotalesHabitaciones } from "@/utils/calcularHab";
 import React, { useEffect, useState } from "react";
 
 const money = (n) =>
@@ -100,6 +101,8 @@ export default function General({ id_grupo }) {
   const vs = data.idVentaservicio ?? {};
   const venta = vs.idVenta ?? {};
 
+  const totalHabs = calcularTotalesHabitaciones(data.grupoHabitaciones);
+
   return (
     <div>
       <div className="row g-3 mb-3">
@@ -142,8 +145,8 @@ export default function General({ id_grupo }) {
                 {val(data.estatus)}
               </span>
             </Field>
-            <Field label="Neto acumulado">{money(vs.costo)}</Field> 
-            <Field label="Total acumulado">{money(vs.tarifa_publica)}</Field> 
+            <Field label="Neto acumulado">{money(totalHabs.neto)}</Field> 
+            <Field label="Total acumulado">{money(totalHabs.publico)}</Field>
             <Field label="Condiciones" multiline>
               {val(data.condiciones)}
             </Field>
