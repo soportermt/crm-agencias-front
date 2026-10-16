@@ -7,17 +7,20 @@ import Habitaciones from "@/components/grupos/info/Habitaciones";
 import Archivos from "@/components/grupos/info/Archivos";
 import {
     ChevronRightIcon,
+    CurrencyDollarIcon,
     FolderIcon,
     InformationCircleIcon,
     UserGroupIcon
 } from '@heroicons/react/24/outline';
 import Link from "next/link";
 import { grupoService } from "@/services/grupo.service";
+import Pagos from "@/components/grupos/info/Pagos";
 
 const tabComponents = {
     general: General,
     habitaciones: Habitaciones,
     archivos: Archivos,
+    pagos: Pagos,
 };
 
 const tabData = {
@@ -33,9 +36,13 @@ const tabData = {
         label: "Archivos",
         Icon: FolderIcon
     },
+    pagos: {
+        label: "Pagos",
+        Icon: CurrencyDollarIcon
+    },
 };
 
-const VALID_TABS = ["general", "habitaciones", "archivos"];
+const VALID_TABS = ["general", "habitaciones", "archivos", "pagos"];
 function GrupoComponent() {
     const router = useRouter();
     const pathname = usePathname();

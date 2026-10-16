@@ -116,13 +116,6 @@ export default function Habitaciones({ id_grupo, comision }) {
             >
               <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
             </button>
-            <button
-              onClick={() => handleEditClick(row)}
-              className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
-              style={{ whiteSpace: "normal", textAlign: "left", fontSize: 14 }}
-            >
-              <EnvelopeIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
-            </button>
             <a
               href={`/grupos/${row.id_venta}`}
               className="btn btn-link p-1 text-primary"
