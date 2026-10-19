@@ -6,6 +6,7 @@ import { grupoService } from "@/services/grupo.service";
 import { EnvelopeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useMemo, useState } from "react";
 import HabModal from "./HabModal";
+import AlertModal from "@/components/common/AlertModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -41,6 +42,10 @@ export default function Habitaciones({ id_grupo, comision }) {
   const [showModal, setShowModal] = useState(false);
   const [habAEditar, setHabAEditar] = useState(null);
 
+  const [habAEliminar, setHabAEliminar] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
   async function loadData(id) {
     setIsLoading(true);
     setError(null);
@@ -54,6 +59,31 @@ export default function Habitaciones({ id_grupo, comision }) {
       setIsLoading(false);
     }
   }
+  const handleDeleteClick = (id_habitacion) => {
+    setHabAEliminar(id_habitacion);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await grupoService.deleteHab(habAEliminar);
+      if (res?.success === false) {
+        throw new Error(res.error || "No se pudo eliminar la habitación");
+      }
+      setData((prev) =>
+        prev.filter((h) => String(h.id_habitacion) !== String(habAEliminar))
+      );
+    } catch (err) {
+      console.error("Error al eliminar habitación:", err);
+      setDeleteError(
+        err.response?.data?.error || err.message || "No se pudo eliminar la habitación"
+      );
+    } finally {
+      setHabAEliminar(null);
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!id_grupo) return;
@@ -96,12 +126,12 @@ export default function Habitaciones({ id_grupo, comision }) {
           </div>
         );
 
-      case "fecha_entrada": 
+      case "fecha_entrada":
         return (
           <span>{formatDate(row.fecha_entrada_raw)}</span>
         );
 
-      case "fecha_salida": 
+      case "fecha_salida":
         return (
           <span>{formatDate(row.fecha_salida_raw)}</span>
         );
@@ -116,12 +146,13 @@ export default function Habitaciones({ id_grupo, comision }) {
             >
               <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
             </button>
-            <a
-              href={`/grupos/${row.id_venta}`}
-              className="btn btn-link p-1 text-primary"
+            <button
+              type="button"
+              onClick={() => handleDeleteClick(row.id_habitacion)}
+              className="btn btn-link p-1"
             >
               <TrashIcon style={{ width: "20px", height: "20px", color: "rgb(175, 35, 58)" }} />
-            </a>
+            </button>
           </div>
         );
       default:
@@ -167,6 +198,10 @@ export default function Habitaciones({ id_grupo, comision }) {
     setHabAEditar(null);
   };
 
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
   if (isLoading) {
     return (
       <div className="text-center py-5">
@@ -202,6 +237,21 @@ export default function Habitaciones({ id_grupo, comision }) {
             </button>
           </div>
         </div>
+        {habAEliminar && (
+          <AlertModal
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={50} color="#dc3545" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            }
+            title="¿Desea eliminar esta habitación?"
+            description="Eliminará este registro del sistema"
+            confirmText="Sí, eliminar"
+            isLoading={isDeleting}
+            onConfirm={handleConfirmDelete}
+            onClose={() => setHabAEliminar(null)}
+          />
+        )}
         <DataTable
           columns={columns}
           data={paginated}
@@ -214,6 +264,7 @@ export default function Habitaciones({ id_grupo, comision }) {
         />
 
       </div>
+      {deleteError && <div className="alert alert-danger">{deleteError}</div>}
       <HabModal
         show={showModal}
         onClose={handleCloseModal}

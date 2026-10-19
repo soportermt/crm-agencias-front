@@ -81,4 +81,9 @@ export const grupoService = {
         const { data } = await api.post(`/grupos/delete/${id}`);
         return data;
     },
+
+    async deleteHab(id) {
+        const { data } = await api.post(`/grupos/deleteHab/${id}`);
+        return data;
+    },
 };
