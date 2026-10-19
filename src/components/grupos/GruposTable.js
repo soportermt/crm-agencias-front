@@ -75,7 +75,7 @@ const PRESETS = [
     },
 ];
 
-export default function GruposTable({ data = [], filters, onFiltersChange, isLoading = false, onEditClick }) {
+export default function GruposTable({ data = [], filters, onFiltersChange, isLoading = false, onEditClick, onDeleteClick }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
     const pickerRef = useRef(null);
@@ -162,12 +162,13 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
                         >
                             <PencilSquareIcon style={{ width: "20px", height: "20px", color: "rgb(34, 124, 242)" }} /> {row[key]}
                         </button>
-                        <a
-                            href={`/grupos/${row.id_venta}`}
-                            className="btn btn-link p-1 text-primary"
+                        <button
+                            onClick={() => onDeleteClick(row.id_grupo)}
+                            className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
+                            style={{ whiteSpace: "normal", textAlign: "left", fontSize: 14 }}
                         >
                             <TrashIcon style={{ width: "20px", height: "20px", color: "rgb(175, 35, 58)" }} />
-                        </a>
+                        </button>
                     </div>
                 );
 

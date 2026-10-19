@@ -1,5 +1,6 @@
 "use client";
 
+import AlertModal from "@/components/common/AlertModal";
 import GrupoModal from "@/components/grupos/GrupoModal";
 import GruposTable from "@/components/grupos/GruposTable";
 import { grupoService } from "@/services/grupo.service";
@@ -22,6 +23,8 @@ export default function Grupos() {
   });
 
   const [grupoAEditar, setGrupoAEditar] = useState(null);
+  const [grupoAEliminar, setGrupoAEliminar] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const cargarGrupos = useCallback(async () => {
     setIsLoading(true);
@@ -66,6 +69,26 @@ export default function Grupos() {
     setGrupoAEditar(null);
   };
 
+  const handleDeleteClick = (id_grupo) => {
+    setGrupoAEliminar(id_grupo);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await grupoService.delete(grupoAEliminar);
+      setGrupoAEliminar(null);
+      await cargarGrupos();
+    } catch (err) {
+      console.error("Error al eliminar grupo:", err);
+      setError(err.response?.data?.error || "No se pudo eliminar el grupo");
+      setGrupoAEliminar(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="container-fluid p-0">
       <div className="bg-white p-4 shadow-premium" style={{ borderRadius: "8px" }}>
@@ -90,6 +113,7 @@ export default function Grupos() {
             onFiltersChange={setFilters}
             isLoading={isLoading}
             onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
           />
         )}
 
@@ -99,6 +123,22 @@ export default function Grupos() {
           onGrupoCreated={handleGrupoSaved}
           grupoAEditar={grupoAEditar}
         />
+
+        {grupoAEliminar && (
+          <AlertModal
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} width={50} color="#dc3545" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            }
+            title="¿Desea eliminar este grupo?"
+            description="Esta acción cancelará también el servicio asociado."
+            confirmText="Sí, eliminar"
+            isLoading={isDeleting}
+            onConfirm={handleConfirmDelete}
+            onClose={() => setGrupoAEliminar(null)}
+          />
+        )}
       </div>
     </div>
   )

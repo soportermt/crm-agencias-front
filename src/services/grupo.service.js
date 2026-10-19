@@ -76,4 +76,9 @@ export const grupoService = {
         });
         return data;
     },
+
+    async delete(id) {
+        const { data } = await api.post(`/grupos/delete/${id}`);
+        return data;
+    },
 };
