@@ -118,7 +118,7 @@ export default function Archivos({ id_grupo }) {
           <div className="grid-archivos">
             {data.map((f) => (
               <a
-                key={f.id}
+                key={f.id_grupo_archivo}
                 href={`${FILES_URL}/${encodeURIComponent(f.path)}`}
                 target="_blank"
                 rel="noopener noreferrer"
