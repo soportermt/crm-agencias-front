@@ -86,4 +86,18 @@ export const grupoService = {
         const { data } = await api.post(`/grupos/deleteHab/${id}`);
         return data;
     },
+
+    async getGroupArchivos(id) {
+        const { data } = await api.get(`/grupos/getGroupArchivos/${id}`);
+        return data;
+    },
+
+    async uploadGroupArchivos(id_grupo, files) {
+        const formData = new FormData();
+        formData.append('group_code', id_grupo);
+        files.forEach((f) => formData.append('files[]', f));
+    
+        const { data } = await api.post('/grupos/uploadFiles', formData);
+        return data;
+    },
 };
