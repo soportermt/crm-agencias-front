@@ -92,6 +92,11 @@ export const grupoService = {
         return data;
     },
 
+    async getGroupPagos(id) {
+        const { data } = await api.get(`/grupos/getGroupPagos/${id}`);
+        return data;
+    },
+
     async uploadGroupArchivos(id_grupo, files) {
         const formData = new FormData();
         formData.append('group_code', id_grupo);

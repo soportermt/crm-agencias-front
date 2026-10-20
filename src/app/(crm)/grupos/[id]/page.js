@@ -115,6 +115,8 @@ function GrupoComponent() {
                             <ActiveComponent
                                 id_grupo={id_grupo}
                                 comision={grupo?.idVentaservicio?.idProveedor?.comision}
+                                pagos={grupo?.idVentaservicio?.pagosDetalles}
+                                id_venta={grupo?.idVentaservicio?.idVenta?.id_venta}
                             />
                         }
                     </div>
