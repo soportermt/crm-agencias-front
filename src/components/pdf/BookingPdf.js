@@ -194,6 +194,7 @@ const styles = StyleSheet.create({
 
 const TIPO_HOSPEDAJE = "1";
 const TIPO_TRASLADO = "2";
+const TIPO_GRUPOS = "3";
 const TIPO_TOUR = "5";
 const TIPO_VUELOS = "6";
 const TIPO_OTROS = "10";
@@ -238,6 +239,14 @@ function formatDiaMesAnio(fecha) {
         .replace(".", "");
 }
 
+function calcNoches(inicio, fin) {
+    const a = parseLocalDate(inicio);
+    const b = parseLocalDate(fin);
+    if (!a || !b) return null;
+    const noches = Math.round((b - a) / (1000 * 60 * 60 * 24));
+    return noches > 0 ? noches : null;
+}
+
 export default function BookingPdf({ venta, terminos }) {
     const servicios = (venta.ventasServicioses || []).map((s) => ({
         ...s,
@@ -279,6 +288,7 @@ export default function BookingPdf({ venta, terminos }) {
                     {servicios.map((servicio, idx) => {
                         const esHospedaje = String(servicio.id_tipo_servicio) === TIPO_HOSPEDAJE;
                         const esTraslado = String(servicio.id_tipo_servicio) === TIPO_TRASLADO;
+                        const esGrupos = String(servicio.id_tipo_servicio) === TIPO_GRUPOS;
                         const esTour = String(servicio.id_tipo_servicio) === TIPO_TOUR;
                         const esVuelos = String(servicio.id_tipo_servicio) === TIPO_VUELOS;
                         const esOtros = String(servicio.id_tipo_servicio) === TIPO_OTROS;
@@ -888,6 +898,67 @@ export default function BookingPdf({ venta, terminos }) {
                                                 </View>
                                             </View>
                                         ))}
+                                    </>
+                                )}
+
+                                {esGrupos && (
+                                    <>
+                                        <View style={styles.serviceHeader}>
+                                            <Image
+                                                src="/pdf/group.png"
+                                                style={[styles.serviceIcon, { backgroundColor: "rgba(231, 241, 254, 0.6)" }]}
+                                            />
+                                            <Text style={[styles.titleService, { color: "#0C5CC6" }]}>Grupos</Text>
+                                        </View>
+
+                                        <View style={{ width: "100%", paddingBottom: 8 }}>
+                                            <Text style={styles.titleData}>Fecha límite de pago cliente</Text>
+                                            <Text style={styles.data}>{formatShortDate(servicio.limite_cliente)}</Text>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Evento</Text>
+                                                <Text style={styles.data}>{d.evento || "-"}</Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha del evento</Text>
+                                                <Text style={styles.data}>{formatShortDate(d.fecha_evento)}</Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Fecha de servicio</Text>
+                                                <Text style={styles.data}>
+                                                    {formatShortDate(servicio.inicio_servicio)}
+                                                    {servicio.fin_servicio &&
+                                                        servicio.fin_servicio !== "0000-00-00" &&
+                                                        ` - ${formatShortDate(servicio.fin_servicio)}`}
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.row}>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>No. de habitaciones</Text>
+                                                <Text style={styles.data}>{d.no_hab || "-"}</Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Tipo de habitación</Text>
+                                                <Text style={styles.data}>{d.tipo_hab || "-"}</Text>
+                                            </View>
+                                            <View style={{ width: "100%" }}>
+                                                <Text style={styles.titleData}>Noches</Text>
+                                                <Text style={styles.data}>
+                                                    {calcNoches(servicio.inicio_servicio, servicio.fin_servicio) ?? "-"}
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        {!!servicio.descripcion && (
+                                            <View style={{ width: "100%", paddingBottom: 8 }}>
+                                                <Text style={styles.titleData}>Descripción</Text>
+                                                <Text style={styles.data}>{servicio.descripcion}</Text>
+                                            </View>
+                                        )}
                                     </>
                                 )}
 
