@@ -164,6 +164,7 @@ function buildDesglose(tipoId, data, comisionPct) {
     const mapPasajero = (p) => ({
       nombre: p.nombre,
       apellidos: p.apellidos,
+      fecha_nacimiento: toDiaMesAnio(p.fecha_nacimiento),
       ...(data.internacional
         ? {
           no_pasaporte: p.no_pasaporte,
