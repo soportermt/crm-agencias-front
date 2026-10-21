@@ -97,6 +97,7 @@ function mapVentaServicioToItem(vs) {
             limiteCliente: parseLocalDate(vs.limite_cliente),
             total_publico: vs.tarifa_publica,
             providerData: desglose.providerData ?? { value: vs.id_proveedor, label: `Proveedor #${vs.id_proveedor}`, comision: vs.comision },
+            fecha_evento: parseLocalDate(desglose.fecha_evento),
             provider: vs.id_proveedor,
             fee: vs.fee,
         };
