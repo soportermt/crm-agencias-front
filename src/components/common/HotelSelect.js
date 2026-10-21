@@ -7,7 +7,9 @@ export default function HotelSelect({
     value,
     onChange,
     error,
+    labelSimple
 }) {
+
 
     const loadOptions = async (inputValue) => {
 
@@ -24,13 +26,13 @@ export default function HotelSelect({
 
     return (
         <>
-            <label className="form-label">Hotel *</label>
+            <label className={`form-label ${labelSimple ? "text-secondary small font-poppins mb-1" : ""}`}>{labelSimple ? "Hotel" : "Hotel *"}</label>
 
             <AsyncCreatableSelect
                 cacheOptions
                 defaultOptions={false}
                 loadOptions={loadOptions}
-                placeholder="Escribe o selecciona un hotel"
+                placeholder={`Escribe o selecciona un hotel`}
                 required
                 value={
                     value

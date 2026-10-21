@@ -569,3 +569,38 @@ body {
 .ventas-datepicker-wrapper .react-datepicker__input-container input {
   height: 37px;
 }
+
+.panel-archivos { padding: 12px; margin-top: 12px; }
+.grid-archivos { display: flex; flex-wrap: wrap; gap: 20px; }
+
+.card-archivos {
+  position: relative; width: 180px; border: 1px solid #e6e6e6; border-radius: 6px;
+  overflow: hidden; text-decoration: none; color: inherit; background: #fff;
+}
+.card-archivos:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, .12); }
+
+.thumb-archivos {
+  height: 100px; background: #e8e8e8; display: flex; align-items: center; justify-content: center;
+}
+.thumb-archivos img { width: 100%; height: 100%; object-fit: cover; }
+
+.badge-archivos {
+  color: #fff; font-size: 11px; font-weight: 700; padding: 18px 10px; border-radius: 4px;
+}
+
+.info-archivos { padding: 12px 16px; }
+.name-archivos { font-weight: 600; color: #6e6b7b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px;}
+.date-archivos { color: #b9b9c3; }
+
+.remove-archivos {
+  position: absolute; top: 6px; right: 6px; z-index: 1; width: 24px; height: 24px;
+  border: 0; border-radius: 50%; background: rgba(0, 0, 0, .55); color: #fff; cursor: pointer;
+}
+
+.dropzone {
+  margin-top: 24px; min-height: 180px; border: 2px dashed #0c5cc6; border-radius: 16px;
+  background: #f8f8f8; color: #0c5cc6; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; cursor: pointer; transition: background .15s;
+}
+.dropzone p { font-size: 20px; margin: 0; }
+.dragging { background: #ece9fd; }

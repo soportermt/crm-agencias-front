@@ -696,14 +696,17 @@ export default function BookingPdf({ venta, terminos }) {
                                                     <View style={{ width: d.internacional ? "30%" : "50%" }}>
                                                         <Text style={styles.titleData}>Nombre Pasajero</Text>
                                                     </View>
-                                                    <View style={{ width: d.internacional ? "15%" : "30%" }}>
+                                                    <View style={{ width: d.internacional ? "15%" : "25%" }}>
                                                         <Text style={styles.titleData}>Tipo Pasajero</Text>
+                                                    </View>
+                                                    <View style={{ width: d.internacional ? "20%" : "25%" }}>
+                                                        <Text style={styles.titleData}>Fecha nacimiento</Text>
                                                     </View>
                                                     {!!Number(d.internacional) && (
                                                         <>
-                                                            <View style={{ width: "20%" }}>
+                                                            {/* <View style={{ width: "20%" }}>
                                                                 <Text style={styles.titleData}>Fecha nacimiento</Text>
-                                                            </View>
+                                                            </View> */}
                                                             <View style={{ width: "17%" }}>
                                                                 <Text style={styles.titleData}>No. Pasaporte</Text>
                                                             </View>
@@ -719,14 +722,17 @@ export default function BookingPdf({ venta, terminos }) {
                                                         <View style={{ width: d.internacional ? "30%" : "50%" }}>
                                                             <Text style={styles.data}>{`${pasajero.nombre} ${pasajero.apellidos}`}</Text>
                                                         </View>
-                                                        <View style={{ width: d.internacional ? "15%" : "30%" }}>
+                                                        <View style={{ width: d.internacional ? "15%" : "25%" }}>
                                                             <Text style={styles.data}>Adulto</Text>
+                                                        </View>
+                                                        <View style={{ width: d.internacional ? "20%" : "25%" }}>
+                                                            <Text style={styles.data}>{formatDiaMesAnio(pasajero.fecha_nacimiento)}</Text>
                                                         </View>
                                                         {!!Number(d.internacional) && (
                                                             <>
-                                                                <View style={{ width: "20%" }}>
+                                                                {/* <View style={{ width: "20%" }}>
                                                                     <Text style={styles.data}>{formatDiaMesAnio(pasajero.fecha_nacimiento)}</Text>
-                                                                </View>
+                                                                </View> */}
                                                                 <View style={{ width: "17%" }}>
                                                                     <Text style={styles.data}>{pasajero.no_pasaporte || "-"}</Text>
                                                                 </View>

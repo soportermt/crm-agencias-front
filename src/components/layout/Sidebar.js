@@ -12,16 +12,14 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   CurrencyDollarIcon,
-  ChartBarIcon,
-  ChartPieIcon,
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   PlusIcon,
   ChatBubbleLeftRightIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
-import Image from "next/image";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
@@ -203,6 +201,11 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             {renderCategoryHeader("Reservaciones")}
             {renderNavLink("/reservaciones", "Lista de reservaciones", CalendarIcon)}
             {renderNavLink("/caja", "Gestión de pagos", CurrencyDollarIcon)}
+          </div>
+
+          <div className="mb-3">
+            {renderCategoryHeader("Grupo")}
+            {renderNavLink("/grupos", "Lista de grupos", UserGroupIcon)}
           </div>
 
           <div className="mb-3">

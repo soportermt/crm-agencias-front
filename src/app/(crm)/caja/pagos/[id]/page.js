@@ -13,7 +13,7 @@ import { downloadPagoPDF } from "@/utils/downloadPagoPDF";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { enviarComprobantePagoPorCorreo } from "@/utils/invoiceEmailPayment";
-import { ArrowDownTrayIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ChevronRightIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "@/components/common/StatusBadge";
 
 registerLocale("es", es);
@@ -407,7 +407,11 @@ export default function Pago() {
         <>
             <div className="row g-0">
                 <div className="col-12">
-                    <h4 className="mx-3 mb-0">Detalles de pagos</h4>
+                    <div className="d-flex align-items-center gap-1">
+                        <h4>Detalles de pagos</h4>
+                        <ChevronRightIcon width={18} />
+                        <Link href="/caja" style={{ textDecoration: "none" }}>Listado de pagos</Link>
+                    </div>
                 </div>
 
                 <div className="col-12 col-xl-8 p-3">

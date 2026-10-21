@@ -446,6 +446,9 @@ export default function VueloForm() {
                             <div className="col-md-4 mt-1 mb-0">
                                 <label className="form-label">Apellidos (Adulto)</label>
                             </div>
+                            <div className="col-md-4 mt-1 mb-0">
+                                <label className="form-label">Fecha nacimiento</label>
+                            </div>
                         </>
                     )}
                 </div>
@@ -478,14 +481,14 @@ export default function VueloForm() {
                                 <div className="col-md-2 mt-0 mb-0">
                                     <input
                                         className="form-control"
-                                        value={pasajero.no_pasaporte}
+                                        value={pasajero.no_pasaporte ?? ""}
                                         onChange={(e) => updatePassenger("adultos", index, "no_pasaporte", e.target.value)}
                                     />
                                 </div>
                                 <div className="col-md-2 mt-0 mb-0">
                                     <input
                                         className="form-control"
-                                        value={pasajero.no_visa}
+                                        value={pasajero.no_visa ?? ""}
                                         onChange={(e) => updatePassenger("adultos", index, "no_visa", e.target.value)}
                                     />
                                 </div>
@@ -504,6 +507,14 @@ export default function VueloForm() {
                                         className="form-control"
                                         value={pasajero.apellidos}
                                         onChange={(e) => updatePassenger("adultos", index, "apellidos", e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-md-4 mt-0 mb-0">
+                                    <input
+                                        type='date'
+                                        className="form-control"
+                                        value={pasajero.fecha_nacimiento ?? ""}
+                                        onChange={(e) => updatePassenger("adultos", index, "fecha_nacimiento", e.target.value)}
                                     />
                                 </div>
                             </>

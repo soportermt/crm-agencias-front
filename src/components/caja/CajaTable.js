@@ -15,7 +15,7 @@ import { catalogosService } from "@/services/catalogos.service";
 import { vendedoresService } from "@/services/vendedores.service";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus, faHotel, faMap, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
+import { faCirclePlus, faHotel, faMap, faPeopleGroup, faPlaneDeparture, faVanShuttle } from "@fortawesome/free-solid-svg-icons";
 import ExportDocuments from "../common/ExportDocuments";
 
 registerLocale("es", es);
@@ -109,6 +109,7 @@ const ventasExportColumns = [
 const ICONOS_SERVICIOS = {
   1: faHotel,
   2: faVanShuttle,
+  3: faPeopleGroup,
   5: faMap,
   6: faPlaneDeparture,
   10: faCirclePlus,
