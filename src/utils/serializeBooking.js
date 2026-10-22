@@ -129,6 +129,7 @@ function buildDesglose(tipoId, data, comisionPct) {
       fecha_evento: data.fecha_evento ? toISODateOnly(data.fecha_evento) : null,
       tipo_hab: data.tipo_hab ?? "",
       no_hab: data.no_hab ?? "",
+      hotel: data.hotel ?? "",
     };
   }
 
