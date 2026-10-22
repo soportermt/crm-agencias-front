@@ -25,6 +25,9 @@ const initialBooking = {
   servicios: [],
 };
 
+const TIPOS_SIN_PASAJEROS = ["grupo", "boda"];
+const sinPasajeros = (tipo) => TIPOS_SIN_PASAJEROS.includes(tipo);
+
 export function BookingFormProvider({ children, initialData = null }) {
   // const [booking, setBooking] = useState(initialBooking);
   const [bookingErrors, setBookingErrors] = useState({});
@@ -58,43 +61,45 @@ export function BookingFormProvider({ children, initialData = null }) {
     const catalogEntry = serviceCatalog.find((s) => s.id === tipo);
     let baseData = { ...catalogEntry.defaultData, ...initialData };
 
-    if (!editingId && booking.servicios.length > 0) {
-      const pool = getPassengersPool(booking.servicios);
+    if (!sinPasajeros(tipo)) {
+      if (!editingId && booking.servicios.length > 0) {
+        const pool = getPassengersPool(booking.servicios);
 
-      if (tipo !== "hospedaje") {
-        const adultos = pool.adultos.length > 0 ? pool.adultos : baseData.pasajeros.adultos;
-        const menores = pool.menores.length > 0 ? pool.menores : baseData.pasajeros.menores;
+        if (tipo !== "hospedaje") {
+          const adultos = pool.adultos.length > 0 ? pool.adultos : baseData.pasajeros.adultos ?? [];
+          const menores = pool.menores.length > 0 ? pool.menores : baseData.pasajeros.menores ?? [];
 
-        baseData = {
-          ...baseData,
-          adultos: adultos.length,
-          menores: menores.length,
-          pasajeros: {
-            adultos: adultos.map((p) => ({ nombre: p.nombre, apellidos: p.apellidos })),
-            menores: menores.map((p) => ({ nombre: p.nombre, apellidos: p.apellidos, edad: p.edad ?? "" })),
-          },
-        };
-      }
-
-      if (tipo === "hospedaje" && (pool.adultos.length > 0 || pool.menores.length > 0)) {
-        baseData = {
-          ...baseData,
-          habitaciones: [
-            {
-              adultos: pool.adultos.length || 2,
-              menores: pool.menores.length,
-              tipo_cama: "",
-              tipo_habitacion: "",
-              plan: "",
-              total_publico: "",
-              total_neto: "",
-              pasajeros: [
-                ...pool.adultos.map((p) => ({ tipo: "adult", nombre: p.nombre, apellidos: p.apellidos })),
-                ...pool.menores.map((p) => ({ tipo: "child", nombre: p.nombre, apellidos: p.apellidos, edad: p.edad ?? "" })),
-              ],
+          baseData = {
+            ...baseData,
+            adultos: adultos.length,
+            menores: menores.length,
+            pasajeros: {
+              adultos: adultos.map((p) => ({ nombre: p.nombre, apellidos: p.apellidos })),
+              menores: menores.map((p) => ({ nombre: p.nombre, apellidos: p.apellidos, edad: p.edad ?? "" })),
             },
-          ],
-        };
+          };
+        }
+
+        if (tipo === "hospedaje" && (pool.adultos.length > 0 || pool.menores.length > 0)) {
+          baseData = {
+            ...baseData,
+            habitaciones: [
+              {
+                adultos: pool.adultos.length || 2,
+                menores: pool.menores.length,
+                tipo_cama: "",
+                tipo_habitacion: "",
+                plan: "",
+                total_publico: "",
+                total_neto: "",
+                pasajeros: [
+                  ...pool.adultos.map((p) => ({ tipo: "adult", nombre: p.nombre, apellidos: p.apellidos })),
+                  ...pool.menores.map((p) => ({ tipo: "child", nombre: p.nombre, apellidos: p.apellidos, edad: p.edad ?? "" })),
+                ],
+              },
+            ],
+          };
+        }
       }
     }
 
