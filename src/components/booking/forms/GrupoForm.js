@@ -72,7 +72,7 @@ export default function GrupoForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Fecha de evento *</label>
+                    <label className="form-label">Fecha de evento</label>
                     <DatePicker
                         selected={data.fecha_evento}
                         open={datePickerOpenE}
@@ -84,12 +84,10 @@ export default function GrupoForm() {
                         minDate={new Date()}
                         shouldCloseOnSelect={false}
                         isClearable
-                        className={`form-control form-datepicker ${(errors.fecha_evento) ? "is-invalid" : ""}`}
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
-                        required
                         autoComplete='off'
                     />
-                    {errors.fecha_evento && <div className="text-danger small">{errors.fecha_evento}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">

@@ -132,7 +132,6 @@ export const serviceCatalog = [
       if (!data.descripcion?.trim()) errors.descripcion = "Requerido";
       if (!data.checkIn) errors.checkIn = "Requerido";
       if (!data.checkOut) errors.checkOut = "Requerido";
-      if (!data.fecha_evento) errors.fecha_evento = "Requerido";
       if (!data.limitePago) errors.limitePago = "Requerido";
       return errors;
     },
