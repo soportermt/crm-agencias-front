@@ -271,7 +271,7 @@ export default function CajaTable({ ventas = [], filters, onFiltersChange, showS
         return (
           <div className="d-flex align-items-center justify-content-center gap-2">
             <a
-              href={`caja/pagos/${row.id_venta}`}
+              href={`/caja/pagos/${row.id_venta}`}
               className="btn btn-link p-1 text-primary"
             >
               <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
