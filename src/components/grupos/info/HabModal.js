@@ -50,7 +50,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
     useEffect(() => {
         if (!show) return;
         setError(null);
-    
+
         if (habAEditar) {
             setTipoHabitacion(habAEditar.tipo_habitacion === "Sin dato" ? "" : habAEditar.tipo_habitacion ?? "");
             setStartDate(parseYMD(habAEditar.fecha_entrada_raw));
@@ -108,7 +108,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
         try {
             setSubmitting(true);
             setError(null);
-        
+
             let res;
 
             if (habAEditar) {
@@ -134,7 +134,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
 
     return (
         <div
-            className="modal-backdrop-custom d-flex align-items-stretch justify-content-end"
+            className="modal-backdrop-custom d-flex align-items-center justify-content-center"
             style={{
                 position: "fixed",
                 top: 0,
@@ -143,11 +143,18 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                 height: "100vh",
                 backgroundColor: "rgba(0, 0, 0, 0.4)",
                 zIndex: 1050,
+                padding: "16px",
             }}
         >
             <div
                 className="bg-white shadow-premium font-inter w-100 transition-smooth"
-                style={{ maxWidth: "800px", height: "100vh", overflowY: "auto", borderRadius: "0", padding: "24px" }}
+                style={{
+                    maxWidth: "800px",
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                    borderRadius: "12px",
+                    padding: "24px",
+                }}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="d-flex align-items-center justify-content-between mb-4">
@@ -266,7 +273,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                                 <input
                                     type="text"
                                     className="form-control input-custom"
-                                    value={guest.apellidos  ?? ""}
+                                    value={guest.apellidos ?? ""}
                                     onChange={(e) => updateGuest(i, "apellidos", e.target.value)}
                                 />
                             </div>
@@ -299,7 +306,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                                 <input
                                     type="email"
                                     className="form-control input-custom"
-                                    value={guest.correo  ?? ""}
+                                    value={guest.correo ?? ""}
                                     onChange={(e) => updateGuest(i, "correo", e.target.value)}
                                 />
                             </div>
@@ -310,7 +317,7 @@ export default function HabModal({ show, onClose, onHabCreated, habAEditar, id_g
                                 <input
                                     type="text"
                                     className="form-control input-custom"
-                                    value={guest.telefono  ?? ""}
+                                    value={guest.telefono ?? ""}
                                     onChange={(e) => updateGuest(i, "telefono", e.target.value)}
                                 />
                             </div>
