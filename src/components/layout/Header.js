@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { usuariosService } from "@/services/usuarios.service";
+import { useBrand } from "@/hooks/useBrand";
 
 export default function Header({ onToggleMobileSidebar }) {
   const [user, setUser] = useState(null);
+  const brand = useBrand();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,15 +59,20 @@ export default function Header({ onToggleMobileSidebar }) {
         </button>
 
         <div className="py-0">
-          {/* <Image
-            src="/2bt2025.png"
-            alt="2Business Travel Logo"
-            width={115}
-            height={23}
-            priority
-            style={{ height: "auto", maxWidth: "115px" }}
-          /> */}
-          <h1 style={{ fontSize: 20, margin: 0, fontWeight: 600 }}>{user?.idAgencia?.nombre_comercial}</h1>
+          {brand ? (
+            <Image
+              src={brand.logo}
+              alt={brand.name}
+              width={115}
+              height={Math.round((115 * brand.logoHeight) / brand.logoWidth)}
+              unoptimized
+              style={{ height: "auto", width: "auto", maxWidth: "115px" }}
+            />
+          ) : (
+            <h1 style={{ fontSize: 20, margin: 0, fontWeight: 600 }}>
+              {user?.idAgencia?.nombre_comercial}
+            </h1>
+          )}
         </div>
       </div>
 
