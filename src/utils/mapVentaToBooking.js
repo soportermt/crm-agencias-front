@@ -38,6 +38,8 @@ function mapVentaServicioToItem(vs) {
         code: vs.codigo,
         providerData: desglose.providerData ?? { id_proveedor: vs.id_proveedor, comision: vs.comision },
         ...desglose,
+        id_grupo: vs.id_grupo,
+        grupoHabitaciones: vs.grupoHabitaciones ?? [],
     };
 
     if (tipo === "hospedaje") {

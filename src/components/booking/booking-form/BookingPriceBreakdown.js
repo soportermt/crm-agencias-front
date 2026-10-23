@@ -9,6 +9,7 @@ import { configService } from '@/services/config.service';
 import BookingPdf from '@/components/pdf/BookingPdf';
 import { pdf } from '@react-pdf/renderer';
 import { enviarComprobantePorCorreo } from '@/utils/invoiceEmail';
+import { calcularTotalesHabitaciones } from '@/utils/calcularHab';
 
 const PdfViewer = dynamic(
   () => import("@/components/pdf/PdfViewer"),
@@ -80,6 +81,22 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
         return acc;
       },
       { totalPublico: 0, totalNeto: 0, totalFee: 0 }
+    );
+  }, [serviciosParaTotal]);
+
+  const totalHabs = useMemo(() => {
+    return serviciosParaTotal.reduce(
+      (acc, item) => {
+        const habs = item.data?.grupoHabitaciones;
+        if (Array.isArray(habs) && habs.length > 0) {
+          const t = calcularTotalesHabitaciones(habs);
+          acc.neto += Number(t.neto) || 0;
+          acc.publico += Number(t.publico) || 0;
+          acc.cantidad += habs.length;
+        }
+        return acc;
+      },
+      { neto: 0, publico: 0, cantidad: 0 }
     );
   }, [serviciosParaTotal]);
 
@@ -175,6 +192,26 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
           <p className='mb-2 fw-bolder' style={{ color: "var(--dark-green)" }}>{formatMoney(totalFinal)}</p>
         </div>
       </div>
+      {totalHabs.cantidad > 0 && (
+        <div
+          className="mt-3 pt-3"
+          style={{ fontSize: 14, color: "rgba(64, 64, 64, 0.8)", borderTop: "1px solid #e5e5e5" }}
+        >
+          <h5 style={{ fontSize: "15px", fontWeight: 600 }} className="mb-2">
+            Habitaciones ({totalHabs.cantidad})
+          </h5>
+          <div className="d-flex justify-content-between">
+            <p className="mb-2">Neto acumulado:</p>
+            <p className="mb-2">{formatMoney(totalHabs.neto)}</p>
+          </div>
+          <div className="d-flex justify-content-between">
+            <p className="mb-2 fw-bolder">Total acumulado:</p>
+            <p className="mb-2 fw-bolder" style={{ color: "var(--dark-green)" }}>
+              {formatMoney(totalHabs.publico)}
+            </p>
+          </div>
+        </div>
+      )}
       <button
         type="submit"
         className='btn btn-primary w-100 mt-3'
