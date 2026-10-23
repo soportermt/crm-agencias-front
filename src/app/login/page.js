@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { authService } from "@/services/auth.service";
+import { useBrand } from "@/hooks/useBrand";
 
 export default function LoginPage() {
   const router = useRouter();
+  const brand = useBrand();
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -101,15 +103,23 @@ export default function LoginPage() {
           <div className="p-card-login border border-light">
             {/* Logo Image */}
             <div className="text-center mb-3 mb-md-4">
-              <Image
-                src="/vjnexuswa.jpg"
-                alt="vjnexuswa logo"
-                width={300}
-                height={60}
-                priority
-                className="img-fluid mx-auto d-block"
-                style={{ height: "auto", maxWidth: "min(300px, 85vw)" }}
-              />
+              {brand ? (
+                <Image
+                  src={brand.logo}
+                  alt={`${brand.name} Logo`}
+                  width={300}
+                  height={Math.round((300 * brand.logoHeight) / brand.logoWidth)}
+                  priority
+                  unoptimized
+                  className="img-fluid mx-auto d-block"
+                  style={{ height: "auto", maxWidth: "min(300px, 85vw)" }}
+                />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  style={{ width: "min(300px, 85vw)", aspectRatio: "1484 / 304", margin: "0 auto" }}
+                />
+              )}
             </div>
 
             {/* Encabezado del panel */}
