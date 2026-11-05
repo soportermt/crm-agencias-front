@@ -7,6 +7,7 @@ import { EnvelopeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/o
 import React, { useEffect, useMemo, useState } from "react";
 import HabModal from "./HabModal";
 import AlertModal from "@/components/common/AlertModal";
+import ExportDocuments from "@/components/common/ExportDocuments";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -17,8 +18,13 @@ const columns = [
   { key: "fecha_entrada", label: "Entrada", sortable: true, align: "center", width: "110px" },
   { key: "fecha_salida", label: "Salida", sortable: true, align: "center", width: "110px" },
   { key: "noches", label: "Noches", sortable: true, align: "center", width: "90px" },
+  { key: "total_publico", label: "Tarifa pública", sortable: true, align: "end", width: "90px" },
   { key: "acciones", label: "", align: "center", width: "90px" },
 ];
+
+const habExportColumns = columns
+    .filter((c) => c.key !== "acciones")
+    .map(({ key, label }) => ({ key, label }));
 
 const formatDate = (s) => {
   if (!s) return "—";
@@ -136,6 +142,9 @@ export default function Habitaciones({ id_grupo, comision }) {
           <span>{formatDate(row.fecha_salida_raw)}</span>
         );
 
+      case "total_publico":
+        return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(row.total_publico);
+
       case "acciones":
         return (
           <div className="d-flex align-items-center justify-content-center gap-1">
@@ -219,12 +228,18 @@ export default function Habitaciones({ id_grupo, comision }) {
       <div className="mt-0">
         <div className="mb-3">
           <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-end gap-2 w-100">
-            <div className="flex-grow-1 flex-sm-grow-0">
+            <div className="flex-grow-1 flex-sm-grow-0 d-flex gap-2">
               <SearchBar
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Buscar por huéspedes"
                 width="100%"
+              />
+              <ExportDocuments
+                data={filteredRows}
+                columns={habExportColumns}
+                filename="hab"
+                sheetName="Habitaciones"
               />
             </div>
             <button
