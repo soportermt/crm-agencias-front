@@ -260,8 +260,14 @@ export default function Pago() {
         });
     };
 
-    const labelStyle = {
+    const infoStyle = {
         fontSize: 14,
+        color: "#6E6B7B",
+    };
+    
+    const labelStyle = {
+        display: "inline-block",
+        minWidth: 90,
         fontWeight: 500,
         color: "#5E5873",
     };
@@ -403,6 +409,7 @@ export default function Pago() {
         ? (serviciosPendientes[0].id_ventaservicio ?? venta.ventasServicioses.indexOf(serviciosPendientes[0]))
         : null;
 
+        
     return (
         <>
             <div className="row g-0">
@@ -419,7 +426,7 @@ export default function Pago() {
                         className="bg-white shadow-premium p-3"
                         style={{ borderRadius: "8px" }}
                     >
-                        <div className="row mb-3">
+                        <div className="row mb-2">
                             <div className="col-6"
                                 style={{
                                     fontSize: 14,
@@ -435,137 +442,25 @@ export default function Pago() {
                                 Fecha de creación: <strong style={{ fontSize: 18, color: "#0d6efd" }}>{formatDate(venta?.fecha)}</strong>
                             </div>
                         </div>
-                        <div className="row mb-4">
-                            <div className="col-12 col-md-6 pe-md-4">
-                                <p className="mb-2" style={{ fontWeight: 600 }}>
-                                    Información de la agencia
-                                </p>
 
-                                <ul
-                                    className="d-flex flex-column gap-2"
-                                    style={{
-                                        fontSize: 14,
-                                        listStyle: "none",
-                                        margin: 0,
-                                        padding: 0,
-                                        color: "#6E6B7B",
-                                    }}
-                                >
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Nombre:
-                                        </span>
+                        <div className="mb-2">
+                            <p className="mb-1" style={{ fontWeight: 600 }}>
+                                Información del cliente
+                            </p>
 
-                                        {agencia?.nombre_comercial || "—"}
-                                    </li>
-
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Dirección:
-                                        </span>
-
-                                        {agencia?.direccion || "—"}
-                                    </li>
-
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Correo:
-                                        </span>
-
-                                        {agencia?.correo || "—"}
-                                    </li>
-
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Teléfono:
-                                        </span>
-
-                                        {agencia?.telefono || "—"}
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div className="col-12 col-md-6 ps-md-4 mt-4 mt-md-0">
-                                <p className="mb-2" style={{ fontWeight: 600 }}>
-                                    Información del cliente
-                                </p>
-
-                                <ul
-                                    className="d-flex flex-column gap-2"
-                                    style={{
-                                        fontSize: 14,
-                                        listStyle: "none",
-                                        margin: 0,
-                                        padding: 0,
-                                        color: "#6E6B7B",
-                                    }}
-                                >
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Nombre:
-                                        </span>
-
-                                        {venta?.idCliente?.nombre || "—"}
-                                    </li>
-
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Teléfono:
-                                        </span>
-
-                                        {venta?.idCliente?.telefono || "—"}
-                                    </li>
-
-                                    <li className="d-flex">
-                                        <span
-                                            style={{
-                                                minWidth: 90,
-                                                fontWeight: 500,
-                                                color: "#5E5873",
-                                            }}
-                                        >
-                                            Correo:
-                                        </span>
-
-                                        {venta?.idCliente?.correo || "—"}
-                                    </li>
-                                </ul>
+                            <div className="row">
+                                <div className="col-12 col-md-6 pe-md-4" style={infoStyle}>
+                                    <span style={labelStyle}>Nombre:</span>
+                                    {venta?.idCliente?.nombre || "—"}
+                                </div>
+                                <div className="col-12 col-md-6" style={infoStyle}>
+                                    <span style={labelStyle}>Teléfono:</span>
+                                    {venta?.idCliente?.telefono || "—"}
+                                </div>
+                                <div className="col-12 col-md-6 pe-md-4" style={infoStyle}>
+                                    <span style={labelStyle}>Correo:</span>
+                                    {venta?.idCliente?.correo || "—"}
+                                </div>
                             </div>
                         </div>
 

@@ -6,6 +6,7 @@ import ProviderSelect from '@/components/common/ProviderSelect';
 import DatePicker from 'react-datepicker';
 import { calcularTotalNeto } from "@/utils/pricing";
 import { cleanDecimalInput } from "@/utils/inputFormatters";
+import HotelSelect from "@/components/common/HotelSelect";
 
 export default function GrupoForm() {
     const { draft, updateDraftField } = useBookingForm();
@@ -72,24 +73,35 @@ export default function GrupoForm() {
                 </div>
 
                 <div className="col-12 col-md-4">
-                    <label className="form-label">Fecha de evento *</label>
+                    <HotelSelect
+                        value={data.hotel}
+                        error={errors.hotel}
+                        onChange={(hotel) => {
+                            updateDraftField("hotel", hotel.label);
+                        }}
+                    />
+                </div>
+
+                <div className="col-12 col-md-4">
+                    <label className="form-label">Fecha de evento</label>
                     <DatePicker
                         selected={data.fecha_evento}
                         open={datePickerOpenE}
                         onInputClick={() => setDatePickerOpenE(true)}
                         onClickOutside={() => setDatePickerOpenE(false)}
-                        onChange={(date) => updateDraftField("fecha_evento", date)}
+                        onChange={(date) => {
+                            updateDraftField("fecha_evento", date);
+                            setDatePickerOpenE(false);
+                        }}
                         locale="es"
                         dateFormat="dd/MM/yyyy"
                         minDate={new Date()}
                         shouldCloseOnSelect={false}
                         isClearable
-                        className={`form-control form-datepicker ${(errors.fecha_evento) ? "is-invalid" : ""}`}
+                        className="form-control form-datepicker"
                         placeholderText="Selecciona una fecha"
-                        required
                         autoComplete='off'
                     />
-                    {errors.fecha_evento && <div className="text-danger small">{errors.fecha_evento}</div>}
                 </div>
 
                 <div className="col-12 col-md-4">
@@ -110,7 +122,7 @@ export default function GrupoForm() {
                         onChange={(e) => updateDraftField("tipo_hab", e.target.value)}
                     />
                 </div>
-                <div className="col-12 col-md-4">
+                <div className="col-12 col-md-2">
                     <label className="form-label">No. Hab.</label>
                     <input
                         type="text"
@@ -120,7 +132,7 @@ export default function GrupoForm() {
                     />
                 </div>
 
-                <div className="col-12 col-md-8">
+                <div className="col-12 col-md-6">
                     <label className="form-label">Descripción *</label>
                     <textarea
                         className={`form-control ${errors.descripcion ? "is-invalid" : ""}`}

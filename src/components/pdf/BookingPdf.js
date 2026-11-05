@@ -951,12 +951,19 @@ export default function BookingPdf({ venta, terminos }) {
                                                     {calcNoches(servicio.inicio_servicio, servicio.fin_servicio) ?? "-"}
                                                 </Text>
                                             </View>
+
                                         </View>
 
                                         {!!servicio.descripcion && (
-                                            <View style={{ width: "100%", paddingBottom: 8 }}>
-                                                <Text style={styles.titleData}>Descripción</Text>
-                                                <Text style={styles.data}>{servicio.descripcion}</Text>
+                                            <View style={styles.row}>
+                                                <View style={{ width: "30%", paddingBottom: 8 }}>
+                                                    <Text style={styles.titleData}>Descripción</Text>
+                                                    <Text style={styles.data}>{servicio.descripcion}</Text>
+                                                </View>
+                                                <View style={{ width: "70%" }}>
+                                                    <Text style={styles.titleData}>Hotel</Text>
+                                                    <Text style={styles.data}>{d.hotel || "-"}</Text>
+                                                </View>
                                             </View>
                                         )}
                                     </>
