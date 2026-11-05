@@ -149,12 +149,12 @@ export default function GruposTable({ data = [], filters, onFiltersChange, isLoa
             case "acciones":
                 return (
                     <div className="d-flex align-items-center justify-content-center gap-1">
-                        <a
+                        <Link
                             href={`/grupos/${row.id_grupo}`}
                             className="btn btn-link p-1 text-primary"
                         >
                             <EyeIcon style={{ width: "20px", height: "20px", color: "rgb(12, 92, 198)" }} />
-                        </a>
+                        </Link>
                         <button
                             onClick={() => onEditClick(row)}
                             className="btn btn-link p-0 text-decoration-none text-start text-primary fw-medium"
