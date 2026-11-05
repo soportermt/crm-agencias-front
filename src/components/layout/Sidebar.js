@@ -20,18 +20,20 @@ import {
   UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
+import { useBrand } from "@/hooks/useBrand";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
   const pathname = usePathname();
+  const brand = useBrand();
   const [isHovered, setIsHovered] = useState(false);
 
   const [logoAgencia, setLogoAgencia] = useState(null);
-  const [nombreAgencia, setNombreAgencia] = useState("2Business Travel");
+  const [nombreAgencia, setNombreAgencia] = useState("");
 
   const logoSrc = logoAgencia
     ? `${process.env.NEXT_PUBLIC_API_URL}images/agencia/${logoAgencia}`
-    : "/images.jpg";
+    : brand?.logo;
 
   useEffect(() => {
     try {
@@ -142,26 +144,33 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
           </div>
 
           <div className="d-flex justify-content-center">
-            <img
-              src={logoSrc}
-              alt={`${nombreAgencia} Logo`}
-              width={110}
-              height={20}
-              style={{
-                width: isExpanded ? "110px" : "80px",
-                height: "auto",
-                maxWidth: "100%",
-                objectFit: "contain",
-                transform: isExpanded ? "scale(1)" : "scale(0.7)",
-                transformOrigin: "center",
-                marginBottom: 12,
-                transition: "all 0.25s ease-in-out",
-              }}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/images.jpg";
-              }}
-            />
+            {logoSrc ? (
+              <img
+                src={logoSrc}
+                alt={`${nombreAgencia || brand?.name || "CRM"} Logo`}
+                width={110}
+                height={20}
+                style={{
+                  width: isExpanded ? "110px" : "80px",
+                  height: "auto",
+                  maxWidth: "100%",
+                  objectFit: "contain",
+                  transform: isExpanded ? "scale(1)" : "scale(0.7)",
+                  transformOrigin: "center",
+                  marginBottom: 12,
+                  transition: "all 0.25s ease-in-out",
+                }}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  if (brand?.logo) e.currentTarget.src = brand.logo;
+                }}
+              />
+            ) : (
+              <div
+                aria-hidden="true"
+                style={{ width: isExpanded ? "110px" : "80px", height: "22px", marginBottom: 12 }}
+              />
+            )}
           </div>
 
           <button

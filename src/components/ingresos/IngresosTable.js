@@ -197,7 +197,7 @@ export default function IngresosTable({
 
     switch (key) {
       case "folio":
-        return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
+        return <Link className="font-inter fw-semibold text-brand-blue" style={{ textDecoration: "none" }} href={`/reservaciones/editar/${row.id_venta}`} target="_blank">{row.folio}</Link>;
 
       case "fecha_limite":
         return (
