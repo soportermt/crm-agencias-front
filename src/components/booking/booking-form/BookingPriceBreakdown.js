@@ -31,7 +31,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
   const handleSendInvoice = async () => {
     setSendingInvoice(true);
     try {
-      const result = await enviarComprobantePorCorreo(rawVenta, term);
+      const result = await enviarComprobantePorCorreo(rawVenta, term, paymentsPromises);
       if (!result.success) console.error(result.error);
     } catch (error) {
       console.error("Error al enviar comprobante:", error);
@@ -47,18 +47,24 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
       .catch((err) => console.error("Error al cargar términos:", err));
   }, [isEditMode]);
 
-  const handleOpenPaymentsModal = async () => {
-    setShowPaymentsModal(true);
+  const cargarPromesas = async () => {
+    if (!rawVenta?.id_venta) return;
     setLoadingPayments(true);
     try {
       const data = await bookingService.paymentsPromises(rawVenta.id_venta);
-      setPaymentsPromises(data);
+      setPaymentsPromises(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al cargar promesas de pago:", error);
     } finally {
       setLoadingPayments(false);
     }
   };
+
+  useEffect(() => {
+    if (isEditMode) cargarPromesas();
+  }, [isEditMode, rawVenta?.id_venta]);
+
+  const handleOpenPaymentsModal = () => setShowPaymentsModal(true);
 
   const serviciosParaTotal = useMemo(() => {
     const confirmados = booking.servicios || [];
@@ -237,7 +243,7 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
       )} */}
       {isEditMode && (
         <>
-          <PdfViewer venta={rawVenta} customer={booking?.customer} terminos={term} />
+          <PdfViewer venta={rawVenta} customer={booking?.customer} terminos={term} promesas={paymentsPromises} />
           <button
             type="button"
             className="btn btn-outline-primary w-100 mt-2"
@@ -258,6 +264,8 @@ export default function BookingPriceBreakdown({ isSubmitting, mode }) {
           total={totalFinal}
           loading={loadingPayments}
           onClose={() => setShowPaymentsModal(false)}
+          onGenerate={(nuevas) => setPaymentsPromises(nuevas)}
+          onDelete={() => setPaymentsPromises([])}
         />
       )}
     </div >
