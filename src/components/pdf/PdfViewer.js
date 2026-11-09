@@ -7,7 +7,7 @@ import { conectividadService } from "@/services/conectividad.service";
 import { templatesService } from "@/services/templates.service";
 import AlertModal from "@/components/common/AlertModal";
 
-export default function PdfViewer({ venta, customer, terminos }) {
+export default function PdfViewer({ venta, customer, terminos, promesas }) {
     const [downloading, setDownloading] = useState(false);
     const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
     const [alertData, setAlertData] = useState(null);
@@ -38,7 +38,7 @@ export default function PdfViewer({ venta, customer, terminos }) {
 
         try {
             setDownloading(true);
-            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos} />).toBlob();
+            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos} promesas={promesas} />).toBlob();
             const url = URL.createObjectURL(blob);
 
             const a = document.createElement("a");
@@ -92,7 +92,7 @@ export default function PdfViewer({ venta, customer, terminos }) {
         try {
             setSendingWhatsapp(true);
 
-            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos}/>).toBlob();
+            const blob = await pdf(<BookingPdf venta={venta} terminos={terminos} promesas={promesas}/>).toBlob();
             const fileName = `Reserva-${venta.folio || "comprobante"}.pdf`;
 
             let templateName = "prueba_envio_docs";

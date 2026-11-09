@@ -7,6 +7,7 @@ import {
     Image,
 } from "@react-pdf/renderer";
 import "./fonts";
+import { formatMoney } from "@/utils/pricing";
 
 const styles = StyleSheet.create({
     page: {
@@ -247,7 +248,7 @@ function calcNoches(inicio, fin) {
     return noches > 0 ? noches : null;
 }
 
-export default function BookingPdf({ venta, terminos }) {
+export default function BookingPdf({ venta, terminos, promesas }) {
     const servicios = (venta.ventasServicioses || []).map((s) => ({
         ...s,
         desglose: parseDesglose(s),
@@ -1059,31 +1060,33 @@ export default function BookingPdf({ venta, terminos }) {
                         );
                     })}
 
-                    {/* <Text style={[styles.title, { marginVertical: 8 }]}>Desglose de pagos</Text>
+                    {Array.isArray(promesas) && promesas.length > 0 && (
+                        <>
+                            <Text style={[styles.title, { marginVertical: 8 }]}>Desglose de pagos</Text>
 
-                    <View style={styles.headerTable}>
-                        <View style={{ borderRightColor: "#fff", flex: 1, borderRightWidth: 1, }}><Text>Fecha</Text></View>
-                        <View style={{ flex: 1, textAlign: "right" }}><Text>Monto</Text></View>
-                    </View>
+                            <View style={styles.headerTable}>
+                                <View style={{ borderRightColor: "#fff", flex: 1, borderRightWidth: 1 }}>
+                                    <Text>Fecha</Text>
+                                </View>
+                                <View style={{ flex: 1, textAlign: "right" }}>
+                                    <Text>Monto</Text>
+                                </View>
+                            </View>
 
-                    <View style={styles.table}>
-                        <View style={styles.tableContent}>
-                            <View style={{ borderRightColor: "#90BDF9", flex: 1, borderRightWidth: 1, }}>
-                                <Text style={{ fontWeight: 500 }}>17 jun 2026</Text>
+                            <View style={styles.table}>
+                                {promesas.map((p, i) => (
+                                    <View key={p.id ?? p.id_promesa ?? i} style={styles.tableContent} wrap={false}>
+                                        <View style={{ borderRightColor: "#90BDF9", flex: 1, borderRightWidth: 1 }}>
+                                            <Text style={{ fontWeight: 500 }}>{formatShortDate(p.fecha)}</Text>
+                                        </View>
+                                        <View style={{ flex: 1, textAlign: "right" }}>
+                                            <Text style={{ fontSize: 12, fontWeight: 600 }}>{formatMoney(p.monto)}</Text>
+                                        </View>
+                                    </View>
+                                ))}
                             </View>
-                            <View style={{ flex: 1, textAlign: "right" }}>
-                                <Text style={{ fontSize: 12, fontWeight: 600 }}>$ 3,475.00</Text>
-                            </View>
-                        </View>
-                        <View style={styles.tableContent}>
-                            <View style={{ borderRightColor: "#90BDF9", flex: 1, borderRightWidth: 1, }}>
-                                <Text style={{ fontWeight: 500 }}>24 jun 2026</Text>
-                            </View>
-                            <View style={{ flex: 1, textAlign: "right" }}>
-                                <Text style={{ fontSize: 12, fontWeight: 600 }}>$ 3,475.00</Text>
-                            </View>
-                        </View>
-                    </View> */}
+                        </>
+                    )}
 
                     <Text style={styles.conditions}>NOTA: EL CLIENTE ACEPTA LAS CONDICIONES Y POLÍTICAS DE CANCELACIÓN Y ACLARACIONES DE ESTA AGENCIA Y/O DEL OPERADOR. CUALQUIER CAMBIO O CANCELACIÓN GENERARÁ UN CARGO MÍNIMO POR PASAJERO.</Text>
                 </View>

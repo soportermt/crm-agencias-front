@@ -52,12 +52,33 @@ const styles = StyleSheet.create({
     resumenWrap: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "flex-end",
-        marginTop: 10
+        alignItems: "flex-start",
+        marginTop: 10,
+    },
+    limiteBox: {
+        width: "55%",
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        backgroundColor: "#FFF5F5",
+        borderRadius: 4,
+        flexDirection: "column",
+        gap: 3,
+    },
+    limiteLabel: {
+        fontWeight: 700,
+        marginBottom: 2,
+    },
+    limiteRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 8,
+    },
+    limiteValue: {
+        fontWeight: 700,
+        color: "#FF0000",
     },
     resumen: {
         width: "40%",
-        marginLeft: "auto",
     },
     resumenRow: {
         flexDirection: "row",
@@ -73,31 +94,12 @@ const styles = StyleSheet.create({
     },
     resumenLabel: { fontWeight: 700 },
     resumenValue: { fontWeight: 700, textAlign: "right" },
-    limiteBox: {
-        paddingVertical: 6,
-        paddingHorizontal: 8,
-        backgroundColor: "#FFF5F5",
-        borderRadius: 4,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        marginBottom: 2
-    },
-    limiteLabel: {
-        // textTransform: "uppercase",
-    },
-    limiteValue: {
-        // marginTop: 2,
-        // fontSize: 12,
-        fontWeight: 700,
-        color: "#FF0000",
-    },
 });
 
 const totalDePago = (pago) =>
     (pago?.pagosDetalles || []).reduce((acc, d) => acc + Number(d.monto || 0), 0);
 
-export default function PagoPDF({ pagos = [], venta, agencia }) {
+export default function PagoPDF({ pagos = [], venta, agencia, promesas = [] }) {
     const activos = pagos
         .filter((p) => String(p.estatus) === "1")
         .sort((a, b) => Number(a.id_pago) - Number(b.id_pago));
@@ -111,6 +113,14 @@ export default function PagoPDF({ pagos = [], venta, agencia }) {
     const saldoPendiente = Math.max(0, Number((granTotal - total).toFixed(2)));
 
     const concepto = conceptoVenta(venta);
+
+    const hayPromesas = Array.isArray(promesas) && promesas.length > 0;
+
+    const limitesServicios = (venta?.ventasServicioses || []).map((s) => ({
+        servicio: s.idTipoServicio?.tipo_servicio || "Servicio",
+        descripcion: (s.descripcion || "").trim(),
+        limite: s.limite_cliente,
+    }));
 
     return (
         <Document title={`recibo_pagos-${venta?.folio || venta?.id_venta}`}>
@@ -129,7 +139,7 @@ export default function PagoPDF({ pagos = [], venta, agencia }) {
                             style={styles.agencyImage}
                         />
                     </View>
-                    <View style={{ width: "50%", textAlign: "center", textTransform: "uppercase"}}>
+                    <View style={{ width: "50%", textAlign: "center", textTransform: "uppercase" }}>
                         <Text style={{ fontWeight: 700 }}>{agencia?.nombre_comercial}</Text>
                         <Text>{agencia?.direccion}</Text>
                     </View>
@@ -162,7 +172,7 @@ export default function PagoPDF({ pagos = [], venta, agencia }) {
                     </View>
                     <View>
                         <Text style={{ fontWeight: 700 }}>
-                            VENDEDOR: <Text style={{ fontWeight: 400 }}>{activos[0]?.nombre_vendedor}</Text>
+                            VENDEDOR: <Text style={{ fontWeight: 400 }}>{venta?.nombre_vendedor}</Text>
                         </Text>
                     </View>
                 </View>
@@ -190,9 +200,34 @@ export default function PagoPDF({ pagos = [], venta, agencia }) {
 
                         <View style={styles.resumenWrap} wrap={false}>
                             <View style={styles.limiteBox}>
-                                <Text style={styles.limiteLabel}>Fecha límite de pago</Text>
-                                <Text style={styles.limiteValue}> {fecha(venta?.limite_cancelacion, "Sin fecha límite")}</Text>
+                                {hayPromesas ? (
+                                    <>
+                                        <Text style={styles.limiteLabel}>Promesas de pago</Text>
+                                        {promesas.map((p, i) => (
+                                            <View key={p.id ?? i} style={styles.limiteRow}>
+                                                <Text>{fecha(p.fecha)}</Text>
+                                                <Text style={styles.limiteValue}>{money(p.monto)}</Text>
+                                            </View>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Text style={styles.limiteLabel}>Fecha límite de pago</Text>
+                                        {limitesServicios.map((s, i) => (
+                                            <View key={i} style={styles.limiteRow}>
+                                                <Text style={{ width: "60%" }}>
+                                                    {s.servicio}{s.descripcion ? ` - ${s.descripcion}` : ""}
+                                                </Text>
+                                                <Text style={styles.limiteValue}>
+                                                    {fecha(s.limite, "Sin fecha límite")}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
                             </View>
+
+
                             <View style={styles.resumen}>
                                 <View style={[styles.resumenRow, { borderBottomWidth: 0.5, borderBottomColor: "#EBE9F1" }]}>
                                     <Text style={styles.resumenLabel}>Total venta:</Text>

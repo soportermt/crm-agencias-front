@@ -1,11 +1,11 @@
-export async function downloadPagoPDF({ pagos, venta, agencia }) {
+export async function downloadPagoPDF({ pagos, venta, agencia, promesas }) {
     const [{ pdf }, { default: PagoPDF }] = await Promise.all([
         import("@react-pdf/renderer"),
         import("@/components/pdf/PagoPDF"),
     ]);
 
     const blob = await pdf(
-        <PagoPDF pagos={pagos} venta={venta} agencia={agencia} />
+        <PagoPDF pagos={pagos} venta={venta} agencia={agencia} promesas={promesas} />
     ).toBlob();
 
     const nombreArchivo = String(venta?.folio || venta?.id_venta || "venta")
