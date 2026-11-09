@@ -212,10 +212,10 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             {renderNavLink("/caja", "Gestión de pagos", CurrencyDollarIcon)}
           </div>
 
-          <div className="mb-3">
+          {/* <div className="mb-3">
             {renderCategoryHeader("Grupo")}
             {renderNavLink("/grupos", "Lista de grupos", UserGroupIcon)}
-          </div>
+          </div> */}
 
           <div className="mb-3">
             {renderCategoryHeader("Gestión")}
