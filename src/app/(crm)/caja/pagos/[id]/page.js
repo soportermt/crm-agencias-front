@@ -15,6 +15,7 @@ import { createPortal } from "react-dom";
 import { enviarComprobantePagoPorCorreo } from "@/utils/invoiceEmailPayment";
 import { ArrowDownTrayIcon, ChevronRightIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "@/components/common/StatusBadge";
+import { bookingService } from "@/services/booking.service";
 
 registerLocale("es", es);
 
@@ -45,6 +46,7 @@ export default function Pago() {
     const [agencia, setAgencia] = useState(null);
     const [venta, setVenta] = useState(null);
     const [pagos, setPagos] = useState(null);
+    const [promesas, setPromesas] = useState(null);
     const [detalles, setDetalles] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -78,7 +80,7 @@ export default function Pago() {
     const handleDownloadRecibo = async () => {
         setDownloadingRecibo(true);
         try {
-            await downloadPagoPDF({ pagos: detalles, venta, agencia });
+            await downloadPagoPDF({ pagos: detalles, venta, agencia, promesas });
         } catch (err) {
             console.error("Error al generar el PDF:", err);
         } finally {
@@ -110,10 +112,12 @@ export default function Pago() {
             const data = await cajaService.getVenta(id);
             const dataPagos = await cajaService.getWaysToPay();
             const dataDetalles = await cajaService.getSalePayments(id);
+            const dataPromesas = await bookingService.paymentsPromises(id);
 
             setVenta(data);
             setPagos(dataPagos);
             setDetalles(dataDetalles);
+            setPromesas(dataPromesas);
 
             return dataDetalles;
         } catch (err) {
@@ -286,7 +290,7 @@ export default function Pago() {
     const handleDownloadPDF = async (row) => {
         setDownloadingId(row.id_pago);
         try {
-            await downloadPagoPDF({ pagos: detalles, venta, agencia });
+            await downloadPagoPDF({ pagos: detalles, venta, agencia, promesas});
         } catch (err) {
             console.error("Error al generar el PDF:", err);
         } finally {
@@ -308,6 +312,7 @@ export default function Pago() {
                 venta,
                 agencia,
                 destinatario,
+                promesas
             });
             setSendResult(res);
         } catch (err) {
