@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-import { serviceCatalog } from "@/mocks/serviceCatalog";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getServiceCatalog, serviceCatalog } from "@/mocks/serviceCatalog";
 import { mapVentaToBooking } from "@/utils/mapVentaToBooking";
 import { getPassengersPool } from "@/utils/passengersPool";
 
@@ -29,6 +29,8 @@ const TIPOS_SIN_PASAJEROS = ["grupo", "boda"];
 const sinPasajeros = (tipo) => TIPOS_SIN_PASAJEROS.includes(tipo);
 
 export function BookingFormProvider({ children, initialData = null }) {
+  const [catalog, setCatalog] = useState([]);
+
   // const [booking, setBooking] = useState(initialBooking);
   const [bookingErrors, setBookingErrors] = useState({});
   const [booking, setBooking] = useState(() =>
@@ -158,10 +160,15 @@ export function BookingFormProvider({ children, initialData = null }) {
     setBookingErrors({});
   };
 
+  useEffect(() => {
+    setCatalog(getServiceCatalog());
+  }, []);
+
   return (
     <BookingFormContext.Provider
       value={{
         booking,
+        catalog, 
         updateBooking,
         draft,
         startDraft,

@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useIngresosNotifications } from "@/context/IngresosNotificationsContext";
 import { useBrand } from "@/hooks/useBrand";
+import { esAgenciaPrincipal } from "@/utils/storedUser";
 
 export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobile, isPinned, onTogglePin }) {
   const router = useRouter();
@@ -31,11 +32,15 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
   const [logoAgencia, setLogoAgencia] = useState(null);
   const [nombreAgencia, setNombreAgencia] = useState("");
 
+  const [mostrarGrupos, setMostrarGrupos] = useState(false);
+
   const logoSrc = logoAgencia
     ? `${process.env.NEXT_PUBLIC_API_URL}images/agencia/${logoAgencia}`
     : brand?.logo;
 
   useEffect(() => {
+    setMostrarGrupos(esAgenciaPrincipal());
+
     try {
       const storedAgencia = localStorage.getItem("agenciaInfo");
       if (storedAgencia) {
@@ -212,10 +217,12 @@ export default function Sidebar({ onRegisterClientClick, mobileOpen, onCloseMobi
             {renderNavLink("/caja", "Gestión de pagos", CurrencyDollarIcon)}
           </div>
 
-          {/* <div className="mb-3">
-            {renderCategoryHeader("Grupo")}
-            {renderNavLink("/grupos", "Lista de grupos", UserGroupIcon)}
-          </div> */}
+          {mostrarGrupos && (
+            <div className="mb-3">
+              {renderCategoryHeader("Grupo")}
+              {renderNavLink("/grupos", "Lista de grupos", UserGroupIcon)}
+            </div>
+          )}
 
           <div className="mb-3">
             {renderCategoryHeader("Gestión")}
