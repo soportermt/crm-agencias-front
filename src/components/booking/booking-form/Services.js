@@ -6,7 +6,7 @@ import { useBookingForm } from "./BookingFormContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function Services({ mode }) {
-  const { booking, draft, startDraft, cancelDraft, confirmDraft, removeService } = useBookingForm();
+  const { booking, catalog, draft, startDraft, cancelDraft, confirmDraft, removeService } = useBookingForm();
   const isEditMode = mode === "edit";
 
   const activeCatalogEntry = draft && serviceCatalog.find((s) => s.id === draft.tipo);
@@ -23,7 +23,7 @@ export default function Services({ mode }) {
     <div className="mt-3">
       {/* {!isEditMode && ( */}
         <div className="d-flex flex-wrap gap-2 mb-3">
-          {serviceCatalog.map((service) => {
+          {catalog.map((service) => {
             const isSelected = booking.servicios.some((item) => item.tipo === service.id);
             const isActive = draft?.tipo === service.id;
             return (
